@@ -715,7 +715,9 @@ ZSHRC
 # Create default P10k config if download fails
 create_default_p10k_config() {
     cat > "$HOME/.p10k.zsh" << 'P10K'
-# Powerlevel10k Cyberpunk Configuration
+# Ultra Simple One-Line Prompt
+# Format: user@host ~/dir (git) $ 
+
 'builtin' 'local' '-a' 'p10k_config_opts'
 [[ ! -o 'aliases'         ]] || p10k_config_opts+=('aliases')
 [[ ! -o 'sh_glob'         ]] || p10k_config_opts+=('sh_glob')
@@ -726,75 +728,55 @@ create_default_p10k_config() {
   emulate -L zsh -o extended_glob
   unset -m '(POWERLEVEL9K_*|DEFAULT_USER)~POWERLEVEL9K_GITSTATUS_DIR'
   [[ $ZSH_VERSION == (5.<1->*|<6->.*) ]] || return
-  
+
+  # Simple one-line prompt
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
-    os_icon dir vcs newline prompt_char
+    context                 # user@hostname
+    dir                     # current directory  
+    vcs                     # git status
+    prompt_char            # $ 
   )
+
+  typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=()
+
+  # Basic settings - ONE LINE, no backgrounds anywhere
+  typeset -g POWERLEVEL9K_PROMPT_ON_NEWLINE=false
+  typeset -g POWERLEVEL9K_PROMPT_ADD_NEWLINE=false
+  typeset -g POWERLEVEL9K_BACKGROUND=                 # global no background
   
-  typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
-    status command_execution_time background_jobs virtualenv anaconda pyenv
-    goenv nodenv nvm nodeenv node_version go_version rust_version
-    dotnet_version php_version laravel_version java_version package
-    kubecontext terraform aws azure gcloud context nordvpn ranger
-    nnn vim_shell midnight_commander nix_shell vi_mode todo timewarrior
-    taskwarrior time
-  )
+  # Rainbow colors - no backgrounds, text only
+  typeset -g POWERLEVEL9K_CONTEXT_FOREGROUND=198     # hot pink text
+  typeset -g POWERLEVEL9K_CONTEXT_BACKGROUND=        # no background
+  typeset -g POWERLEVEL9K_CONTEXT_TEMPLATE='%n@%m'
   
-  typeset -g POWERLEVEL9K_MODE=nerdfont-complete
-  typeset -g POWERLEVEL9K_ICON_PADDING=moderate
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=226         # bright yellow text
+  typeset -g POWERLEVEL9K_DIR_BACKGROUND=            # no background
+  typeset -g POWERLEVEL9K_DIR_MAX_LENGTH=30
   
-  typeset -g POWERLEVEL9K_BACKGROUND=
-  typeset -g POWERLEVEL9K_{LEFT,RIGHT}_{LEFT,RIGHT}_WHITESPACE=
+  # Git - rainbow colors, no backgrounds
+  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=46     # bright green text
+  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND=       # no background
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=201 # bright magenta text
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_BACKGROUND=    # no background
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=51 # bright cyan text
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=   # no background
+  
+  # Rainbow prompt character - no background
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_BACKGROUND=     # no background
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=51    # cyan
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=196  # red  
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='$'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_VIINS_CONTENT_EXPANSION='$'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_LEFT_PROMPT_LAST_SEGMENT_END_SYMBOL=' '
+  
+  # Separators - compact spacing
+  typeset -g POWERLEVEL9K_{LEFT,RIGHT}_SEGMENT_SEPARATOR=' '
   typeset -g POWERLEVEL9K_{LEFT,RIGHT}_SUBSEGMENT_SEPARATOR=' '
-  typeset -g POWERLEVEL9K_{LEFT,RIGHT}_SEGMENT_SEPARATOR=
-  
-  typeset -g POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX='%F{198}╭─%f'
-  typeset -g POWERLEVEL9K_MULTILINE_NEWLINE_PROMPT_PREFIX='%F{198}│%f '
-  typeset -g POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX='%F{198}╰─%f'
-  
-  typeset -g POWERLEVEL9K_LEFT_PROMPT_FIRST_SEGMENT_START_SYMBOL=
-  typeset -g POWERLEVEL9K_RIGHT_PROMPT_LAST_SEGMENT_END_SYMBOL=
-  
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=46
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=196
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='%F{198}❯%F{198}❯%F{51}❯%f'
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VICMD_CONTENT_EXPANSION='%F{51}❮%F{198}❮%F{198}❮%f'
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIVIS_CONTENT_EXPANSION='%F{198}V%f'
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIOWR_CONTENT_EXPANSION='%F{198}▶%f'
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_OVERWRITE_STATE=true
-  
-  typeset -g POWERLEVEL9K_OS_ICON_FOREGROUND=198
-  typeset -g POWERLEVEL9K_OS_ICON_CONTENT_EXPANSION='⚡'
-  
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=51
-  typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=141
-  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=198
-  
-  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=46
-  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=198
-  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=226
-  
-  typeset -g POWERLEVEL9K_STATUS_OK=false
-  typeset -g POWERLEVEL9K_STATUS_ERROR_FOREGROUND=196
-  typeset -g POWERLEVEL9K_STATUS_ERROR_VISUAL_IDENTIFIER_EXPANSION='✘'
-  
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=226
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=3
-  
-  typeset -g POWERLEVEL9K_BACKGROUND_JOBS_FOREGROUND=51
-  typeset -g POWERLEVEL9K_BACKGROUND_JOBS_VISUAL_IDENTIFIER_EXPANSION='⚙'
-  
-  typeset -g POWERLEVEL9K_TIME_FOREGROUND=141
-  typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%H:%M}'
-  
-  typeset -g POWERLEVEL9K_TRANSIENT_PROMPT=off
-  typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
-  typeset -g POWERLEVEL9K_DISABLE_HOT_RELOAD=true
-  
+  typeset -g POWERLEVEL9K_{LEFT,RIGHT}_{LEFT,RIGHT}_WHITESPACE=
+
   (( ! $+functions[p10k] )) || p10k reload
 }
 
-typeset -g POWERLEVEL9K_CONFIG_FILE=${${(%):-%x}:a}
 (( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
 'builtin' 'unset' 'p10k_config_opts'
 P10K
