@@ -22,23 +22,30 @@
 
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=()
 
-  # Basic settings - ONE LINE
+  # Basic settings - ONE LINE, no backgrounds anywhere
   typeset -g POWERLEVEL9K_PROMPT_ON_NEWLINE=false
   typeset -g POWERLEVEL9K_PROMPT_ADD_NEWLINE=false
+  typeset -g POWERLEVEL9K_BACKGROUND=                 # global no background
   
-  # Colors
-  typeset -g POWERLEVEL9K_CONTEXT_FOREGROUND=51      # cyan
+  # Colors - no backgrounds, text only
+  typeset -g POWERLEVEL9K_CONTEXT_FOREGROUND=51      # cyan text
+  typeset -g POWERLEVEL9K_CONTEXT_BACKGROUND=        # no background
   typeset -g POWERLEVEL9K_CONTEXT_TEMPLATE='%n@%m'
   
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=46          # green
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=46          # green text
+  typeset -g POWERLEVEL9K_DIR_BACKGROUND=            # no background
   typeset -g POWERLEVEL9K_DIR_MAX_LENGTH=30
   
-  # Git - readable colors
-  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=46     # green - easy to read
-  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=208 # orange - easy to read  
-  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=46 # green instead of yellow
+  # Git - readable colors, no backgrounds
+  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=46     # green text
+  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND=       # no background
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=208 # orange text
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_BACKGROUND=    # no background
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=46 # green text
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=   # no background
   
-  # Simple prompt character - compact
+  # Simple prompt character - no background
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_BACKGROUND=     # no background
   typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=51
   typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=196  
   typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='$'
