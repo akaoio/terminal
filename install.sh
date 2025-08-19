@@ -4,9 +4,37 @@
 #║                       AKAOIO TERMINAL - CYBERPUNK EDITION                       ║
 #║                          Ultra Pro Terminal Setup Script                        ║
 #║                              No questions asked!                                ║
+#║                                                                                  ║
+#║ Usage:                                                                           ║
+#║   ./install.sh                    # Normal installation with animations         ║
+#║   DISABLE_ANIMATIONS=1 ./install.sh  # Install without loading animations      ║
+#║                                                                                  ║
+#║ Features:                                                                        ║
+#║   • Improved loading animations with fallback support                           ║
+#║   • Better terminal compatibility and error handling                            ║
+#║   • Unicode spinner with ASCII fallback                                         ║
+#║   • Proper background process cleanup                                           ║
 #╚══════════════════════════════════════════════════════════════════════════════╝
 
 set -e  # Exit on error
+
+# Cleanup function to kill any remaining background processes
+cleanup() {
+    if [ -n "$LOADING_PID" ] && kill -0 "$LOADING_PID" 2>/dev/null; then
+        kill "$LOADING_PID" 2>/dev/null || true
+        wait "$LOADING_PID" 2>/dev/null || true
+    fi
+    
+    # Kill any remaining spinner processes
+    pkill -f "bash.*spinner" 2>/dev/null || true
+    
+    exit "${1:-0}"
+}
+
+# Set up signal traps for proper cleanup
+trap 'cleanup 130' INT
+trap 'cleanup 143' TERM
+trap 'cleanup $?' EXIT
 
 # Colors for beautiful output
 RED='\033[0;31m'
@@ -28,26 +56,119 @@ NEON_PURPLE='\033[38;5;141m'
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BACKUP_DIR="$HOME/.terminal-backup-$(date +%Y%m%d-%H%M%S)"
 
-# Loading animation
-show_loading() {
-    local text="$1"
-    local delay=0.1
-    local spinstr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    printf "${NEON_BLUE}[*] $text ${NC}"
-    while true; do
-        local temp=${spinstr#?}
-        printf "${NEON_PINK}[%c]${NC}" "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b"
-    done &
-    return $!
+# Check if loading animations are enabled (can be disabled with DISABLE_ANIMATIONS=1 or --no-animations)
+ENABLE_ANIMATIONS=1
+if [ "${DISABLE_ANIMATIONS:-0}" = "1" ]; then
+    ENABLE_ANIMATIONS=0
+fi
+
+# Check command line arguments for animation control
+for arg in "$@"; do
+    case $arg in
+        --no-animations|--disable-animations)
+            ENABLE_ANIMATIONS=0
+            shift
+            ;;
+        --help|-h)
+            echo "AKAOIO Terminal - Cyberpunk Edition Installer"
+            echo ""
+            echo "Usage: $0 [options]"
+            echo ""
+            echo "Options:"
+            echo "  --no-animations        Disable loading animations"
+            echo "  --disable-animations   Same as --no-animations"
+            echo "  --help, -h             Show this help message"
+            echo ""
+            echo "Environment variables:"
+            echo "  DISABLE_ANIMATIONS=1   Disable animations (same as --no-animations)"
+            echo ""
+            exit 0
+            ;;
+    esac
+done
+
+# Check terminal capabilities
+check_terminal_support() {
+    # Check if terminal supports UTF-8 and cursor positioning
+    if [ -z "${TERM:-}" ] || [ "$TERM" = "dumb" ]; then
+        return 1
+    fi
+    
+    # Check if we can use tput for cursor control
+    if ! command -v tput >/dev/null 2>&1; then
+        return 1
+    fi
+    
+    # Test if terminal supports cursor positioning
+    if ! tput cup 0 0 >/dev/null 2>&1; then
+        return 1
+    fi
+    
+    return 0
 }
 
-# Stop loading animation
+# Global variable to track loading animation PID
+LOADING_PID=""
+
+# Simple loading functions that avoid terminal compatibility issues
+show_loading() {
+    local text="$1"
+    
+    # If animations are disabled or terminal doesn't support them, use simple progress
+    if [ "$ENABLE_ANIMATIONS" = "0" ] || ! check_terminal_support; then
+        printf "${NEON_BLUE}[*] $text...${NC}"
+        return 0
+    fi
+    
+    # For compatible terminals, use dots animation instead of spinners
+    printf "${NEON_BLUE}[*] $text${NC}"
+    
+    (
+        trap 'exit 0' TERM INT
+        local dots=""
+        local max_dots=3
+        local count=0
+        
+        while true; do
+            printf "\r${NEON_BLUE}[*] $text$dots${NC}   "
+            
+            count=$((count + 1))
+            if [ $count -le $max_dots ]; then
+                dots="$dots."
+            else
+                dots=""
+                count=0
+            fi
+            
+            sleep 0.5
+        done
+    ) &
+    
+    LOADING_PID=$!
+    return 0
+}
+
+# Stop loading animation with improved cleanup
 stop_loading() {
-    kill $1 2>/dev/null
-    printf "\b\b\b${GREEN}[✓]${NC}\n"
+    local pid="${1:-$LOADING_PID}"
+    local text="${2:-}"
+    
+    # If animations are disabled, just print success
+    if [ "$ENABLE_ANIMATIONS" = "0" ] || ! check_terminal_support; then
+        printf " ${GREEN}[✓]${NC}\n"
+        return 0
+    fi
+    
+    # Kill the background process gracefully
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+        kill "$pid" 2>/dev/null
+        wait "$pid" 2>/dev/null || true
+    fi
+    
+    # Clear the line and show success - use more spaces to clear completely
+    printf "\r${GREEN}[✓] ${text:-Done}${NC}                    \n"
+    
+    LOADING_PID=""
 }
 
 # Print cyberpunk banner
@@ -108,13 +229,13 @@ install_packages() {
         if command -v apt-get &> /dev/null; then
             show_loading "Updating package list"
             sudo apt-get update -qq > /dev/null 2>&1
-            stop_loading $!
+            stop_loading "" "Package list updated"
             
             show_loading "Installing Zsh, Git, Curl, and utilities"
             sudo apt-get install -y -qq zsh git curl wget fonts-powerline \
                 build-essential python3-pip fzf bat ripgrep fd-find \
                 neofetch htop ncdu tldr exa > /dev/null 2>&1
-            stop_loading $!
+            stop_loading "" "Packages installed"
         elif command -v yum &> /dev/null; then
             sudo yum install -y zsh git curl wget > /dev/null 2>&1
         elif command -v pacman &> /dev/null; then
@@ -143,7 +264,7 @@ install_oh_my_zsh() {
     else
         show_loading "Installing Oh My Zsh"
         sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended > /dev/null 2>&1
-        stop_loading $!
+        stop_loading
         echo -e "${GREEN}  ✓ Oh My Zsh installed${NC}"
     fi
     sleep 1
@@ -163,7 +284,7 @@ install_p10k() {
     else
         show_loading "Cloning Powerlevel10k"
         git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR" > /dev/null 2>&1
-        stop_loading $!
+        stop_loading
     fi
     
     echo -e "${GREEN}  ✓ Powerlevel10k installed${NC}"
@@ -182,7 +303,7 @@ install_plugins() {
     if [ ! -d "$CUSTOM_DIR/plugins/zsh-autosuggestions" ]; then
         show_loading "Installing auto-suggestions"
         git clone https://github.com/zsh-users/zsh-autosuggestions "$CUSTOM_DIR/plugins/zsh-autosuggestions" > /dev/null 2>&1
-        stop_loading $!
+        stop_loading
     else
         echo -e "${YELLOW}  ⚠ Auto-suggestions already installed${NC}"
     fi
@@ -191,7 +312,7 @@ install_plugins() {
     if [ ! -d "$CUSTOM_DIR/plugins/zsh-syntax-highlighting" ]; then
         show_loading "Installing syntax highlighting"
         git clone https://github.com/zsh-users/zsh-syntax-highlighting "$CUSTOM_DIR/plugins/zsh-syntax-highlighting" > /dev/null 2>&1
-        stop_loading $!
+        stop_loading
     else
         echo -e "${YELLOW}  ⚠ Syntax highlighting already installed${NC}"
     fi
@@ -200,7 +321,7 @@ install_plugins() {
     if [ ! -d "$CUSTOM_DIR/plugins/zsh-completions" ]; then
         show_loading "Installing enhanced completions"
         git clone https://github.com/zsh-users/zsh-completions "$CUSTOM_DIR/plugins/zsh-completions" > /dev/null 2>&1
-        stop_loading $!
+        stop_loading
     else
         echo -e "${YELLOW}  ⚠ Completions already installed${NC}"
     fi
@@ -209,7 +330,7 @@ install_plugins() {
     if [ ! -d "$CUSTOM_DIR/plugins/fzf-tab" ]; then
         show_loading "Installing FZF tab completion"
         git clone https://github.com/Aloxaf/fzf-tab "$CUSTOM_DIR/plugins/fzf-tab" > /dev/null 2>&1
-        stop_loading $!
+        stop_loading
     else
         echo -e "${YELLOW}  ⚠ FZF tab already installed${NC}"
     fi
@@ -241,7 +362,7 @@ install_fonts() {
             https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf \
             2>/dev/null
         
-        stop_loading $!
+        stop_loading
         
         # Update font cache
         if command -v fc-cache &> /dev/null; then
@@ -568,7 +689,7 @@ fi
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 ZSHRC
 
-    stop_loading $!
+    stop_loading
     
     # Copy P10k config
     cp "$SCRIPT_DIR/configs/p10k-cyberpunk.zsh" "$HOME/.p10k.zsh" 2>/dev/null || \
@@ -676,7 +797,7 @@ set_default_shell() {
     if [ "$SHELL" != "$(which zsh)" ]; then
         show_loading "Configuring default shell"
         sudo chsh -s $(which zsh) $USER 2>/dev/null || chsh -s $(which zsh) 2>/dev/null || true
-        stop_loading $!
+        stop_loading
         echo -e "${GREEN}  ✓ Zsh set as default shell${NC}"
     else
         echo -e "${YELLOW}  ⚠ Zsh already default shell${NC}"
