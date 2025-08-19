@@ -46,11 +46,11 @@ CYAN='\033[0;36m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
-# Neon glow effect for cyberpunk style
-NEON_PINK='\033[38;5;198m'
-NEON_BLUE='\033[38;5;51m'
-NEON_GREEN='\033[38;5;46m'
-NEON_PURPLE='\033[38;5;141m'
+# Professional color scheme - neutral & modern
+ACCENT_BLUE='\033[38;5;39m'    # Professional blue
+ACCENT_CYAN='\033[38;5;51m'    # Cyan accent
+ACCENT_GRAY='\033[38;5;244m'   # Neutral gray
+ACCENT_GREEN='\033[38;5;46m'   # Success green
 
 # Script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
