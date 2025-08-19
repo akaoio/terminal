@@ -174,9 +174,7 @@ stop_loading() {
 # Print cyberpunk banner
 print_banner() {
     clear
-    echo -e "${NEON_PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${NEON_PINK}            AKAOIO TERMINAL CYBERPUNK            ${NC}"
-    echo -e "${NEON_PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${NEON_PINK}AKAOIO TERMINAL CYBERPUNK${NC}"
     echo ""
     echo -e "${NEON_BLUE}    ▸ Professional terminal setup${NC}"
     echo -e "${NEON_GREEN}    ▸ Full automation${NC}"
@@ -370,9 +368,7 @@ configure_zsh() {
     
     # Create .zshrc
     cat > "$HOME/.zshrc" << 'ZSHRC'
-# ═════════════════════════════════════════════════════════════════════════════════
 # AKAOIO TERMINAL - CYBERPUNK ZSH
-# ═════════════════════════════════════════════════════════════════════════════════
 
 # Enable Powerlevel10k instant prompt
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
@@ -431,9 +427,7 @@ HIST_STAMPS="yyyy-mm-dd"
 # Load Oh My Zsh
 source $ZSH/oh-my-zsh.sh
 
-# ═════════════════════════════════════════════════════════════════════════════════
 # CYBERPUNK ALIASES
-# ═════════════════════════════════════════════════════════════════════════════════
 
 # Better ls with exa - Rainbow colors
 if command -v exa &> /dev/null; then
@@ -533,9 +527,7 @@ alias crypto='curl rate.sx'
 alias hack='hollywood'
 alias parrot='curl parrot.live'
 
-# ═════════════════════════════════════════════════════════════════════════════════
 # CYBERPUNK FUNCTIONS
-# ═════════════════════════════════════════════════════════════════════════════════
 
 # Create directory and cd into it
 mkcd() {
@@ -576,9 +568,7 @@ fd() {
 
 # System info
 sysinfo() {
-    echo -e "\n\033[38;5;198m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "\033[38;5;198m         SYSTEM INFORMATION             \033[0m"
-    echo -e "\033[38;5;198m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n"
+    echo -e "\n\033[38;5;198mSYSTEM INFORMATION\033[0m\n"
     neofetch
 }
 
@@ -600,9 +590,7 @@ backup() {
     cp "$1" "$1.backup-$(date +%Y%m%d-%H%M%S)"
 }
 
-# ═════════════════════════════════════════════════════════════════════════════════
 # ENVIRONMENT SETUP
-# ═════════════════════════════════════════════════════════════════════════════════
 
 # Environment variables
 export LANG=en_US.UTF-8
@@ -682,9 +670,7 @@ if command -v neofetch &> /dev/null; then
     neofetch
 fi
 
-# ═════════════════════════════════════════════════════════════════════════════════
 # END OF CYBERPUNK CONFIG
-# ═════════════════════════════════════════════════════════════════════════════════
 ZSHRC
 
     stop_loading
@@ -788,12 +774,9 @@ set_default_shell() {
 # Final message
 show_complete() {
     clear
-    echo -e "${NEON_PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${NEON_PINK}                    SUCCESS!                    ${NC}"
-    echo -e "${NEON_PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${NEON_PINK}SUCCESS!${NC}"
     echo ""
-    
-    echo -e "${NEON_BLUE}         🎉 INSTALLATION COMPLETE! 🎉         ${NC}"
+    echo -e "${NEON_BLUE}🎉 INSTALLATION COMPLETE! 🎉${NC}"
     echo ""
     echo -e "${CYAN}  Your terminal has been transformed into a CYBERPUNK MASTERPIECE!${NC}"
     echo ""

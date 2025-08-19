@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-# ══════════════════════════════════════════════════════════════════════════════
 # AKAOIO TERMINAL - UPDATE SCRIPT
 # Keep your terminal bleeding edge
-# ══════════════════════════════════════════════════════════════════════════════
 
 set -e
 
@@ -19,11 +17,9 @@ NC='\033[0m'
 
 # Banner
 clear
-echo -e "${NEON_PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${NEON_PINK}            AKAOIO TERMINAL UPDATE               ${NC}"
-echo -e "${NEON_PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${NEON_PINK}AKAOIO TERMINAL UPDATE${NC}"
 echo ""
-echo -e "${NEON_GREEN}  Updating to the latest terminal config...${NC}"
+echo -e "${NEON_GREEN}Updating to the latest terminal config...${NC}"
 echo ""
 
 # Update repository

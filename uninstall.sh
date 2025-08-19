@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-# ══════════════════════════════════════════════════════════════════════════════
 # AKAOIO TERMINAL - UNINSTALL SCRIPT
 # Restore your terminal to defaults
-# ══════════════════════════════════════════════════════════════════════════════
 
 set -e
 
@@ -18,9 +16,7 @@ NC='\033[0m'
 
 # Banner
 clear
-echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${RED}            AKAOIO TERMINAL UNINSTALL            ${NC}"
-echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${RED}AKAOIO TERMINAL UNINSTALL${NC}"
 echo ""
 
 echo -e "${YELLOW}⚠ WARNING: This will remove all Cyberpunk Terminal configurations!${NC}"
