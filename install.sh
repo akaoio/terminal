@@ -1,22 +1,35 @@
 #!/usr/bin/env bash
-
-#╔══════════════════════════════════════════════════════════════════════════════╗
-#║                       AKAOIO TERMINAL - CYBERPUNK EDITION                       ║
-#║                          Ultra Pro Terminal Setup Script                        ║
-#║                              No questions asked!                                ║
-#║                                                                                  ║
-#║ Usage:                                                                           ║
-#║   ./install.sh                    # Normal installation with animations         ║
-#║   DISABLE_ANIMATIONS=1 ./install.sh  # Install without loading animations      ║
-#║                                                                                  ║
-#║ Features:                                                                        ║
-#║   • Improved loading animations with fallback support                           ║
-#║   • Better terminal compatibility and error handling                            ║
-#║   • Unicode spinner with ASCII fallback                                         ║
-#║   • Proper background process cleanup                                           ║
-#╚══════════════════════════════════════════════════════════════════════════════╝
+# AKAOIO TERMINAL - UNIVERSAL MOBILE-FIRST INSTALLER
+# Smart detection for Termux, Linux, macOS
+# Compact, beautiful, no backgrounds
 
 set -e  # Exit on error
+
+# SMART ENVIRONMENT DETECTION
+detect_environment() {
+    if [ -n "$TERMUX_VERSION" ] || [ -d "/data/data/com.termux" ]; then
+        echo "termux"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        if command -v apt-get &> /dev/null; then
+            echo "debian"
+        elif command -v yum &> /dev/null; then
+            echo "redhat"
+        elif command -v pacman &> /dev/null; then
+            echo "arch"
+        else
+            echo "linux"
+        fi
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "macos"
+    else
+        echo "unknown"
+    fi
+}
+
+# Global environment variable
+ENV_TYPE=$(detect_environment)
+IS_MOBILE=0
+[ "$ENV_TYPE" = "termux" ] && IS_MOBILE=1
 
 # Cleanup function to kill any remaining background processes
 cleanup() {
@@ -36,21 +49,13 @@ trap 'cleanup 130' INT
 trap 'cleanup 143' TERM
 trap 'cleanup $?' EXIT
 
-# Colors for beautiful output
+# Mobile-first colors - high contrast, minimal
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
-WHITE='\033[1;37m'
 NC='\033[0m' # No Color
-
-# Professional color scheme - neutral & modern
-ACCENT_BLUE='\033[38;5;39m'    # Professional blue
-ACCENT_CYAN='\033[38;5;51m'    # Cyan accent
-ACCENT_GRAY='\033[38;5;244m'   # Neutral gray
-ACCENT_GREEN='\033[38;5;46m'   # Success green
 
 # Script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -171,23 +176,19 @@ stop_loading() {
     LOADING_PID=""
 }
 
-# Print cyberpunk banner
+# Mobile-first banner
 print_banner() {
     clear
-    echo -e "${NEON_PINK}AKAOIO TERMINAL CYBERPUNK${NC}"
-    echo ""
-    echo -e "${NEON_BLUE}    ▸ Professional terminal setup${NC}"
-    echo -e "${NEON_GREEN}    ▸ Full automation${NC}"
-    echo -e "${NEON_PURPLE}    ▸ Installing...${NC}"
+    echo -e "${CYAN}AKAOIO TERMINAL${NC}"
+    echo -e "${BLUE}Mobile-First Edition${NC}"
+    echo -e "${GREEN}Environment: $ENV_TYPE${NC}"
     echo ""
     sleep 1
 }
 
 # Backup existing configs
 backup_configs() {
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${NEON_BLUE}▸ PHASE 1: BACKING UP EXISTING CONFIGURATION${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}▸ Backing up configs${NC}"
     
     mkdir -p "$BACKUP_DIR"
     
@@ -201,47 +202,42 @@ backup_configs() {
     sleep 1
 }
 
-# Install required packages
+# Smart package installation
 install_packages() {
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${NEON_BLUE}▸ PHASE 2: INSTALLING CORE PACKAGES${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}▸ Installing packages for $ENV_TYPE${NC}"
     
-    # Detect OS
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Linux
-        if command -v apt-get &> /dev/null; then
-            show_loading "Updating package list"
+    case "$ENV_TYPE" in
+        termux)
+            pkg update -y > /dev/null 2>&1
+            pkg install -y zsh git curl wget nano \
+                fzf bat ripgrep fd neofetch htop ncdu \
+                python nodejs > /dev/null 2>&1
+            ;;
+        debian)
+            show_loading "Installing packages"
             sudo apt-get update -qq > /dev/null 2>&1
-            stop_loading "" "Package list updated"
-            
-            show_loading "Installing Zsh, Git, Curl, and utilities"
-            sudo apt-get install -y -qq zsh git curl wget fonts-powerline \
-                build-essential python3-pip fzf bat ripgrep fd-find \
-                neofetch htop ncdu tldr exa > /dev/null 2>&1
-            stop_loading "" "Packages installed"
-        elif command -v yum &> /dev/null; then
-            sudo yum install -y zsh git curl wget > /dev/null 2>&1
-        elif command -v pacman &> /dev/null; then
-            sudo pacman -S --noconfirm zsh git curl wget > /dev/null 2>&1
-        fi
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        if ! command -v brew &> /dev/null; then
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        fi
-        brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu tldr exa
-    fi
+            sudo apt-get install -y -qq zsh git curl wget \
+                fzf bat ripgrep fd-find neofetch htop ncdu > /dev/null 2>&1
+            stop_loading
+            ;;
+        macos)
+            if ! command -v brew &> /dev/null; then
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            fi
+            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu
+            ;;
+        *)
+            echo -e "${YELLOW}⚠ Unknown environment, trying generic install${NC}"
+            ;;
+    esac
     
-    echo -e "${GREEN}  ✓ Core packages installed${NC}"
+    echo -e "${GREEN}✓ Packages installed${NC}"
     sleep 1
 }
 
 # Install Oh My Zsh
 install_oh_my_zsh() {
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${NEON_BLUE}▸ PHASE 3: INSTALLING OH-MY-ZSH FRAMEWORK${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}▸ Installing Oh My Zsh${NC}"
     
     if [ -d "$HOME/.oh-my-zsh" ]; then
         echo -e "${YELLOW}  ⚠ Oh My Zsh already installed, skipping...${NC}"
@@ -256,9 +252,7 @@ install_oh_my_zsh() {
 
 # Install Powerlevel10k theme
 install_p10k() {
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${NEON_BLUE}▸ PHASE 4: INSTALLING POWERLEVEL10K THEME${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}▸ Installing Powerlevel10k${NC}"
     
     P10K_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
     
@@ -277,9 +271,7 @@ install_p10k() {
 
 # Install plugins
 install_plugins() {
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${NEON_BLUE}▸ PHASE 5: INSTALLING ZSH PLUGINS${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}▸ Installing plugins${NC}"
     
     CUSTOM_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
     
@@ -323,46 +315,36 @@ install_plugins() {
     sleep 1
 }
 
-# Install Nerd Fonts
+# Smart font installation
 install_fonts() {
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${NEON_BLUE}▸ PHASE 6: INSTALLING NERD FONTS${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}▸ Setting up fonts${NC}"
     
-    FONT_DIR="$HOME/.local/share/fonts"
-    mkdir -p "$FONT_DIR"
-    
-    # Check if font already installed
-    if fc-list | grep -q "MesloLGS NF" 2>/dev/null; then
-        echo -e "${YELLOW}  ⚠ Nerd Fonts already installed${NC}"
+    if [ "$ENV_TYPE" = "termux" ]; then
+        echo -e "${YELLOW}  Termux: Install Termux:Styling from F-Droid for fonts${NC}"
     else
-        show_loading "Downloading MesloLGS Nerd Font"
+        FONT_DIR="$HOME/.local/share/fonts"
+        mkdir -p "$FONT_DIR"
         
-        # Download recommended P10k fonts
-        wget -q -P "$FONT_DIR" \
-            https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf \
-            https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf \
-            https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf \
-            https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf \
-            2>/dev/null
-        
-        stop_loading
-        
-        # Update font cache
-        if command -v fc-cache &> /dev/null; then
-            fc-cache -f "$FONT_DIR" > /dev/null 2>&1
+        if ! fc-list | grep -q "MesloLGS NF" 2>/dev/null; then
+            show_loading "Installing fonts"
+            wget -q -P "$FONT_DIR" \
+                https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf \
+                2>/dev/null || true
+            
+            if command -v fc-cache &> /dev/null; then
+                fc-cache -f "$FONT_DIR" > /dev/null 2>&1
+            fi
+            stop_loading
         fi
-        
-        echo -e "${GREEN}  ✓ Nerd Fonts installed${NC}"
     fi
+    
+    echo -e "${GREEN}✓ Font setup complete${NC}"
     sleep 1
 }
 
 # Configure Zsh
 configure_zsh() {
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${NEON_BLUE}▸ PHASE 7: CONFIGURING CYBERPUNK TERMINAL${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}▸ Configuring terminal${NC}"
     
     show_loading "Creating ultimate .zshrc configuration"
     
@@ -675,16 +657,22 @@ ZSHRC
 
     stop_loading
     
-    # Copy P10k config
-    cp "$SCRIPT_DIR/configs/p10k-cyberpunk.zsh" "$HOME/.p10k.zsh" 2>/dev/null || \
-    curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/configs/p10k-cyberpunk.zsh -o "$HOME/.p10k.zsh" 2>/dev/null || \
-    create_default_p10k_config
+    # Use mobile-first P10k config
+    if [ "$IS_MOBILE" = "1" ]; then
+        cp "$SCRIPT_DIR/configs/p10k-mobile.zsh" "$HOME/.p10k.zsh" 2>/dev/null || \
+        curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/configs/p10k-mobile.zsh -o "$HOME/.p10k.zsh" 2>/dev/null || \
+        create_default_p10k_config
+    else
+        cp "$SCRIPT_DIR/configs/p10k-cyberpunk.zsh" "$HOME/.p10k.zsh" 2>/dev/null || \
+        curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/configs/p10k-cyberpunk.zsh -o "$HOME/.p10k.zsh" 2>/dev/null || \
+        create_default_p10k_config
+    fi
     
     echo -e "${GREEN}  ✓ Configuration complete${NC}"
     sleep 1
 }
 
-# Create default P10k config if download fails
+# Mobile-first P10k config
 create_default_p10k_config() {
     cat > "$HOME/.p10k.zsh" << 'P10K'
 # Ultra Simple One-Line Prompt
@@ -754,29 +742,39 @@ create_default_p10k_config() {
 P10K
 }
 
-# Set Zsh as default shell
+# Smart shell configuration
 set_default_shell() {
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${NEON_BLUE}▸ PHASE 8: SETTING ZSH AS DEFAULT SHELL${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}▸ Setting default shell${NC}"
     
-    if [ "$SHELL" != "$(which zsh)" ]; then
-        show_loading "Configuring default shell"
-        sudo chsh -s $(which zsh) $USER 2>/dev/null || chsh -s $(which zsh) 2>/dev/null || true
-        stop_loading
-        echo -e "${GREEN}  ✓ Zsh set as default shell${NC}"
+    if [ "$ENV_TYPE" = "termux" ]; then
+        # Termux: add to .bashrc
+        if ! grep -q "exec zsh" ~/.bashrc 2>/dev/null; then
+            echo "exec zsh" >> ~/.bashrc
+        fi
+        # Setup storage access
+        termux-setup-storage 2>/dev/null || true
     else
-        echo -e "${YELLOW}  ⚠ Zsh already default shell${NC}"
+        # Other systems: use chsh
+        if [ "$SHELL" != "$(which zsh)" ]; then
+            if [ "$ENV_TYPE" = "debian" ] || [ "$ENV_TYPE" = "redhat" ]; then
+                sudo chsh -s $(which zsh) $USER 2>/dev/null || true
+            else
+                chsh -s $(which zsh) 2>/dev/null || true
+            fi
+        fi
     fi
+    
+    echo -e "${GREEN}✓ Shell configured${NC}"
     sleep 1
 }
 
-# Final message
+# Mobile-first completion message
 show_complete() {
     clear
-    echo -e "${NEON_PINK}SUCCESS!${NC}"
+    echo -e "${GREEN}✓ SUCCESS!${NC}"
     echo ""
-    echo -e "${NEON_BLUE}🎉 INSTALLATION COMPLETE! 🎉${NC}"
+    echo -e "${CYAN}Installation Complete${NC}"
+    echo -e "${BLUE}Environment: $ENV_TYPE${NC}"
     echo ""
     echo -e "${CYAN}  Your terminal has been transformed into a CYBERPUNK MASTERPIECE!${NC}"
     echo ""
