@@ -425,8 +425,13 @@ plugins=(
     history-substring-search
 )
 
-# Plugin settings
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
+# Plugin settings - Fixed autosuggestions to prevent garbled characters
+# SOLUTION: Disable highlighting completely to prevent terminal compatibility issues
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=""
+# Alternative safe options (choose one and comment out the empty one above):
+# ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=240"          # Safe gray color
+# ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=black,bold"   # Safe black bold
+# ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="underline"       # Just underline, no color
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 ZSH_AUTOSUGGEST_USE_ASYNC=true
