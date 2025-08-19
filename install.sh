@@ -1,0 +1,761 @@
+#!/usr/bin/env bash
+
+#╔══════════════════════════════════════════════════════════════════════════════╗
+#║                       AKAOIO TERMINAL - CYBERPUNK EDITION                       ║
+#║                          Ultra Pro Terminal Setup Script                        ║
+#║                              No questions asked!                                ║
+#╚══════════════════════════════════════════════════════════════════════════════╝
+
+set -e  # Exit on error
+
+# Colors for beautiful output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+NC='\033[0m' # No Color
+
+# Neon glow effect for cyberpunk style
+NEON_PINK='\033[38;5;198m'
+NEON_BLUE='\033[38;5;51m'
+NEON_GREEN='\033[38;5;46m'
+NEON_PURPLE='\033[38;5;141m'
+
+# Script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BACKUP_DIR="$HOME/.terminal-backup-$(date +%Y%m%d-%H%M%S)"
+
+# Loading animation
+show_loading() {
+    local text="$1"
+    local delay=0.1
+    local spinstr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    printf "${NEON_BLUE}[*] $text ${NC}"
+    while true; do
+        local temp=${spinstr#?}
+        printf "${NEON_PINK}[%c]${NC}" "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b"
+    done &
+    return $!
+}
+
+# Stop loading animation
+stop_loading() {
+    kill $1 2>/dev/null
+    printf "\b\b\b${GREEN}[✓]${NC}\n"
+}
+
+# Print cyberpunk banner
+print_banner() {
+    clear
+    echo -e "${NEON_PINK}"
+    cat << "EOF"
+    ╔═══════════════════════════════════════════════════════════════════════╗
+    ║                                                                       ║
+    ║   ████████ ███████ ██████  ███    ███ ██ ███    ██  █████  ██        ║
+    ║      ██    ██      ██   ██ ████  ████ ██ ████   ██ ██   ██ ██        ║
+    ║      ██    █████   ██████  ██ ████ ██ ██ ██ ██  ██ ███████ ██        ║
+    ║      ██    ██      ██   ██ ██  ██  ██ ██ ██  ██ ██ ██   ██ ██        ║
+    ║      ██    ███████ ██   ██ ██      ██ ██ ██   ████ ██   ██ ███████   ║
+    ║                                                                       ║
+    ║                     ▀▄   ▄▀  CYBERPUNK EDITION  ▀▄   ▄▀              ║
+    ║                    ▄█▀███▀█▄    BY AKAOIO      ▄█▀███▀█▄             ║
+    ║                   █▀███████▀█                  █▀███████▀█            ║
+    ║                   ▀ ▀▄▄ ▄▄▀ ▀                  ▀ ▀▄▄ ▄▄▀ ▀            ║
+    ║                                                                       ║
+    ╚═══════════════════════════════════════════════════════════════════════╝
+EOF
+    echo -e "${NC}"
+    echo -e "${NEON_BLUE}    ▸ Transform your terminal into a cyberpunk masterpiece${NC}"
+    echo -e "${NEON_GREEN}    ▸ Full automation - No questions asked${NC}"
+    echo -e "${NEON_PURPLE}    ▸ Installing in 3... 2... 1...${NC}"
+    echo ""
+    sleep 2
+}
+
+# Backup existing configs
+backup_configs() {
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${NEON_BLUE}▸ PHASE 1: BACKING UP EXISTING CONFIGURATION${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    mkdir -p "$BACKUP_DIR"
+    
+    # Backup files if they exist
+    [ -f "$HOME/.bashrc" ] && cp "$HOME/.bashrc" "$BACKUP_DIR/" 2>/dev/null || true
+    [ -f "$HOME/.zshrc" ] && cp "$HOME/.zshrc" "$BACKUP_DIR/" 2>/dev/null || true
+    [ -f "$HOME/.p10k.zsh" ] && cp "$HOME/.p10k.zsh" "$BACKUP_DIR/" 2>/dev/null || true
+    [ -d "$HOME/.oh-my-zsh" ] && echo "$HOME/.oh-my-zsh" > "$BACKUP_DIR/oh-my-zsh.path" || true
+    
+    echo -e "${GREEN}  ✓ Backup saved to: $BACKUP_DIR${NC}"
+    sleep 1
+}
+
+# Install required packages
+install_packages() {
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${NEON_BLUE}▸ PHASE 2: INSTALLING CORE PACKAGES${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    # Detect OS
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux
+        if command -v apt-get &> /dev/null; then
+            show_loading "Updating package list"
+            sudo apt-get update -qq > /dev/null 2>&1
+            stop_loading $!
+            
+            show_loading "Installing Zsh, Git, Curl, and utilities"
+            sudo apt-get install -y -qq zsh git curl wget fonts-powerline \
+                build-essential python3-pip fzf bat ripgrep fd-find \
+                neofetch htop ncdu tldr exa > /dev/null 2>&1
+            stop_loading $!
+        elif command -v yum &> /dev/null; then
+            sudo yum install -y zsh git curl wget > /dev/null 2>&1
+        elif command -v pacman &> /dev/null; then
+            sudo pacman -S --noconfirm zsh git curl wget > /dev/null 2>&1
+        fi
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        if ! command -v brew &> /dev/null; then
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        fi
+        brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu tldr exa
+    fi
+    
+    echo -e "${GREEN}  ✓ Core packages installed${NC}"
+    sleep 1
+}
+
+# Install Oh My Zsh
+install_oh_my_zsh() {
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${NEON_BLUE}▸ PHASE 3: INSTALLING OH-MY-ZSH FRAMEWORK${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    if [ -d "$HOME/.oh-my-zsh" ]; then
+        echo -e "${YELLOW}  ⚠ Oh My Zsh already installed, skipping...${NC}"
+    else
+        show_loading "Installing Oh My Zsh"
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended > /dev/null 2>&1
+        stop_loading $!
+        echo -e "${GREEN}  ✓ Oh My Zsh installed${NC}"
+    fi
+    sleep 1
+}
+
+# Install Powerlevel10k theme
+install_p10k() {
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${NEON_BLUE}▸ PHASE 4: INSTALLING POWERLEVEL10K THEME${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    P10K_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+    
+    if [ -d "$P10K_DIR" ]; then
+        echo -e "${YELLOW}  ⚠ Powerlevel10k already installed, updating...${NC}"
+        cd "$P10K_DIR" && git pull > /dev/null 2>&1
+    else
+        show_loading "Cloning Powerlevel10k"
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR" > /dev/null 2>&1
+        stop_loading $!
+    fi
+    
+    echo -e "${GREEN}  ✓ Powerlevel10k installed${NC}"
+    sleep 1
+}
+
+# Install plugins
+install_plugins() {
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${NEON_BLUE}▸ PHASE 5: INSTALLING ZSH PLUGINS${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    CUSTOM_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+    
+    # Auto-suggestions
+    if [ ! -d "$CUSTOM_DIR/plugins/zsh-autosuggestions" ]; then
+        show_loading "Installing auto-suggestions"
+        git clone https://github.com/zsh-users/zsh-autosuggestions "$CUSTOM_DIR/plugins/zsh-autosuggestions" > /dev/null 2>&1
+        stop_loading $!
+    else
+        echo -e "${YELLOW}  ⚠ Auto-suggestions already installed${NC}"
+    fi
+    
+    # Syntax highlighting
+    if [ ! -d "$CUSTOM_DIR/plugins/zsh-syntax-highlighting" ]; then
+        show_loading "Installing syntax highlighting"
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting "$CUSTOM_DIR/plugins/zsh-syntax-highlighting" > /dev/null 2>&1
+        stop_loading $!
+    else
+        echo -e "${YELLOW}  ⚠ Syntax highlighting already installed${NC}"
+    fi
+    
+    # Completions
+    if [ ! -d "$CUSTOM_DIR/plugins/zsh-completions" ]; then
+        show_loading "Installing enhanced completions"
+        git clone https://github.com/zsh-users/zsh-completions "$CUSTOM_DIR/plugins/zsh-completions" > /dev/null 2>&1
+        stop_loading $!
+    else
+        echo -e "${YELLOW}  ⚠ Completions already installed${NC}"
+    fi
+    
+    # FZF tab completion
+    if [ ! -d "$CUSTOM_DIR/plugins/fzf-tab" ]; then
+        show_loading "Installing FZF tab completion"
+        git clone https://github.com/Aloxaf/fzf-tab "$CUSTOM_DIR/plugins/fzf-tab" > /dev/null 2>&1
+        stop_loading $!
+    else
+        echo -e "${YELLOW}  ⚠ FZF tab already installed${NC}"
+    fi
+    
+    echo -e "${GREEN}  ✓ All plugins installed${NC}"
+    sleep 1
+}
+
+# Install Nerd Fonts
+install_fonts() {
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${NEON_BLUE}▸ PHASE 6: INSTALLING NERD FONTS${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    FONT_DIR="$HOME/.local/share/fonts"
+    mkdir -p "$FONT_DIR"
+    
+    # Check if font already installed
+    if fc-list | grep -q "MesloLGS NF" 2>/dev/null; then
+        echo -e "${YELLOW}  ⚠ Nerd Fonts already installed${NC}"
+    else
+        show_loading "Downloading MesloLGS Nerd Font"
+        
+        # Download recommended P10k fonts
+        wget -q -P "$FONT_DIR" \
+            https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf \
+            https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf \
+            https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf \
+            https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf \
+            2>/dev/null
+        
+        stop_loading $!
+        
+        # Update font cache
+        if command -v fc-cache &> /dev/null; then
+            fc-cache -f "$FONT_DIR" > /dev/null 2>&1
+        fi
+        
+        echo -e "${GREEN}  ✓ Nerd Fonts installed${NC}"
+    fi
+    sleep 1
+}
+
+# Configure Zsh
+configure_zsh() {
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${NEON_BLUE}▸ PHASE 7: CONFIGURING CYBERPUNK TERMINAL${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    show_loading "Creating ultimate .zshrc configuration"
+    
+    # Create .zshrc
+    cat > "$HOME/.zshrc" << 'ZSHRC'
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                         AKAOIO TERMINAL - CYBERPUNK ZSH                          ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# Enable Powerlevel10k instant prompt
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Path to Oh My Zsh
+export ZSH="$HOME/.oh-my-zsh"
+
+# Theme
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# Plugins
+plugins=(
+    git
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+    zsh-completions
+    fzf-tab
+    sudo
+    docker
+    docker-compose
+    kubectl
+    terraform
+    aws
+    npm
+    node
+    python
+    pip
+    golang
+    rust
+    command-not-found
+    colored-man-pages
+    extract
+    z
+    history-substring-search
+)
+
+# Plugin settings
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#ff00ff,bold,underline"
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+
+# Oh My Zsh settings
+ENABLE_CORRECTION="true"
+COMPLETION_WAITING_DOTS="⏳"
+DISABLE_UNTRACKED_FILES_DIRTY="false"
+HIST_STAMPS="yyyy-mm-dd"
+
+# Load Oh My Zsh
+source $ZSH/oh-my-zsh.sh
+
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                               CYBERPUNK ALIASES                                  ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# Better ls with exa
+if command -v exa &> /dev/null; then
+    alias ls='exa --icons --color=always --group-directories-first'
+    alias ll='exa -alF --icons --color=always --group-directories-first'
+    alias la='exa -a --icons --color=always --group-directories-first'
+    alias l='exa -F --icons --color=always --group-directories-first'
+    alias lt='exa --tree --icons --color=always --group-directories-first'
+else
+    alias ls='ls --color=auto'
+    alias ll='ls -alF --color=auto'
+    alias la='ls -A --color=auto'
+    alias l='ls -CF --color=auto'
+fi
+
+# Better cat with bat
+if command -v bat &> /dev/null; then
+    alias cat='bat --style=numbers,changes,grid --theme="Dracula"'
+    alias ccat='/bin/cat'
+fi
+
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ~='cd ~'
+alias -- -='cd -'
+
+# Git shortcuts
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline --graph --decorate --all'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
+alias gm='git merge'
+alias gr='git remote'
+alias gf='git fetch'
+alias gpl='git pull'
+alias gcl='git clone'
+
+# Docker shortcuts
+alias d='docker'
+alias dc='docker-compose'
+alias dps='docker ps'
+alias dpsa='docker ps -a'
+alias dimg='docker images'
+alias drm='docker rm'
+alias drmi='docker rmi'
+alias dexec='docker exec -it'
+alias dlogs='docker logs'
+
+# System shortcuts
+alias h='history | grep'
+alias j='jobs -l'
+alias ports='sudo lsof -iTCP -sTCP:LISTEN -n -P'
+alias myip='curl ifconfig.me'
+alias reload='source ~/.zshrc && echo "✨ Terminal reloaded!"'
+alias path='echo -e ${PATH//:/\\n}'
+alias now='date +"%Y-%m-%d %H:%M:%S"'
+alias week='date +%V'
+
+# Safety nets
+alias rm='rm -iv'
+alias cp='cp -iv'
+alias mv='mv -iv'
+alias mkdir='mkdir -pv'
+
+# Power user
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias diff='diff --color=auto'
+alias ip='ip --color=auto'
+alias wget='wget -c'
+alias df='df -H'
+alias du='du -ch'
+alias free='free -m'
+alias top='htop'
+alias vim='nvim'
+
+# Fun stuff
+alias matrix='cmatrix -B'
+alias weather='curl wttr.in'
+alias moon='curl wttr.in/Moon'
+alias crypto='curl rate.sx'
+alias hack='hollywood'
+alias parrot='curl parrot.live'
+
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                              CYBERPUNK FUNCTIONS                                 ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# Create directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Extract any archive
+extract() {
+    if [ -f $1 ]; then
+        case $1 in
+            *.tar.bz2)   tar xjf $1     ;;
+            *.tar.gz)    tar xzf $1     ;;
+            *.bz2)       bunzip2 $1     ;;
+            *.rar)       unrar e $1     ;;
+            *.gz)        gunzip $1      ;;
+            *.tar)       tar xf $1      ;;
+            *.tbz2)      tar xjf $1     ;;
+            *.tgz)       tar xzf $1     ;;
+            *.zip)       unzip $1       ;;
+            *.Z)         uncompress $1  ;;
+            *.7z)        7z x $1        ;;
+            *)           echo "'$1' cannot be extracted" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# Find files
+ff() {
+    find . -type f -iname "*$1*"
+}
+
+# Find directories
+fd() {
+    find . -type d -iname "*$1*"
+}
+
+# System info
+sysinfo() {
+    echo -e "\n\033[38;5;198m╔════════════════════════════════════════╗\033[0m"
+    echo -e "\033[38;5;198m║         SYSTEM INFORMATION             ║\033[0m"
+    echo -e "\033[38;5;198m╚════════════════════════════════════════╝\033[0m\n"
+    neofetch
+}
+
+# Git status for all repos in current directory
+git-status-all() {
+    for dir in */; do
+        if [ -d "$dir/.git" ]; then
+            echo -e "\033[38;5;51m▸ $dir\033[0m"
+            cd "$dir"
+            git status -s
+            cd ..
+            echo ""
+        fi
+    done
+}
+
+# Backup file with timestamp
+backup() {
+    cp "$1" "$1.backup-$(date +%Y%m%d-%H%M%S)"
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                                ENVIRONMENT SETUP                                 ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# Environment variables
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export EDITOR='nano'
+export VISUAL='nano'
+export PAGER='less'
+export LESS='-R'
+
+# History
+export HISTSIZE=100000
+export SAVEHIST=100000
+export HISTFILE=~/.zsh_history
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_VERIFY
+setopt INC_APPEND_HISTORY
+setopt SHARE_HISTORY
+
+# FZF settings
+export FZF_DEFAULT_OPTS="
+    --color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9
+    --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9
+    --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6
+    --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4
+    --height 40%
+    --layout=reverse
+    --border
+    --preview 'bat --style=numbers --color=always --line-range :500 {}'
+"
+
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+
+# Completion settings
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' rehash true
+zstyle ':completion:*' accept-exact '*(N)'
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'exa -1 --color=always $realpath'
+zstyle ':fzf-tab:*' switch-group ',' '.'
+
+# Key bindings
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+bindkey '^[[C' forward-char
+bindkey '^[[D' backward-char
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+bindkey '^[[3~' delete-char
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
+bindkey '^K' kill-line
+bindkey '^R' history-incremental-search-backward
+bindkey '^S' history-incremental-search-forward
+bindkey '^Y' yank
+bindkey '^N' down-line-or-history
+bindkey '^P' up-line-or-history
+
+# Auto suggestions key bindings
+bindkey '^ ' autosuggest-accept
+bindkey '^[[Z' autosuggest-accept
+
+# Load additional configs
+[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+
+# Welcome message
+if command -v neofetch &> /dev/null; then
+    clear
+    neofetch
+fi
+
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                            END OF CYBERPUNK CONFIG                               ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+ZSHRC
+
+    stop_loading $!
+    
+    # Copy P10k config
+    cp "$SCRIPT_DIR/configs/p10k-cyberpunk.zsh" "$HOME/.p10k.zsh" 2>/dev/null || \
+    curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/configs/p10k-cyberpunk.zsh -o "$HOME/.p10k.zsh" 2>/dev/null || \
+    create_default_p10k_config
+    
+    echo -e "${GREEN}  ✓ Configuration complete${NC}"
+    sleep 1
+}
+
+# Create default P10k config if download fails
+create_default_p10k_config() {
+    cat > "$HOME/.p10k.zsh" << 'P10K'
+# Powerlevel10k Cyberpunk Configuration
+'builtin' 'local' '-a' 'p10k_config_opts'
+[[ ! -o 'aliases'         ]] || p10k_config_opts+=('aliases')
+[[ ! -o 'sh_glob'         ]] || p10k_config_opts+=('sh_glob')
+[[ ! -o 'no_brace_expand' ]] || p10k_config_opts+=('no_brace_expand')
+'builtin' 'setopt' 'no_aliases' 'no_sh_glob' 'brace_expand'
+
+() {
+  emulate -L zsh -o extended_glob
+  unset -m '(POWERLEVEL9K_*|DEFAULT_USER)~POWERLEVEL9K_GITSTATUS_DIR'
+  [[ $ZSH_VERSION == (5.<1->*|<6->.*) ]] || return
+  
+  typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
+    os_icon dir vcs newline prompt_char
+  )
+  
+  typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
+    status command_execution_time background_jobs virtualenv anaconda pyenv
+    goenv nodenv nvm nodeenv node_version go_version rust_version
+    dotnet_version php_version laravel_version java_version package
+    kubecontext terraform aws azure gcloud context nordvpn ranger
+    nnn vim_shell midnight_commander nix_shell vi_mode todo timewarrior
+    taskwarrior time
+  )
+  
+  typeset -g POWERLEVEL9K_MODE=nerdfont-complete
+  typeset -g POWERLEVEL9K_ICON_PADDING=moderate
+  
+  typeset -g POWERLEVEL9K_BACKGROUND=
+  typeset -g POWERLEVEL9K_{LEFT,RIGHT}_{LEFT,RIGHT}_WHITESPACE=
+  typeset -g POWERLEVEL9K_{LEFT,RIGHT}_SUBSEGMENT_SEPARATOR=' '
+  typeset -g POWERLEVEL9K_{LEFT,RIGHT}_SEGMENT_SEPARATOR=
+  
+  typeset -g POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX='%F{198}╭─%f'
+  typeset -g POWERLEVEL9K_MULTILINE_NEWLINE_PROMPT_PREFIX='%F{198}│%f '
+  typeset -g POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX='%F{198}╰─%f'
+  
+  typeset -g POWERLEVEL9K_LEFT_PROMPT_FIRST_SEGMENT_START_SYMBOL=
+  typeset -g POWERLEVEL9K_RIGHT_PROMPT_LAST_SEGMENT_END_SYMBOL=
+  
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=46
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=196
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='%F{198}❯%F{198}❯%F{51}❯%f'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VICMD_CONTENT_EXPANSION='%F{51}❮%F{198}❮%F{198}❮%f'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIVIS_CONTENT_EXPANSION='%F{198}V%f'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIOWR_CONTENT_EXPANSION='%F{198}▶%f'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OVERWRITE_STATE=true
+  
+  typeset -g POWERLEVEL9K_OS_ICON_FOREGROUND=198
+  typeset -g POWERLEVEL9K_OS_ICON_CONTENT_EXPANSION='⚡'
+  
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=51
+  typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=141
+  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=198
+  
+  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=46
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=198
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=226
+  
+  typeset -g POWERLEVEL9K_STATUS_OK=false
+  typeset -g POWERLEVEL9K_STATUS_ERROR_FOREGROUND=196
+  typeset -g POWERLEVEL9K_STATUS_ERROR_VISUAL_IDENTIFIER_EXPANSION='✘'
+  
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=226
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=3
+  
+  typeset -g POWERLEVEL9K_BACKGROUND_JOBS_FOREGROUND=51
+  typeset -g POWERLEVEL9K_BACKGROUND_JOBS_VISUAL_IDENTIFIER_EXPANSION='⚙'
+  
+  typeset -g POWERLEVEL9K_TIME_FOREGROUND=141
+  typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%H:%M}'
+  
+  typeset -g POWERLEVEL9K_TRANSIENT_PROMPT=off
+  typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+  typeset -g POWERLEVEL9K_DISABLE_HOT_RELOAD=true
+  
+  (( ! $+functions[p10k] )) || p10k reload
+}
+
+typeset -g POWERLEVEL9K_CONFIG_FILE=${${(%):-%x}:a}
+(( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
+'builtin' 'unset' 'p10k_config_opts'
+P10K
+}
+
+# Set Zsh as default shell
+set_default_shell() {
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${NEON_BLUE}▸ PHASE 8: SETTING ZSH AS DEFAULT SHELL${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    if [ "$SHELL" != "$(which zsh)" ]; then
+        show_loading "Configuring default shell"
+        sudo chsh -s $(which zsh) $USER 2>/dev/null || chsh -s $(which zsh) 2>/dev/null || true
+        stop_loading $!
+        echo -e "${GREEN}  ✓ Zsh set as default shell${NC}"
+    else
+        echo -e "${YELLOW}  ⚠ Zsh already default shell${NC}"
+    fi
+    sleep 1
+}
+
+# Final message
+show_complete() {
+    clear
+    echo -e "${NEON_PINK}"
+    cat << "EOF"
+    ╔═══════════════════════════════════════════════════════════════════════╗
+    ║                                                                       ║
+    ║   ███████ ██    ██  ██████  ██████ ███████ ███████ ███████ ██        ║
+    ║   ██      ██    ██ ██      ██      ██      ██      ██      ██        ║
+    ║   ███████ ██    ██ ██      ██      █████   ███████ ███████ ██        ║
+    ║        ██ ██    ██ ██      ██      ██           ██      ██           ║
+    ║   ███████  ██████   ██████  ██████ ███████ ███████ ███████ ██        ║
+    ║                                                                       ║
+    ╚═══════════════════════════════════════════════════════════════════════╝
+EOF
+    echo -e "${NC}"
+    
+    echo -e "${NEON_BLUE}╔═══════════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${NEON_BLUE}║                    🎉 INSTALLATION COMPLETE! 🎉                      ║${NC}"
+    echo -e "${NEON_BLUE}╚═══════════════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${CYAN}  Your terminal has been transformed into a CYBERPUNK MASTERPIECE!${NC}"
+    echo ""
+    echo -e "${NEON_GREEN}  ▸ FEATURES INSTALLED:${NC}"
+    echo -e "${WHITE}    • Zsh with Oh-My-Zsh Framework${NC}"
+    echo -e "${WHITE}    • Powerlevel10k Theme (Cyberpunk Edition)${NC}"
+    echo -e "${WHITE}    • Auto-suggestions & Syntax Highlighting${NC}"
+    echo -e "${WHITE}    • FZF Integration with Tab Completion${NC}"
+    echo -e "${WHITE}    • Enhanced CLI Tools (bat, exa, ripgrep)${NC}"
+    echo -e "${WHITE}    • Nerd Fonts for Icons${NC}"
+    echo -e "${WHITE}    • 50+ Useful Aliases & Functions${NC}"
+    echo ""
+    echo -e "${NEON_PURPLE}  ▸ KEYBOARD SHORTCUTS:${NC}"
+    echo -e "${WHITE}    • Tab         → Auto-complete with FZF${NC}"
+    echo -e "${WHITE}    • Ctrl+R      → Search command history${NC}"
+    echo -e "${WHITE}    • Ctrl+Space  → Accept auto-suggestion${NC}"
+    echo -e "${WHITE}    • Ctrl+T      → Find files${NC}"
+    echo -e "${WHITE}    • Alt+C       → Navigate directories${NC}"
+    echo ""
+    echo -e "${NEON_PINK}  ▸ NEXT STEPS:${NC}"
+    echo -e "${WHITE}    1. Restart your terminal or run: ${CYAN}zsh${NC}"
+    echo -e "${WHITE}    2. Set terminal font to: ${CYAN}MesloLGS NF${NC}"
+    echo -e "${WHITE}    3. Customize further: ${CYAN}p10k configure${NC}"
+    echo -e "${WHITE}    4. View all aliases: ${CYAN}alias${NC}"
+    echo ""
+    echo -e "${YELLOW}  ▸ BACKUP LOCATION:${NC}"
+    echo -e "${WHITE}    $BACKUP_DIR${NC}"
+    echo ""
+    echo -e "${NEON_BLUE}═══════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${NEON_GREEN}         Welcome to the future of terminal experience!${NC}"
+    echo -e "${NEON_BLUE}═══════════════════════════════════════════════════════════════════════${NC}"
+    echo ""
+}
+
+# Main installation flow
+main() {
+    print_banner
+    backup_configs
+    install_packages
+    install_oh_my_zsh
+    install_p10k
+    install_plugins
+    install_fonts
+    configure_zsh
+    set_default_shell
+    show_complete
+}
+
+# Run main function
+main
+
+# Start new shell
+echo -e "${CYAN}Starting new Zsh shell in 3 seconds...${NC}"
+sleep 3
+exec zsh -l
