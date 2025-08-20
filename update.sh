@@ -116,10 +116,8 @@ echo -e "${GREEN}✓ Packages updated${NC}"
 
 # Update configs from repo
 echo -e "${BLUE}▸ Updating configurations...${NC}"
-if [ -f "$REPO_DIR/configs/p10k-mobile.zsh" ] && [ "$ENV_TYPE" = "termux" ]; then
-    cp "$REPO_DIR/configs/p10k-mobile.zsh" "$HOME/.p10k.zsh"
-elif [ -f "$REPO_DIR/configs/p10k-cyberpunk.zsh" ]; then
-    cp "$REPO_DIR/configs/p10k-cyberpunk.zsh" "$HOME/.p10k.zsh"
+if [ -f "$REPO_DIR/configs/p10k.zsh" ]; then
+    cp "$REPO_DIR/configs/p10k.zsh" "$HOME/.p10k.zsh"
 fi
 echo -e "${GREEN}✓ Configurations updated${NC}"
 

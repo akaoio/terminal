@@ -58,8 +58,7 @@ akaoio/terminal/
 ├── README.md           # User documentation
 ├── CLAUDE.md           # AI documentation
 ├── configs/
-│   ├── p10k-cyberpunk.zsh    # Powerlevel10k config
-│   └── terminal-settings.json # Terminal preferences
+│   └── p10k.zsh        # Unified Powerlevel10k config (2-line prompt)
 ├── themes/
 │   └── cyberpunk.zsh-theme   # Custom theme
 └── assets/
@@ -120,9 +119,12 @@ akaoio/terminal/
 - Completion configurations
 - Key bindings
 
-#### Powerlevel10k Settings
-- Prompt elements (os_icon, dir, vcs, status)
-- Color definitions
+#### Powerlevel10k Settings (configs/p10k.zsh)
+- 2-line prompt design for better readability
+- First line: user@hostname, directory, git status
+- Second line: prompt symbol (❯)
+- Prompt elements (context, dir, vcs, status)
+- Color definitions (cyberpunk theme)
 - Symbol customization
 - Performance optimizations
 

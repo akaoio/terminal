@@ -777,16 +777,10 @@ ZSHRC
 
     stop_loading
     
-    # Use mobile-first P10k config
-    if [ "$IS_MOBILE" = "1" ]; then
-        cp "$SCRIPT_DIR/configs/p10k-mobile.zsh" "$HOME/.p10k.zsh" 2>/dev/null || \
-        curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/configs/p10k-mobile.zsh -o "$HOME/.p10k.zsh" 2>/dev/null || \
-        create_default_p10k_config
-    else
-        cp "$SCRIPT_DIR/configs/p10k-cyberpunk.zsh" "$HOME/.p10k.zsh" 2>/dev/null || \
-        curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/configs/p10k-cyberpunk.zsh -o "$HOME/.p10k.zsh" 2>/dev/null || \
-        create_default_p10k_config
-    fi
+    # Use unified P10k config for all environments
+    cp "$SCRIPT_DIR/configs/p10k.zsh" "$HOME/.p10k.zsh" 2>/dev/null || \
+    curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/configs/p10k.zsh -o "$HOME/.p10k.zsh" 2>/dev/null || \
+    create_default_p10k_config
     
     echo -e "${GREEN}  ✓ Configuration complete${NC}"
     sleep 1
