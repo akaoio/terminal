@@ -7,20 +7,48 @@ set -e  # Exit on error
 
 # SMART ENVIRONMENT DETECTION
 detect_environment() {
+    # Check for Termux first
     if [ -n "$TERMUX_VERSION" ] || [ -d "/data/data/com.termux" ]; then
         echo "termux"
+    # Check for containerized environments
+    elif [ -f /run/.containerenv ] || [ -f /.dockerenv ]; then
+        echo "container"
+    # Check for WSL
+    elif grep -qi microsoft /proc/version 2>/dev/null; then
+        echo "wsl"
+    # Check for macOS
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "macos"
+    # Linux detection with immutable check
     elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        if command -v apt-get &> /dev/null; then
+        # Check for immutable systems first (Bazzite, Silverblue, etc.)
+        if [ -f /usr/bin/rpm-ostree ]; then
+            if [ -f /etc/os-release ]; then
+                . /etc/os-release
+                if [[ "$ID" == "bazzite" ]]; then
+                    echo "bazzite"
+                else
+                    echo "immutable"
+                fi
+            else
+                echo "immutable"
+            fi
+        # Regular Linux distros
+        elif command -v apt-get &> /dev/null; then
             echo "debian"
+        elif command -v dnf &> /dev/null; then
+            echo "redhat"
         elif command -v yum &> /dev/null; then
             echo "redhat"
         elif command -v pacman &> /dev/null; then
             echo "arch"
+        elif command -v zypper &> /dev/null; then
+            echo "suse"
+        elif command -v apk &> /dev/null; then
+            echo "alpine"
         else
             echo "linux"
         fi
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        echo "macos"
     else
         echo "unknown"
     fi
@@ -202,32 +230,114 @@ backup_configs() {
     sleep 1
 }
 
+# Install Homebrew if needed
+install_homebrew() {
+    if ! command -v brew &> /dev/null; then
+        echo -e "${YELLOW}  Installing Homebrew...${NC}"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        
+        # Add to PATH based on system
+        if [ -d "/home/linuxbrew/.linuxbrew" ]; then
+            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        elif [ -d "/opt/homebrew" ]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
+    fi
+}
+
 # Smart package installation
 install_packages() {
     echo -e "${BLUE}▸ Installing packages for $ENV_TYPE${NC}"
     
     case "$ENV_TYPE" in
         termux)
+            show_loading "Updating Termux packages"
             pkg update -y > /dev/null 2>&1
             pkg install -y zsh git curl wget nano \
                 fzf bat ripgrep fd neofetch htop ncdu \
                 python nodejs > /dev/null 2>&1
-            ;;
-        debian)
-            show_loading "Installing packages"
-            sudo apt-get update -qq > /dev/null 2>&1
-            sudo apt-get install -y -qq zsh git curl wget \
-                fzf bat ripgrep fd-find neofetch htop ncdu > /dev/null 2>&1
             stop_loading
             ;;
-        macos)
-            if ! command -v brew &> /dev/null; then
-                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            fi
-            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu
+            
+        bazzite|immutable)
+            echo -e "${YELLOW}  Immutable system detected - using Homebrew${NC}"
+            install_homebrew
+            show_loading "Installing packages via Homebrew"
+            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu eza > /dev/null 2>&1
+            stop_loading
+            
+            # Try to layer zsh if possible
+            echo -e "${YELLOW}  Attempting to layer zsh (may require reboot)${NC}"
+            sudo rpm-ostree install zsh util-linux-user --idempotent 2>/dev/null || true
             ;;
+            
+        container)
+            echo -e "${YELLOW}  Container environment - attempting package installation${NC}"
+            if command -v apt-get &> /dev/null; then
+                apt-get update && apt-get install -y zsh git curl wget
+            elif command -v dnf &> /dev/null; then
+                dnf install -y zsh git curl wget
+            elif command -v apk &> /dev/null; then
+                apk add --no-cache zsh git curl wget
+            fi
+            ;;
+            
+        wsl|debian)
+            show_loading "Installing packages via APT"
+            sudo apt-get update -qq > /dev/null 2>&1
+            sudo apt-get install -y -qq zsh git curl wget \
+                fzf ripgrep fd-find neofetch htop ncdu > /dev/null 2>&1
+            # Try to install bat (might not be available on older versions)
+            sudo apt-get install -y -qq bat 2>/dev/null || true
+            stop_loading
+            ;;
+            
+        redhat)
+            show_loading "Installing packages via DNF/YUM"
+            if command -v dnf &> /dev/null; then
+                sudo dnf install -y zsh git curl wget nano \
+                    fzf ripgrep fd-find neofetch htop ncdu \
+                    util-linux-user > /dev/null 2>&1
+            else
+                sudo yum install -y zsh git curl wget nano > /dev/null 2>&1
+            fi
+            stop_loading
+            ;;
+            
+        arch)
+            show_loading "Installing packages via Pacman"
+            sudo pacman -Syu --noconfirm > /dev/null 2>&1
+            sudo pacman -S --noconfirm zsh git curl wget nano \
+                fzf bat ripgrep fd neofetch htop ncdu > /dev/null 2>&1
+            stop_loading
+            ;;
+            
+        suse)
+            show_loading "Installing packages via Zypper"
+            sudo zypper install -y zsh git curl wget nano \
+                fzf ripgrep fd neofetch htop ncdu > /dev/null 2>&1
+            stop_loading
+            ;;
+            
+        alpine)
+            show_loading "Installing packages via APK"
+            sudo apk add --no-cache zsh git curl wget nano \
+                fzf bat ripgrep fd neofetch htop ncdu > /dev/null 2>&1
+            stop_loading
+            ;;
+            
+        macos)
+            echo -e "${YELLOW}  Using Homebrew for macOS${NC}"
+            install_homebrew
+            show_loading "Installing packages"
+            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu eza > /dev/null 2>&1
+            stop_loading
+            ;;
+            
         *)
-            echo -e "${YELLOW}⚠ Unknown environment, trying generic install${NC}"
+            echo -e "${YELLOW}⚠ Unknown environment, attempting Homebrew installation${NC}"
+            install_homebrew
+            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu eza > /dev/null 2>&1
             ;;
     esac
     
@@ -355,6 +465,13 @@ configure_zsh() {
 # Enable Powerlevel10k instant prompt
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Add Homebrew to PATH if installed (for immutable systems)
+if [ -d "/home/linuxbrew/.linuxbrew" ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+elif [ -d "/opt/homebrew" ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
 # Path to Oh My Zsh
