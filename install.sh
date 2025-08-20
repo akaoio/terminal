@@ -5,6 +5,9 @@
 
 set -e  # Exit on error
 
+# Save original directory
+ORIGINAL_DIR="$(pwd)"
+
 # SMART ENVIRONMENT DETECTION
 detect_environment() {
     # Check for Termux first
@@ -943,7 +946,8 @@ main() {
 # Run main function
 main
 
-# Start new shell
+# Return to original directory and start new shell
+cd "$ORIGINAL_DIR"
 echo -e "${CYAN}Starting new Zsh shell in 3 seconds...${NC}"
 sleep 3
 exec zsh -l
