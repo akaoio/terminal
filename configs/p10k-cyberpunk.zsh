@@ -12,19 +12,21 @@
   unset -m '(POWERLEVEL9K_*|DEFAULT_USER)~POWERLEVEL9K_GITSTATUS_DIR'
   [[ $ZSH_VERSION == (5.<1->*|<6->.*) ]] || return
 
-  # Simple one-line prompt
+  # Two-line prompt for better readability on small screens
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
+    # First line: path and git info
     context                 # user@hostname
     dir                     # current directory  
     vcs                     # git status
-    prompt_char            # $ 
+    newline                 # line break
+    prompt_char            # ❯ on second line
   )
 
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=()
 
-  # Basic settings - ONE LINE, no backgrounds anywhere
+  # Two-line settings - no backgrounds anywhere
   typeset -g POWERLEVEL9K_PROMPT_ON_NEWLINE=false
-  typeset -g POWERLEVEL9K_PROMPT_ADD_NEWLINE=false
+  typeset -g POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
   typeset -g POWERLEVEL9K_BACKGROUND=                 # global no background
   
   # Rainbow colors - no backgrounds, text only
@@ -48,9 +50,14 @@
   typeset -g POWERLEVEL9K_PROMPT_CHAR_BACKGROUND=     # no background
   typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=51    # cyan
   typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=196  # red  
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='$'
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_VIINS_CONTENT_EXPANSION='$'
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_LEFT_PROMPT_LAST_SEGMENT_END_SYMBOL=' '
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='❯'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_VIINS_CONTENT_EXPANSION='❯'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_LEFT_PROMPT_LAST_SEGMENT_END_SYMBOL=''
+  
+  # Disable multiline prompt decorations
+  typeset -g POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX=
+  typeset -g POWERLEVEL9K_MULTILINE_NEWLINE_PROMPT_PREFIX=
+  typeset -g POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX=
   
   # Separators - compact spacing
   typeset -g POWERLEVEL9K_{LEFT,RIGHT}_SEGMENT_SEPARATOR=' '
