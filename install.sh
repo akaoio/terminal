@@ -441,7 +441,46 @@ install_fonts() {
     echo -e "${BLUE}▸ Setting up fonts${NC}"
     
     if [ "$ENV_TYPE" = "termux" ]; then
-        echo -e "${YELLOW}  Termux: Install Termux:Styling from F-Droid for fonts${NC}"
+        # Install Nerd Font for Termux
+        show_loading "Installing Nerd Fonts for Termux"
+        
+        # Create font directory for Termux
+        TERMUX_FONT_DIR="$HOME/.termux"
+        mkdir -p "$TERMUX_FONT_DIR"
+        
+        # Download DejaVu Sans Mono Nerd Font (works well with Termux)
+        if ! [ -f "$TERMUX_FONT_DIR/font.ttf" ]; then
+            # Try DejaVu Sans Mono Nerd Font first (smaller, better compatibility)
+            if wget -q -O "$TERMUX_FONT_DIR/font.ttf" \
+                "https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DejaVuSansMono/Regular/DejaVuSansMNerdFont-Regular.ttf" 2>/dev/null; then
+                echo -e "${GREEN}  ✓ DejaVu Sans Mono Nerd Font installed${NC}"
+            else
+                # Fallback to MesloLGS NF
+                wget -q -O "$TERMUX_FONT_DIR/font.ttf" \
+                    "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf" 2>/dev/null || true
+                echo -e "${GREEN}  ✓ MesloLGS Nerd Font installed${NC}"
+            fi
+            
+            # Apply font immediately
+            termux-reload-settings 2>/dev/null || true
+        fi
+        
+        stop_loading
+        
+        # Configure Termux properties for better icon support
+        TERMUX_PROPS="$HOME/.termux/termux.properties"
+        if ! [ -f "$TERMUX_PROPS" ]; then
+            cat > "$TERMUX_PROPS" << 'PROPS'
+# Enable true color support
+use-black-ui = true
+# Extra keys for better navigation
+extra-keys = [['ESC','/','-','HOME','UP','END','PGUP'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN']]
+PROPS
+            termux-reload-settings 2>/dev/null || true
+        fi
+        
+        echo -e "${CYAN}  Font installed! Restart Termux app to apply.${NC}"
+        echo -e "${YELLOW}  Alternative: Install Termux:Styling from F-Droid for more fonts${NC}"
     else
         FONT_DIR="$HOME/.local/share/fonts"
         mkdir -p "$FONT_DIR"
