@@ -146,6 +146,17 @@ case "$COMMAND" in
         apply_theme "$1"
         ;;
         
+    apply-ls)
+        # Output only LS_COLORS for the theme
+        local theme_name="${1:-$CURRENT_THEME}"
+        case "$theme_name" in
+            dracula) echo "di=1;35:ln=1;36:so=1;32:pi=33:ex=1;35:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43" ;;
+            cyberpunk) echo "di=1;95:ln=1;96:so=1;92:pi=1;93:ex=1;92:bd=1;91:cd=1;91:su=1;97;41:sg=1;97;44:tw=1;97;42:ow=1;97;43" ;;
+            nord) echo "di=1;34:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43" ;;
+            gruvbox) echo "di=1;33:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43" ;;
+        esac
+        ;;
+        
     export)
         if [ -z "$1" ]; then
             echo "Error: Output file required" >&2

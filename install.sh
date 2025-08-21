@@ -280,7 +280,7 @@ install_packages() {
         termux)
             show_loading "Updating Termux packages"
             pkg update -y > /dev/null 2>&1
-            pkg install -y zsh git curl wget nano \
+            pkg install -y zsh git curl wget jq nano \
                 fzf bat ripgrep fd neofetch htop ncdu \
                 cmatrix python nodejs > /dev/null 2>&1
             stop_loading
@@ -290,7 +290,7 @@ install_packages() {
             echo -e "${YELLOW}  Immutable system detected - using Homebrew${NC}"
             install_homebrew
             show_loading "Installing packages via Homebrew"
-            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu eza > /dev/null 2>&1
+            brew install zsh git curl wget jq fzf bat ripgrep fd neofetch htop ncdu eza > /dev/null 2>&1
             stop_loading
             
             # Try to layer zsh if possible
@@ -301,18 +301,18 @@ install_packages() {
         container)
             echo -e "${YELLOW}  Container environment - attempting package installation${NC}"
             if command -v apt-get &> /dev/null; then
-                apt-get update && apt-get install -y zsh git curl wget
+                apt-get update && apt-get install -y zsh git curl wget jq
             elif command -v dnf &> /dev/null; then
-                dnf install -y zsh git curl wget
+                dnf install -y zsh git curl wget jq
             elif command -v apk &> /dev/null; then
-                apk add --no-cache zsh git curl wget
+                apk add --no-cache zsh git curl wget jq
             fi
             ;;
             
         wsl|debian)
             show_loading "Installing packages via APT"
             sudo apt-get update -qq > /dev/null 2>&1
-            sudo apt-get install -y -qq zsh git curl wget \
+            sudo apt-get install -y -qq zsh git curl wget jq \
                 fzf ripgrep fd-find neofetch htop ncdu cmatrix > /dev/null 2>&1
             # Try to install bat (might not be available on older versions)
             sudo apt-get install -y -qq bat 2>/dev/null || true
@@ -322,13 +322,13 @@ install_packages() {
         redhat)
             show_loading "Installing packages via DNF/YUM"
             if command -v dnf &> /dev/null; then
-                sudo dnf install -y zsh git curl wget nano \
+                sudo dnf install -y zsh git curl wget jq nano \
                     fzf ripgrep fd-find neofetch htop ncdu cmatrix \
                     util-linux-user > /dev/null 2>&1
                 # Try to install bat
                 sudo dnf install -y bat 2>/dev/null || true
             else
-                sudo yum install -y zsh git curl wget nano cmatrix > /dev/null 2>&1
+                sudo yum install -y zsh git curl wget jq nano cmatrix > /dev/null 2>&1
             fi
             stop_loading
             ;;
@@ -336,14 +336,14 @@ install_packages() {
         arch)
             show_loading "Installing packages via Pacman"
             sudo pacman -Syu --noconfirm > /dev/null 2>&1
-            sudo pacman -S --noconfirm zsh git curl wget nano \
+            sudo pacman -S --noconfirm zsh git curl wget jq nano \
                 fzf bat ripgrep fd neofetch htop ncdu cmatrix > /dev/null 2>&1
             stop_loading
             ;;
             
         suse)
             show_loading "Installing packages via Zypper"
-            sudo zypper install -y zsh git curl wget nano \
+            sudo zypper install -y zsh git curl wget jq nano \
                 fzf ripgrep fd neofetch htop ncdu cmatrix > /dev/null 2>&1
             # Try to install bat
             sudo zypper install -y bat 2>/dev/null || true
@@ -352,7 +352,7 @@ install_packages() {
             
         alpine)
             show_loading "Installing packages via APK"
-            sudo apk add --no-cache zsh git curl wget nano \
+            sudo apk add --no-cache zsh git curl wget jq nano \
                 fzf bat ripgrep fd neofetch htop ncdu cmatrix > /dev/null 2>&1
             stop_loading
             ;;
@@ -361,14 +361,14 @@ install_packages() {
             echo -e "${YELLOW}  Using Homebrew for macOS${NC}"
             install_homebrew
             show_loading "Installing packages"
-            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu eza cmatrix > /dev/null 2>&1
+            brew install zsh git curl wget jq fzf bat ripgrep fd neofetch htop ncdu eza cmatrix > /dev/null 2>&1
             stop_loading
             ;;
             
         *)
             echo -e "${YELLOW}⚠ Unknown environment, attempting Homebrew installation${NC}"
             install_homebrew
-            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu eza cmatrix > /dev/null 2>&1
+            brew install zsh git curl wget jq fzf bat ripgrep fd neofetch htop ncdu eza cmatrix > /dev/null 2>&1
             ;;
     esac
     
@@ -1411,62 +1411,74 @@ theme() {
             "$theme_dir/cli.sh" set "$THEME_NAME" > /dev/null 2>&1
             export TERMINAL_THEME="$THEME_NAME"
             
-            # Apply LS_COLORS immediately based on theme
-            case "$THEME_NAME" in
-                dracula)
-                    export LS_COLORS="di=1;35:ln=1;36:so=1;32:pi=33:ex=1;35:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                    export EXA_COLORS="di=1;35:ex=1;35:ln=1;36:*.md=1;33:*.json=1;34:*.js=1;32:*.ts=1;32:*.sh=1;31"
-                    export BAT_THEME="Dracula"
-                    ;;
-                cyberpunk)
-                    export LS_COLORS="di=1;95:ln=1;96:so=1;92:pi=1;93:ex=1;92:bd=1;91:cd=1;91:su=1;97;41:sg=1;97;44:tw=1;97;42:ow=1;97;43"
-                    export EXA_COLORS="di=1;95:ex=1;92:ln=1;96:*.md=1;93:*.json=1;94:*.js=1;92:*.ts=1;92:*.sh=1;91"
-                    export BAT_THEME="TwoDark"
-                    ;;
-                nord)
-                    export LS_COLORS="di=1;34:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                    export EXA_COLORS="di=1;34:ex=1;32:ln=1;36:*.md=1;33:*.json=1;34:*.js=1;32:*.ts=1;32:*.sh=1;31"
-                    export BAT_THEME="Nord"
-                    ;;
-                gruvbox)
-                    export LS_COLORS="di=1;33:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                    export EXA_COLORS="di=1;33:ex=1;32:ln=1;36:*.md=1;33:*.json=1;34:*.js=1;32:*.ts=1;32:*.sh=1;31"
-                    export BAT_THEME="gruvbox-dark"
-                    ;;
-            esac
-            
-            # Apply ZSH syntax highlighting colors if plugin is loaded
-            if [ -n "$ZSH_VERSION" ] && [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ]; then
+            # Apply colors dynamically using jq if available
+            if command -v jq &> /dev/null; then
+                # Get colors from JSON using jq
+                local purple=$(jq -r '.colors.term.purple' "$theme_dir/data/${THEME_NAME}.json")
+                local green=$(jq -r '.colors.term.green' "$theme_dir/data/${THEME_NAME}.json")
+                local cyan=$(jq -r '.colors.term.cyan' "$theme_dir/data/${THEME_NAME}.json")
+                local pink=$(jq -r '.colors.term.pink' "$theme_dir/data/${THEME_NAME}.json")
+                local yellow=$(jq -r '.colors.term.yellow' "$theme_dir/data/${THEME_NAME}.json")
+                local red=$(jq -r '.colors.term.red' "$theme_dir/data/${THEME_NAME}.json")
+                local blue=$(jq -r '.colors.term.blue' "$theme_dir/data/${THEME_NAME}.json")
+                
+                # Generate LS_COLORS based on theme's actual colors
                 case "$THEME_NAME" in
                     dracula)
-                        ZSH_HIGHLIGHT_STYLES[default]='fg=248'
-                        ZSH_HIGHLIGHT_STYLES[command]='fg=141'
-                        ZSH_HIGHLIGHT_STYLES[builtin]='fg=212'
-                        ZSH_HIGHLIGHT_STYLES[function]='fg=84'
-                        ZSH_HIGHLIGHT_STYLES[alias]='fg=84'
+                        export LS_COLORS="di=1;${purple}:ln=1;${cyan}:so=1;${green}:pi=${yellow}:ex=1;${pink}:bd=${blue};46:cd=${blue};43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+                        export BAT_THEME="Dracula"
                         ;;
                     cyberpunk)
-                        ZSH_HIGHLIGHT_STYLES[default]='fg=15'
-                        ZSH_HIGHLIGHT_STYLES[command]='fg=198'
-                        ZSH_HIGHLIGHT_STYLES[builtin]='fg=51'
-                        ZSH_HIGHLIGHT_STYLES[function]='fg=46'
-                        ZSH_HIGHLIGHT_STYLES[alias]='fg=226'
+                        export LS_COLORS="di=1;${pink}:ln=1;${cyan}:so=1;${green}:pi=1;${yellow}:ex=1;${green}:bd=1;${red}:cd=1;${red}:su=1;97;41:sg=1;97;44:tw=1;97;42:ow=1;97;43"
+                        export BAT_THEME="TwoDark"
                         ;;
                     nord)
-                        ZSH_HIGHLIGHT_STYLES[default]='fg=252'
-                        ZSH_HIGHLIGHT_STYLES[command]='fg=81'
-                        ZSH_HIGHLIGHT_STYLES[builtin]='fg=139'
-                        ZSH_HIGHLIGHT_STYLES[function]='fg=109'
-                        ZSH_HIGHLIGHT_STYLES[alias]='fg=109'
+                        export LS_COLORS="di=1;${blue}:ln=1;${cyan}:so=1;${purple}:pi=${yellow}:ex=1;${green}:bd=${blue};46:cd=${blue};43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+                        export BAT_THEME="Nord"
                         ;;
                     gruvbox)
-                        ZSH_HIGHLIGHT_STYLES[default]='fg=223'
-                        ZSH_HIGHLIGHT_STYLES[command]='fg=142'
-                        ZSH_HIGHLIGHT_STYLES[builtin]='fg=167'
-                        ZSH_HIGHLIGHT_STYLES[function]='fg=109'
-                        ZSH_HIGHLIGHT_STYLES[alias]='fg=108'
+                        export LS_COLORS="di=1;${yellow}:ln=1;${cyan}:so=1;${purple}:pi=${yellow}:ex=1;${green}:bd=${blue};46:cd=${blue};43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+                        export BAT_THEME="gruvbox-dark"
                         ;;
                 esac
+                
+                # Generate EXA_COLORS dynamically
+                export EXA_COLORS="di=1;${purple}:ex=1;${green}:ln=1;${cyan}:*.md=1;${yellow}:*.json=1;${blue}:*.js=1;${green}:*.ts=1;${green}:*.sh=1;${red}"
+            else
+                # Fallback if jq not available - still hardcoded but at least works
+                case "$THEME_NAME" in
+                    dracula)
+                        export LS_COLORS="di=1;35:ln=1;36:so=1;32:pi=33:ex=1;35:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+                        export BAT_THEME="Dracula"
+                        ;;
+                    cyberpunk)
+                        export LS_COLORS="di=1;95:ln=1;96:so=1;92:pi=1;93:ex=1;92:bd=1;91:cd=1;91:su=1;97;41:sg=1;97;44:tw=1;97;42:ow=1;97;43"
+                        export BAT_THEME="TwoDark"
+                        ;;
+                    nord)
+                        export LS_COLORS="di=1;34:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+                        export BAT_THEME="Nord"
+                        ;;
+                    gruvbox)
+                        export LS_COLORS="di=1;33:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+                        export BAT_THEME="gruvbox-dark"
+                        ;;
+                esac
+            fi
+            
+            # Apply ZSH syntax highlighting colors if plugin is loaded
+            if [ -n "$ZSH_VERSION" ] && [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ] && command -v jq &> /dev/null; then
+                # Get syntax colors dynamically from JSON
+                local white=$(jq -r '.colors.term.white' "$theme_dir/data/${THEME_NAME}.json")
+                local command_color=$(jq -r '.colors.term.purple' "$theme_dir/data/${THEME_NAME}.json")
+                local builtin_color=$(jq -r '.colors.term.pink' "$theme_dir/data/${THEME_NAME}.json")
+                local function_color=$(jq -r '.colors.term.green' "$theme_dir/data/${THEME_NAME}.json")
+                
+                ZSH_HIGHLIGHT_STYLES[default]="fg=${white}"
+                ZSH_HIGHLIGHT_STYLES[command]="fg=${command_color}"
+                ZSH_HIGHLIGHT_STYLES[builtin]="fg=${builtin_color}"
+                ZSH_HIGHLIGHT_STYLES[function]="fg=${function_color}"
+                ZSH_HIGHLIGHT_STYLES[alias]="fg=${function_color}"
                 
                 # Force syntax highlighting refresh only if function exists
                 if typeset -f _zsh_highlight > /dev/null 2>&1; then
