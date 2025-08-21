@@ -43,16 +43,31 @@ echo ""
 
 # Update repository
 echo -e "${BLUE}▸ Updating repository...${NC}"
-REPO_DIR="$HOME/.akaoio-terminal"
-
-if [ ! -d "$REPO_DIR" ]; then
-    git clone https://github.com/akaoio/terminal.git "$REPO_DIR" > /dev/null 2>&1
-else
+# Detect if we're running from the repo or from curl
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -d "$SCRIPT_DIR/.git" ]; then
+    # Running from local repo - DON'T reset, just pull
+    REPO_DIR="$SCRIPT_DIR"
     cd "$REPO_DIR"
     git fetch origin > /dev/null 2>&1
-    git reset --hard origin/main > /dev/null 2>&1
+    # Only pull if no local changes
+    if git diff-index --quiet HEAD --; then
+        git pull origin main > /dev/null 2>&1
+    else
+        echo -e "${YELLOW}  Local changes detected, skipping pull${NC}"
+    fi
+else
+    # Running from curl, use hidden directory
+    REPO_DIR="$HOME/.akaoio-terminal"
+    if [ ! -d "$REPO_DIR" ]; then
+        git clone https://github.com/akaoio/terminal.git "$REPO_DIR" > /dev/null 2>&1
+    else
+        cd "$REPO_DIR"
+        git fetch origin > /dev/null 2>&1
+        git reset --hard origin/main > /dev/null 2>&1
+    fi
 fi
-echo -e "${GREEN}✓ Repository updated${NC}"
+echo -e "${GREEN}✓ Repository updated from GitHub${NC}"
 
 # Update Oh My Zsh
 echo -e "${BLUE}▸ Updating Oh My Zsh...${NC}"
@@ -118,18 +133,40 @@ case "$ENV_TYPE" in
 esac
 echo -e "${GREEN}✓ Packages updated${NC}"
 
-# Update configs from repo
-echo -e "${BLUE}▸ Updating configurations...${NC}"
+# Force update ALL configs from repo (overwrite local changes)
+echo -e "${BLUE}▸ Syncing all configurations from GitHub...${NC}"
+
+# Update p10k config
 if [ -f "$REPO_DIR/configs/p10k.zsh" ]; then
-    cp "$REPO_DIR/configs/p10k.zsh" "$HOME/.p10k.zsh"
+    cp -f "$REPO_DIR/configs/p10k.zsh" "$HOME/.p10k.zsh"
+    echo -e "${GREEN}  ✓ Powerlevel10k config synced${NC}"
+else
+    echo -e "${RED}  ✗ p10k.zsh not found in repo${NC}"
 fi
 
-# Update dex script
+# Sync any other config files from repo
+if [ -d "$REPO_DIR/configs" ]; then
+    # Copy tmux config if exists
+    [ -f "$REPO_DIR/configs/.tmux.conf" ] && cp -f "$REPO_DIR/configs/.tmux.conf" "$HOME/.tmux.conf" && echo -e "${GREEN}  ✓ tmux config synced${NC}"
+    
+    # Copy nvim configs if exists
+    if [ -d "$REPO_DIR/configs/nvim" ]; then
+        mkdir -p "$HOME/.config/nvim"
+        cp -rf "$REPO_DIR/configs/nvim/"* "$HOME/.config/nvim/" 2>/dev/null && echo -e "${GREEN}  ✓ Neovim configs synced${NC}"
+    fi
+    
+    # Copy any zsh custom configs
+    [ -f "$REPO_DIR/configs/.zshrc.custom" ] && cp -f "$REPO_DIR/configs/.zshrc.custom" "$HOME/.zshrc.custom" && echo -e "${GREEN}  ✓ Custom zsh config synced${NC}"
+fi
+
+# Force update dex script from repo
 if [ -f "$REPO_DIR/dex" ]; then
     mkdir -p "$HOME/.local/bin"
-    cp "$REPO_DIR/dex" "$HOME/.local/bin/dex"
+    cp -f "$REPO_DIR/dex" "$HOME/.local/bin/dex"
     chmod +x "$HOME/.local/bin/dex"
-    echo -e "${GREEN}✓ dex script updated${NC}"
+    echo -e "${GREEN}  ✓ dex script updated from GitHub${NC}"
+else
+    echo -e "${YELLOW}  ⚠ dex script not found in repo${NC}"
 fi
 
 # Update tmux config
@@ -137,11 +174,25 @@ if [ -f "$HOME/.tmux.conf" ]; then
     echo -e "${YELLOW}  Keeping existing tmux config${NC}"
 fi
 
-# Update LazyVim if installed
-if [ -d "$HOME/.config/nvim" ]; then
-    echo -e "${BLUE}▸ Updating LazyVim...${NC}"
-    cd "$HOME/.config/nvim"
-    git pull 2>/dev/null || echo -e "${YELLOW}  LazyVim is customized, skipping update${NC}"
+# Install or Update LazyVim
+echo -e "${BLUE}▸ Setting up LazyVim...${NC}"
+if command -v nvim &> /dev/null; then
+    if [ ! -d "$HOME/.config/nvim" ]; then
+        # Fresh install LazyVim
+        echo -e "${YELLOW}  Installing LazyVim...${NC}"
+        git clone https://github.com/LazyVim/starter "$HOME/.config/nvim" > /dev/null 2>&1
+        rm -rf "$HOME/.config/nvim/.git"
+        echo -e "${GREEN}  ✓ LazyVim installed${NC}"
+    else
+        echo -e "${YELLOW}  LazyVim already configured${NC}"
+    fi
+    # Ensure lazy.nvim is installed
+    LAZY_PATH="$HOME/.local/share/nvim/lazy/lazy.nvim"
+    if [ ! -d "$LAZY_PATH" ]; then
+        git clone --filter=blob:none --branch=stable https://github.com/folke/lazy.nvim.git "$LAZY_PATH" > /dev/null 2>&1
+    fi
+else
+    echo -e "${YELLOW}  Neovim not installed${NC}"
 fi
 
 # Update Claude Code
@@ -211,10 +262,10 @@ alias cc='"'"'claude --dangerously-skip-permissions'"'"'\\
 alias dex='"'"'claude --dangerously-skip-permissions'"'"'
 ' "$HOME/.zshrc" 2>/dev/null || \
         # Fallback: append to end of file
-        echo -e "\n# Claude CLI aliases (override system cc compiler)\nunalias cc 2>/dev/null\nunalias dex 2>/dev/null\nalias cc='claude --dangerously-skip-permissions'\nalias dex='claude --dangerously-skip-permissions'" >> "$HOME/.zshrc"
+        echo -e "\n# Claude CLI alias\nalias cc='claude --dangerously-skip-permissions'" >> "$HOME/.zshrc"
     else
         # Append to end of file if pattern not found
-        echo -e "\n# Claude CLI aliases (override system cc compiler)\nunalias cc 2>/dev/null\nunalias dex 2>/dev/null\nalias cc='claude --dangerously-skip-permissions'\nalias dex='claude --dangerously-skip-permissions'" >> "$HOME/.zshrc"
+        echo -e "\n# Claude CLI alias\nalias cc='claude --dangerously-skip-permissions'" >> "$HOME/.zshrc"
     fi
     echo -e "${GREEN}✓ Claude CLI aliases updated${NC}"
 else
