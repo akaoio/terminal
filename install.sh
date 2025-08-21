@@ -980,6 +980,56 @@ HIST_STAMPS="yyyy-mm-dd"
 # Load Oh My Zsh
 source $ZSH/oh-my-zsh.sh
 
+# ZSH SYNTAX HIGHLIGHTING - Dracula Theme Colors
+# These colors ensure command input matches the Dracula color scheme
+typeset -A ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[default]='fg=#f8f8f2'                      # Default text - white
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#ff5555,bold'           # Unknown - red
+ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#ff79c6'                # Reserved words - pink
+ZSH_HIGHLIGHT_STYLES[alias]='fg=#50fa7b'                        # Aliases - green
+ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#50fa7b'                 # Suffix aliases - green
+ZSH_HIGHLIGHT_STYLES[global-alias]='fg=#50fa7b'                 # Global aliases - green
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=#8be9fd'                      # Builtins - cyan
+ZSH_HIGHLIGHT_STYLES[function]='fg=#50fa7b'                     # Functions - green
+ZSH_HIGHLIGHT_STYLES[command]='fg=#50fa7b'                      # Commands - green
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=#50fa7b,underline'         # Precommands - green underlined
+ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#ff79c6'             # Command separators - pink
+ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#8be9fd'               # Hashed commands - cyan
+ZSH_HIGHLIGHT_STYLES[autodirectory]='fg=#ffb86c,underline'      # Auto directories - orange
+ZSH_HIGHLIGHT_STYLES[path]='fg=#f8f8f2,underline'               # Paths - white underlined
+ZSH_HIGHLIGHT_STYLES[path_pathseparator]='fg=#ff79c6'           # Path separators - pink
+ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=#f8f8f2,underline'        # Path prefix - white underlined
+ZSH_HIGHLIGHT_STYLES[path_prefix_pathseparator]='fg=#ff79c6'    # Path prefix separators - pink
+ZSH_HIGHLIGHT_STYLES[globbing]='fg=#8be9fd'                     # Globbing - cyan
+ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#bd93f9'            # History expansion - purple
+ZSH_HIGHLIGHT_STYLES[command-substitution]='fg=#f1fa8c'         # Command substitution - yellow
+ZSH_HIGHLIGHT_STYLES[command-substitution-unquoted]='fg=#f1fa8c' # Unquoted substitution - yellow
+ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]='fg=#ff79c6' # Substitution delimiters - pink
+ZSH_HIGHLIGHT_STYLES[process-substitution]='fg=#f1fa8c'         # Process substitution - yellow
+ZSH_HIGHLIGHT_STYLES[process-substitution-delimiter]='fg=#ff79c6' # Process delimiters - pink
+ZSH_HIGHLIGHT_STYLES[arithmetic-expansion]='fg=#bd93f9'         # Arithmetic - purple
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#ffb86c'         # Single hyphen options - orange
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#ffb86c'         # Double hyphen options - orange
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=#bd93f9'         # Back quotes - purple
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument-unclosed]='fg=#ff5555' # Unclosed back quotes - red
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument-delimiter]='fg=#ff79c6' # Back quote delimiters - pink
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#f1fa8c'       # Single quotes - yellow
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument-unclosed]='fg=#ff5555' # Unclosed single quotes - red
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#f1fa8c'       # Double quotes - yellow
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument-unclosed]='fg=#ff5555' # Unclosed double quotes - red
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#f1fa8c'       # Dollar quotes - yellow
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument-unclosed]='fg=#ff5555' # Unclosed dollar quotes - red
+ZSH_HIGHLIGHT_STYLES[rc-quote]='fg=#f1fa8c'                     # RC quotes - yellow
+ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]='fg=#bd93f9' # Dollar double quotes - purple
+ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]='fg=#bd93f9'  # Back double quotes - purple
+ZSH_HIGHLIGHT_STYLES[back-dollar-quoted-argument]='fg=#bd93f9'  # Back dollar quotes - purple
+ZSH_HIGHLIGHT_STYLES[assign]='fg=#f8f8f2'                       # Assignments - white
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=#ff79c6'                  # Redirections - pink
+ZSH_HIGHLIGHT_STYLES[comment]='fg=#6272a4'                      # Comments - gray
+ZSH_HIGHLIGHT_STYLES[named-fd]='fg=#f8f8f2'                     # Named file descriptors - white
+ZSH_HIGHLIGHT_STYLES[numeric-fd]='fg=#f8f8f2'                   # Numeric file descriptors - white
+ZSH_HIGHLIGHT_STYLES[arg0]='fg=#50fa7b'                         # First argument - green
+
 # CYBERPUNK ALIASES
 
 # Better ls with exa - Rainbow colors

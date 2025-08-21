@@ -46,7 +46,7 @@ get_session_info() {
 get_status_info() {
     local prefix_status=""
     if tmux display -p '#{?client_prefix,PREFIX,}' 2>/dev/null | grep -q "PREFIX"; then
-        prefix_status=" \033[7;38;2;255;85;85m PREFIX \033[0;38;2;139;233;253m"
+        prefix_status=" \033[7;38;5;203m PREFIX \033[0;38;5;117m"
     fi
     echo "$prefix_status"
 }
@@ -56,14 +56,14 @@ while true; do
     clear
     
     # Top line - controls
-    echo -e "\033[38;2;139;233;253m┌─ \033[38;2;189;147;249mDEX CONTROL\033[38;2;139;233;253m ──────────────────────────────────────────────────┐\033[0m"
+    echo -e "\033[38;5;117m┌─ \033[38;5;141mDEX CONTROL\033[38;5;117m ──────────────────────────────────────────────────┐\033[0m"
     
     # Bottom line - status and info
     local session_info=$(get_session_info)
     local status_info=$(get_status_info)
     local current_time=$(date +'%H:%M:%S')
     
-    printf "\033[38;2;139;233;253m│\033[38;2;80;250;123m[Ctrl+A+?]\033[38;2;248;248;242m Help \033[38;2;255;121;198m[Ctrl+A+D]\033[38;2;248;248;242m Detach \033[38;2;189;147;249m[Ctrl+A+F]\033[38;2;248;248;242m Footer%s\033[38;2;139;233;253m│ \033[38;2;248;248;242m%s\033[38;2;139;233;253m │ \033[38;2;139;233;253m%s\033[38;2;139;233;253m │\033[0m\n" "$status_info" "$session_info" "$current_time"
+    printf "\033[38;5;117m│\033[38;5;84m[Ctrl+A+?]\033[38;5;253m Help \033[38;5;212m[Ctrl+A+D]\033[38;5;253m Detach \033[38;5;141m[Ctrl+A+F]\033[38;5;253m Footer%s\033[38;5;117m│ \033[38;5;253m%s\033[38;5;117m │ \033[38;5;117m%s\033[38;5;117m │\033[0m\n" "$status_info" "$session_info" "$current_time"
     
     sleep 1
 done

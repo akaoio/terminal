@@ -4,13 +4,17 @@
 
 set -e
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-NC='\033[0m'
+# Dracula Theme Colors
+RED='\033[38;5;203m'    # Dracula Red (#ff5555)
+GREEN='\033[38;5;84m'   # Dracula Green (#50fa7b)
+YELLOW='\033[38;5;228m' # Dracula Yellow (#f1fa8c)
+BLUE='\033[38;5;117m'   # Dracula Cyan (#8be9fd)
+CYAN='\033[38;5;117m'   # Dracula Cyan (#8be9fd)
+PURPLE='\033[38;5;141m' # Dracula Purple (#bd93f9)
+PINK='\033[38;5;212m'   # Dracula Pink (#ff79c6)
+ORANGE='\033[38;5;215m' # Dracula Orange (#ffb86c)
+WHITE='\033[38;5;253m'  # Dracula Foreground (#f8f8f2)
+NC='\033[0m'             # No Color
 
 # Test counters
 TESTS_PASSED=0
