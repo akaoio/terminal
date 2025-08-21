@@ -34,10 +34,11 @@ get_screen_info() {
     fi
 }
 
-# Setup enhanced UI with header and sidebar
+# Setup enhanced UI with header, footer, and sidebar
 setup_enhanced_ui() {
-    # Configure custom status bar (header)
+    # Configure header (top status bar)
     tmux set -t "$SESSION_NAME" status-position top
+    tmux set -t "$SESSION_NAME" status on
     tmux set -t "$SESSION_NAME" status-interval 1
     tmux set -t "$SESSION_NAME" status-style "bg=colour235,fg=colour198"
     
@@ -54,32 +55,78 @@ setup_enhanced_ui() {
     tmux set -t "$SESSION_NAME" status-right-length 60
     tmux set -t "$SESSION_NAME" status-right "#[fg=colour245]│ #[fg=colour226]P:#{pane_index}/#{window_panes} #[fg=colour51]%H:%M "
     
+    # Configure footer (status bar 2)
+    tmux set -t "$SESSION_NAME" status2 on
+    tmux set -t "$SESSION_NAME" status2-format "#[fg=colour198,bg=colour235] DEX #{?client_prefix,#[reverse] PREFIX #[noreverse] ,}#[fg=colour245]│ #[fg=colour226]#{session_windows} windows #[fg=colour245]│ #[fg=colour51]Ctrl+A+M: Menu #[fg=colour245]│ #[fg=colour46]#{host_short}"
+    
+    # Create layout with header and footer space
+    create_full_layout
+    
     # Setup key bindings for UI controls
     setup_ui_keybindings
     
-    # Create sidebar management script
-    create_sidebar_script
+    # Setup script paths for global access
+    setup_script_paths
+}
+
+# Create full layout with header, footer, and content area
+create_full_layout() {
+    # Just set up the footer automatically - layout is already created by create_smart_layout
+    bash ~/.tmux/dex-footer.sh show
 }
 
 # Setup UI keybindings
 setup_ui_keybindings() {
-    # Menu toggle (Ctrl-a + m)
-    tmux bind -T prefix m run-shell "bash ~/.tmux/dex-menu.sh toggle"
+    # Burger menu toggle (Ctrl-a + m) - same as sidebar
+    tmux bind -T prefix m run-shell "bash ~/.tmux/dex-sidebar.sh toggle"
     
-    # Sidebar toggle (Ctrl-a + M)
+    # Sidebar toggle (Ctrl-a + M) - primary sidebar control
     tmux bind -T prefix M run-shell "bash ~/.tmux/dex-sidebar.sh toggle"
     
     # Quick help (Ctrl-a + ?)
     tmux bind -T prefix ? display-popup -E -w 80% -h 80% "bash ~/.tmux/dex-help.sh"
     
     # Session manager popup (Ctrl-a + Ctrl-s)
-    tmux bind -T prefix C-s display-popup -E -w 60% -h 60% "bash ~/.tmux/dex-sessions.sh"
+    tmux bind -T prefix C-s display-popup -E -w 60% -h 60% "tmux choose-session -F '#{session_name}: #{?session_attached,attached,not attached}'"
     
     # Window manager popup (Ctrl-a + Ctrl-w)
-    tmux bind -T prefix C-w display-popup -E -w 60% -h 60% "bash ~/.tmux/dex-windows.sh"
+    tmux bind -T prefix C-w display-popup -E -w 60% -h 60% "tmux choose-window -F '#{window_index}: #{window_name} #{?window_active,(active),}'"
     
     # Pane manager popup (Ctrl-a + Ctrl-p)
-    tmux bind -T prefix C-p display-popup -E -w 60% -h 60% "bash ~/.tmux/dex-panes.sh"
+    tmux bind -T prefix C-p display-popup -E -w 60% -h 60% "tmux choose-pane -F '#{pane_index}: #{pane_current_command} #{?pane_active,(active),}'"
+    
+    # Footer controls - add keybinding for footer toggle
+    tmux bind -T prefix f run-shell "bash ~/.tmux/dex-footer.sh toggle"
+}
+
+# Setup script paths for global access
+setup_script_paths() {
+    # Ensure ~/.tmux directory exists
+    mkdir -p ~/.tmux
+    
+    # Copy scripts from terminal project to user's tmux directory
+    # This happens during dex execution to ensure latest versions
+    local script_source_dir
+    
+    # Try to find the terminal project directory
+    if [ -d "/home/$(whoami)/Projects/terminal/configs/tmux-scripts" ]; then
+        script_source_dir="/home/$(whoami)/Projects/terminal/configs/tmux-scripts"
+    elif [ -d "$HOME/akaoio/terminal/configs/tmux-scripts" ]; then
+        script_source_dir="$HOME/akaoio/terminal/configs/tmux-scripts"
+    elif [ -f "$0" ]; then
+        # Get directory where dex is located
+        local dex_dir=$(dirname "$(readlink -f "$0")")
+        script_source_dir="$dex_dir/configs/tmux-scripts"
+    fi
+    
+    if [ -d "$script_source_dir" ]; then
+        echo -e "${CYAN}Setting up DEX UI scripts...${NC}"
+        cp "$script_source_dir/"*.sh ~/.tmux/
+        chmod +x ~/.tmux/dex-*.sh
+    else
+        echo -e "${YELLOW}Warning: Could not find tmux scripts directory${NC}"
+        echo -e "${YELLOW}UI features may not work properly${NC}"
+    fi
 }
 
 # Create sidebar management script
