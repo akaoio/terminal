@@ -80,20 +80,40 @@ trap 'cleanup 130' INT
 trap 'cleanup 143' TERM
 trap 'cleanup $?' EXIT
 
-# Dracula theme colors - beautiful and consistent
-PURPLE='\033[38;2;189;147;249m'  # BD93F9
-GREEN='\033[38;2;80;250;123m'    # 50FA7B
-CYAN='\033[38;2;139;233;253m'    # 8BE9FD
-PINK='\033[38;2;255;121;198m'    # FF79C6
-YELLOW='\033[38;2;241;250;140m'  # F1FA8C
-RED='\033[38;2;255;85;85m'       # FF5555
-ORANGE='\033[38;2;255;184;108m'  # FFB86C
-BLUE='\033[38;2;139;233;253m'    # 8BE9FD (same as cyan for compatibility)
-COMMENT='\033[38;2;98;114;164m'  # 6272A4
-NC='\033[0m' # No Color
-
-# Script directory
+# Load theme system - single source of truth for colors
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+THEME_NAME="${TERMINAL_THEME:-dracula}"
+
+# Load theme colors
+if [ -f "$SCRIPT_DIR/theme/load.sh" ]; then
+    source "$SCRIPT_DIR/theme/load.sh" "$THEME_NAME" 2>/dev/null || {
+        # Fallback to hardcoded Dracula colors if theme system fails
+        PURPLE='\033[38;2;189;147;249m'
+        GREEN='\033[38;2;80;250;123m'
+        CYAN='\033[38;2;139;233;253m'
+        PINK='\033[38;2;255;121;198m'
+        YELLOW='\033[38;2;241;250;140m'
+        RED='\033[38;2;255;85;85m'
+        ORANGE='\033[38;2;255;184;108m'
+        BLUE='\033[38;2;139;233;253m'
+        COMMENT='\033[38;2;98;114;164m'
+        NC='\033[0m'
+    }
+else
+    # Fallback colors
+    PURPLE='\033[38;2;189;147;249m'
+    GREEN='\033[38;2;80;250;123m'
+    CYAN='\033[38;2;139;233;253m'
+    PINK='\033[38;2;255;121;198m'
+    YELLOW='\033[38;2;241;250;140m'
+    RED='\033[38;2;255;85;85m'
+    ORANGE='\033[38;2;255;184;108m'
+    BLUE='\033[38;2;139;233;253m'
+    COMMENT='\033[38;2;98;114;164m'
+    NC='\033[0m'
+fi
+
+# Backup directory
 BACKUP_DIR="$HOME/.terminal-backup-$(date +%Y%m%d-%H%M%S)"
 
 # Check if loading animations are enabled (can be disabled with DISABLE_ANIMATIONS=1 or --no-animations)
@@ -973,6 +993,12 @@ export ZSH="$HOME/.oh-my-zsh"
 # Theme
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
+# Terminal Theme System
+export TERMINAL_THEME="${TERMINAL_THEME:-dracula}"
+if [ -f "$HOME/.config/terminal/theme/load.sh" ]; then
+    source "$HOME/.config/terminal/theme/load.sh" "$TERMINAL_THEME" 2>/dev/null
+fi
+
 # Plugins
 plugins=(
     git
@@ -1320,6 +1346,50 @@ bindkey '^P' up-line-or-history
 bindkey '^ ' autosuggest-accept
 bindkey '^[[Z' autosuggest-accept
 
+# Theme management functions
+theme() {
+    local theme_cmd="\${1:-list}"
+    local theme_dir="\$HOME/.config/terminal/theme"
+    
+    if [ ! -f "\$theme_dir/cli.js" ]; then
+        echo "Theme system not installed. Run the installer first."
+        return 1
+    fi
+    
+    case "\$theme_cmd" in
+        list)
+            node "\$theme_dir/cli.js" list
+            ;;
+        set)
+            if [ -z "\$2" ]; then
+                echo "Usage: theme set <name>"
+                return 1
+            fi
+            node "\$theme_dir/cli.js" set "\$2"
+            export TERMINAL_THEME="\$2"
+            # Save preference
+            echo "export TERMINAL_THEME='\$2'" > ~/.terminal-theme
+            # Reload shell to apply
+            exec zsh
+            ;;
+        get|current)
+            node "\$theme_dir/cli.js" get | grep '"name"' | cut -d'"' -f4
+            ;;
+        *)
+            echo "Usage: theme [list|set <name>|get]"
+            ;;
+    esac
+}
+
+# Quick theme switcher aliases
+alias theme-dracula='theme set dracula'
+alias theme-cyberpunk='theme set cyberpunk'
+alias theme-nord='theme set nord'
+alias theme-gruvbox='theme set gruvbox'
+
+# Load saved theme preference
+[ -f ~/.terminal-theme ] && source ~/.terminal-theme
+
 # Load additional configs
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
@@ -1544,6 +1614,8 @@ install_dex() {
     
     # Copy dex script
     if [ -f "$SCRIPT_DIR/dex" ]; then
+        # Remove existing file or symlink to avoid conflicts
+        [ -e "$HOME/.local/bin/dex" ] && rm -f "$HOME/.local/bin/dex"
         cp "$SCRIPT_DIR/dex" "$HOME/.local/bin/dex"
     else
         # Download from repository if not local
@@ -1564,9 +1636,63 @@ install_dex() {
     sleep 1
 }
 
+# Theme selection
+select_theme() {
+    echo -e "${CYAN}▸ Theme Selection${NC}"
+    echo ""
+    echo "Available themes:"
+    echo "  1) Dracula (default) - Dark with vibrant colors"
+    echo "  2) Cyberpunk - Neon and bright"
+    echo "  3) Nord - Cool and subdued"
+    echo "  4) Gruvbox - Warm and retro"
+    echo ""
+    
+    # Check if theme provided via environment
+    if [ -n "$TERMINAL_THEME" ]; then
+        echo -e "${GREEN}Using theme: $TERMINAL_THEME${NC}"
+        return 0
+    fi
+    
+    # Auto-select default after timeout
+    echo -n "Select theme [1-4] (auto-select in 5s): "
+    
+    # Read with timeout
+    if read -t 5 -n 1 choice; then
+        echo ""
+        case "$choice" in
+            1) export TERMINAL_THEME="dracula" ;;
+            2) export TERMINAL_THEME="cyberpunk" ;;
+            3) export TERMINAL_THEME="nord" ;;
+            4) export TERMINAL_THEME="gruvbox" ;;
+            *) export TERMINAL_THEME="dracula" ;;
+        esac
+    else
+        echo ""
+        export TERMINAL_THEME="dracula"
+    fi
+    
+    echo -e "${GREEN}Theme selected: $TERMINAL_THEME${NC}"
+    
+    # Reload colors with selected theme
+    if [ -f "$SCRIPT_DIR/theme/load.sh" ]; then
+        source "$SCRIPT_DIR/theme/load.sh" "$TERMINAL_THEME" 2>/dev/null
+    fi
+    
+    # Copy theme system to user config
+    if [ -d "$SCRIPT_DIR/theme" ]; then
+        echo -e "${CYAN}Installing theme system...${NC}"
+        mkdir -p "$HOME/.config/terminal"
+        cp -r "$SCRIPT_DIR/theme" "$HOME/.config/terminal/" 2>/dev/null || true
+        echo -e "${GREEN}✓ Theme system installed${NC}"
+    fi
+    
+    sleep 1
+}
+
 # Main installation flow
 main() {
     print_banner
+    select_theme
     backup_configs
     install_packages
     install_oh_my_zsh

@@ -50,6 +50,8 @@ fi
 # dex script
 if [ -f "$SCRIPT_DIR/dex" ]; then
     mkdir -p "$HOME/.local/bin"
+    # Remove existing file or symlink to avoid conflicts
+    [ -e "$HOME/.local/bin/dex" ] && rm -f "$HOME/.local/bin/dex"
     cp -f "$SCRIPT_DIR/dex" "$HOME/.local/bin/dex"
     chmod +x "$HOME/.local/bin/dex"
     echo -e "${GREEN}  ✓ dex script overwritten${NC}"

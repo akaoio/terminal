@@ -27,17 +27,52 @@ detect_environment() {
 
 ENV_TYPE=$(detect_environment)
 
-# Dracula Theme Colors
-GREEN='\033[38;5;84m'   # Dracula Green (#50fa7b)
-YELLOW='\033[38;5;228m' # Dracula Yellow (#f1fa8c)
-BLUE='\033[38;5;117m'   # Dracula Cyan (#8be9fd)
-CYAN='\033[38;5;117m'   # Dracula Cyan (#8be9fd)
-RED='\033[38;5;203m'    # Dracula Red (#ff5555)
-PURPLE='\033[38;5;141m' # Dracula Purple (#bd93f9)
-PINK='\033[38;5;212m'   # Dracula Pink (#ff79c6)
-ORANGE='\033[38;5;215m' # Dracula Orange (#ffb86c)
-WHITE='\033[38;5;253m'  # Dracula Foreground (#f8f8f2)
-NC='\033[0m'             # No Color
+# Load theme system - single source of truth for colors
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+THEME_NAME="${TERMINAL_THEME:-dracula}"
+
+# Try to load theme from user config first, then from script dir
+if [ -f "$HOME/.config/terminal/theme/load.sh" ]; then
+    source "$HOME/.config/terminal/theme/load.sh" "$THEME_NAME" 2>/dev/null || {
+        # Fallback colors
+        GREEN='\033[38;5;84m'
+        YELLOW='\033[38;5;228m'
+        BLUE='\033[38;5;117m'
+        CYAN='\033[38;5;117m'
+        RED='\033[38;5;203m'
+        PURPLE='\033[38;5;141m'
+        PINK='\033[38;5;212m'
+        ORANGE='\033[38;5;215m'
+        WHITE='\033[38;5;253m'
+        NC='\033[0m'
+    }
+elif [ -f "$SCRIPT_DIR/theme/load.sh" ]; then
+    source "$SCRIPT_DIR/theme/load.sh" "$THEME_NAME" 2>/dev/null || {
+        # Fallback colors
+        GREEN='\033[38;5;84m'
+        YELLOW='\033[38;5;228m'
+        BLUE='\033[38;5;117m'
+        CYAN='\033[38;5;117m'
+        RED='\033[38;5;203m'
+        PURPLE='\033[38;5;141m'
+        PINK='\033[38;5;212m'
+        ORANGE='\033[38;5;215m'
+        WHITE='\033[38;5;253m'
+        NC='\033[0m'
+    }
+else
+    # Fallback colors
+    GREEN='\033[38;5;84m'
+    YELLOW='\033[38;5;228m'
+    BLUE='\033[38;5;117m'
+    CYAN='\033[38;5;117m'
+    RED='\033[38;5;203m'
+    PURPLE='\033[38;5;141m'
+    PINK='\033[38;5;212m'
+    ORANGE='\033[38;5;215m'
+    WHITE='\033[38;5;253m'
+    NC='\033[0m'
+fi
 
 # Banner
 clear
@@ -148,6 +183,20 @@ else
     echo -e "${RED}  ✗ p10k.zsh not found in repo${NC}"
 fi
 
+# Update theme system
+echo -e "${BLUE}▸ Updating theme system...${NC}"
+if [ -d "$REPO_DIR/theme" ]; then
+    mkdir -p "$HOME/.config/terminal"
+    cp -rf "$REPO_DIR/theme" "$HOME/.config/terminal/" 2>/dev/null
+    echo -e "${GREEN}  ✓ Theme system updated${NC}"
+    
+    # Show current theme
+    if [ -f "$HOME/.config/terminal/theme/cli.js" ] && command -v node &> /dev/null; then
+        CURRENT_THEME=$(node "$HOME/.config/terminal/theme/cli.js" get 2>/dev/null | grep -o '"name":[[:space:]]*"[^"]*"' | cut -d'"' -f4 || echo "dracula")
+        echo -e "${CYAN}  Current theme: $CURRENT_THEME${NC}"
+    fi
+fi
+
 # Sync any other config files from repo
 if [ -d "$REPO_DIR/configs" ]; then
     # FORCE copy tmux config (without dot prefix in repo)
@@ -169,6 +218,8 @@ fi
 # Force update dex script from repo
 if [ -f "$REPO_DIR/dex" ]; then
     mkdir -p "$HOME/.local/bin"
+    # Remove existing file or symlink to avoid conflicts
+    [ -e "$HOME/.local/bin/dex" ] && rm -f "$HOME/.local/bin/dex"
     cp -f "$REPO_DIR/dex" "$HOME/.local/bin/dex"
     chmod +x "$HOME/.local/bin/dex"
     echo -e "${GREEN}  ✓ dex script updated from GitHub${NC}"
