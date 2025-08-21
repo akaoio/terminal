@@ -702,10 +702,15 @@ install_lazyvim() {
             show_loading "Installing Neovim"
             # Try to install from official sources or PPA
             if ! command -v nvim &> /dev/null; then
-                sudo apt-get install -y -qq software-properties-common > /dev/null 2>&1
-                sudo add-apt-repository -y ppa:neovim-ppa/unstable > /dev/null 2>&1
-                sudo apt-get update -qq > /dev/null 2>&1
-                sudo apt-get install -y -qq neovim python3-neovim nodejs npm > /dev/null 2>&1
+                # Try PPA first, fallback to default repos
+                if sudo apt-get install -y -qq software-properties-common > /dev/null 2>&1 && \
+                   sudo add-apt-repository -y ppa:neovim-ppa/unstable > /dev/null 2>&1 && \
+                   sudo apt-get update -qq > /dev/null 2>&1; then
+                    sudo apt-get install -y -qq neovim python3-neovim nodejs npm > /dev/null 2>&1
+                else
+                    # Fallback to default repos
+                    sudo apt-get install -y -qq neovim python3-neovim nodejs npm > /dev/null 2>&1 || true
+                fi
             fi
             stop_loading
             ;;
@@ -747,10 +752,15 @@ install_lazyvim() {
     
     # Install LazyVim
     show_loading "Setting up LazyVim"
-    git clone https://github.com/LazyVim/starter "$HOME/.config/nvim" > /dev/null 2>&1
-    
-    # Remove .git folder to make it your own
-    rm -rf "$HOME/.config/nvim/.git"
+    if git clone https://github.com/LazyVim/starter "$HOME/.config/nvim" > /dev/null 2>&1; then
+        # Remove .git folder to make it your own
+        rm -rf "$HOME/.config/nvim/.git" 2>/dev/null || true
+        stop_loading
+    else
+        stop_loading
+        echo -e "${YELLOW}  LazyVim clone failed, creating basic Neovim config${NC}"
+        mkdir -p "$HOME/.config/nvim/lua/config"
+    fi
     
     # Create a simple init configuration
     cat > "$HOME/.config/nvim/lua/config/options.lua" << 'LAZYVIM'
