@@ -1470,9 +1470,13 @@ theme() {
             # It requires restart to apply properly
             
             echo "✓ Theme changed to: $THEME_NAME"
-            echo "  • File colors updated (try 'ls -la')"
-            echo "  • BAT theme updated (try 'bat <file>')"
-            echo "  • Changes applied immediately!"
+            echo ""
+            echo "Applied immediately:"
+            echo "  • File colors (ls/exa)"
+            echo "  • BAT syntax highlighting"
+            echo ""
+            echo "To update syntax highlighting colors:"
+            echo "  Run: exec zsh"
             ;;
         get|current)
             "$theme_dir/cli.sh" get | grep '"name"' | cut -d'"' -f4
