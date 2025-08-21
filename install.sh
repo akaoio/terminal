@@ -1340,8 +1340,30 @@ ZSHRC
     curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/configs/p10k.zsh -o "$HOME/.p10k.zsh" 2>/dev/null || \
     create_default_p10k_config
     
+    # Configure neofetch for minimal display
+    mkdir -p "$HOME/.config/neofetch"
+    cp "$SCRIPT_DIR/configs/neofetch.conf" "$HOME/.config/neofetch/config.conf" 2>/dev/null || \
+    curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/configs/neofetch.conf -o "$HOME/.config/neofetch/config.conf" 2>/dev/null || \
+    create_minimal_neofetch_config
+    
     echo -e "${GREEN}  ✓ Configuration complete${NC}"
     sleep 1
+}
+
+# Create minimal neofetch config
+create_minimal_neofetch_config() {
+    mkdir -p "$HOME/.config/neofetch"
+    cat > "$HOME/.config/neofetch/config.conf" << 'NEOFETCH'
+# Minimal Neofetch Config
+image_backend="off"
+print_info() {
+    info "OS" distro
+    info "Shell" shell  
+    info "Terminal" term
+    info "CPU" cpu
+    info "Memory" memory
+}
+NEOFETCH
 }
 
 # Universal P10k config for all environments
