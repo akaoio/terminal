@@ -910,7 +910,7 @@ LAZYVIM
 configure_zsh() {
     echo -e "${BLUE}▸ Configuring terminal${NC}"
     
-    show_loading "Creating ultimate .zshrc configuration"
+    show_loading "Creating .zshrc configuration"
     
     # Create .zshrc
     cat > "$HOME/.zshrc" << 'ZSHRC'
@@ -991,7 +991,7 @@ ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#50fa7b'                 # Suffix aliases
 ZSH_HIGHLIGHT_STYLES[global-alias]='fg=#50fa7b'                 # Global aliases - green
 ZSH_HIGHLIGHT_STYLES[builtin]='fg=#8be9fd'                      # Builtins - cyan
 ZSH_HIGHLIGHT_STYLES[function]='fg=#50fa7b'                     # Functions - green
-ZSH_HIGHLIGHT_STYLES[command]='fg=#50fa7b'                      # Commands - green
+ZSH_HIGHLIGHT_STYLES[command]='fg=#8be9fd'                      # Commands - cyan
 ZSH_HIGHLIGHT_STYLES[precommand]='fg=#50fa7b,underline'         # Precommands - green underlined
 ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#ff79c6'             # Command separators - pink
 ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#8be9fd'               # Hashed commands - cyan
@@ -1384,8 +1384,10 @@ set_default_shell() {
         if ! grep -q "exec zsh" ~/.bashrc 2>/dev/null; then
             echo "exec zsh" >> ~/.bashrc
         fi
-        # Setup storage access
-        termux-setup-storage 2>/dev/null || true
+        # Setup storage access (skip if already exists to avoid prompts)
+        if [ ! -d "$HOME/storage" ]; then
+            termux-setup-storage 2>/dev/null || true
+        fi
     else
         # Other systems: use chsh
         if [ "$SHELL" != "$(which zsh)" ]; then
