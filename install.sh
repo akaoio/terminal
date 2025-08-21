@@ -1466,29 +1466,12 @@ theme() {
                 esac
             fi
             
-            # Apply ZSH syntax highlighting colors if plugin is loaded
-            if [ -n "$ZSH_VERSION" ] && [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ] && command -v jq &> /dev/null; then
-                # Get syntax colors dynamically from JSON
-                local white=$(jq -r '.colors.term.white' "$theme_dir/data/${THEME_NAME}.json")
-                local command_color=$(jq -r '.colors.term.purple' "$theme_dir/data/${THEME_NAME}.json")
-                local builtin_color=$(jq -r '.colors.term.pink' "$theme_dir/data/${THEME_NAME}.json")
-                local function_color=$(jq -r '.colors.term.green' "$theme_dir/data/${THEME_NAME}.json")
-                
-                ZSH_HIGHLIGHT_STYLES[default]="fg=${white}"
-                ZSH_HIGHLIGHT_STYLES[command]="fg=${command_color}"
-                ZSH_HIGHLIGHT_STYLES[builtin]="fg=${builtin_color}"
-                ZSH_HIGHLIGHT_STYLES[function]="fg=${function_color}"
-                ZSH_HIGHLIGHT_STYLES[alias]="fg=${function_color}"
-                
-                # Force syntax highlighting refresh only if function exists
-                if typeset -f _zsh_highlight > /dev/null 2>&1; then
-                    _zsh_highlight 2>/dev/null || true
-                fi
-            fi
+            # Note: ZSH syntax highlighting can't be changed dynamically
+            # It requires restart to apply properly
             
             echo "✓ Theme changed to: $THEME_NAME"
             echo "  • File colors updated (try 'ls -la')"
-            echo "  • Syntax highlighting updated"
+            echo "  • BAT theme updated (try 'bat <file>')"
             echo "  • Changes applied immediately!"
             ;;
         get|current)
