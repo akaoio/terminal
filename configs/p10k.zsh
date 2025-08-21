@@ -1,4 +1,4 @@
-# AKAOIO Terminal - Professional Cyberpunk One-Line Theme
+# AKAOIO Terminal - Professional Dracula Theme
 # Format: user@host ~/dir (git) $ 
 
 'builtin' 'local' '-a' 'p10k_config_opts'
@@ -29,27 +29,27 @@
   typeset -g POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
   typeset -g POWERLEVEL9K_BACKGROUND=                 # global no background
   
-  # Rainbow colors - no backgrounds, text only
-  typeset -g POWERLEVEL9K_CONTEXT_FOREGROUND=198     # hot pink text
-  typeset -g POWERLEVEL9K_CONTEXT_BACKGROUND=        # no background
+  # Dracula colors - no backgrounds, text only
+  typeset -g POWERLEVEL9K_CONTEXT_FOREGROUND='#BD93F9'  # purple text
+  typeset -g POWERLEVEL9K_CONTEXT_BACKGROUND=           # no background
   typeset -g POWERLEVEL9K_CONTEXT_TEMPLATE='%n@%m'
   
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=226         # bright yellow text
-  typeset -g POWERLEVEL9K_DIR_BACKGROUND=            # no background
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND='#8BE9FD'      # cyan text
+  typeset -g POWERLEVEL9K_DIR_BACKGROUND=               # no background
   typeset -g POWERLEVEL9K_DIR_MAX_LENGTH=30
   
-  # Git - rainbow colors, no backgrounds
-  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=46     # bright green text
-  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND=       # no background
-  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=201 # bright magenta text
-  typeset -g POWERLEVEL9K_VCS_MODIFIED_BACKGROUND=    # no background
-  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=51 # bright cyan text
-  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=   # no background
+  # Git - Dracula colors, no backgrounds
+  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND='#50FA7B'     # green text
+  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND=              # no background
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND='#F1FA8C'  # yellow text
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_BACKGROUND=           # no background
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND='#FFB86C' # orange text
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=          # no background
   
-  # Rainbow prompt character - no background
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_BACKGROUND=     # no background
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=51    # cyan
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=196  # red  
+  # Dracula prompt character - no background
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_BACKGROUND=            # no background
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND='#FF79C6'    # pink
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND='#FF5555'  # red  
   typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='❯'
   typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_VIINS_CONTENT_EXPANSION='❯'
   typeset -g POWERLEVEL9K_PROMPT_CHAR_LEFT_PROMPT_LAST_SEGMENT_END_SYMBOL=''
