@@ -59,8 +59,8 @@ create_smart_layout() {
             echo -e "${CYAN}Layout: Mobile Portrait (2 vertical panes)${NC}"
             tmux split-window -v -t "$SESSION_NAME:main"
             
-            # Adjust pane sizes (60/40 split)
-            tmux resize-pane -t "$SESSION_NAME:main.0" -y 60%
+            # Adjust pane sizes (60/40 split)  
+            tmux resize-pane -t "$SESSION_NAME:main.1" -p 60
             
         else
             # Mobile landscape: 2 horizontal panes
@@ -78,8 +78,8 @@ create_smart_layout() {
             
             # Create 4 panes in grid layout
             tmux split-window -h -t "$SESSION_NAME:main"
-            tmux split-window -v -t "$SESSION_NAME:main.0"
-            tmux split-window -v -t "$SESSION_NAME:main.2"
+            tmux split-window -v -t "$SESSION_NAME:main.1"
+            tmux split-window -v -t "$SESSION_NAME:main.3"
             
             # Arrange in tiled layout
             tmux select-layout -t "$SESSION_NAME:main" tiled
@@ -100,28 +100,32 @@ create_smart_layout() {
             
             # Create main pane on left, 3 smaller on right
             tmux split-window -h -t "$SESSION_NAME:main" -p 40
-            tmux split-window -v -t "$SESSION_NAME:main.1" -p 66
-            tmux split-window -v -t "$SESSION_NAME:main.2" -p 50
+            tmux split-window -v -t "$SESSION_NAME:main.2" -p 66
+            tmux split-window -v -t "$SESSION_NAME:main.3" -p 50
         fi
     fi
     
     # Set pane titles based on their purpose
     if [ "$SCREEN_TYPE" = "mobile" ]; then
-        tmux send-keys -t "$SESSION_NAME:main.0" "# Main workspace" C-m
-        tmux send-keys -t "$SESSION_NAME:main.1" "# Terminal" C-m
-    else
-        tmux send-keys -t "$SESSION_NAME:main.0" "# Main workspace" C-m
-        tmux send-keys -t "$SESSION_NAME:main.1" "# Git/Commands" C-m
+        tmux send-keys -t "$SESSION_NAME:main.1" "# Main workspace" C-m
         if tmux list-panes -t "$SESSION_NAME:main" | grep -q "^2:"; then
-            tmux send-keys -t "$SESSION_NAME:main.2" "# Logs/Output" C-m
+            tmux send-keys -t "$SESSION_NAME:main.2" "# Terminal" C-m
+        fi
+    else
+        tmux send-keys -t "$SESSION_NAME:main.1" "# Main workspace" C-m
+        if tmux list-panes -t "$SESSION_NAME:main" | grep -q "^2:"; then
+            tmux send-keys -t "$SESSION_NAME:main.2" "# Git/Commands" C-m
         fi
         if tmux list-panes -t "$SESSION_NAME:main" | grep -q "^3:"; then
-            tmux send-keys -t "$SESSION_NAME:main.3" "# Testing/Debug" C-m
+            tmux send-keys -t "$SESSION_NAME:main.3" "# Logs/Output" C-m
+        fi
+        if tmux list-panes -t "$SESSION_NAME:main" | grep -q "^4:"; then
+            tmux send-keys -t "$SESSION_NAME:main.4" "# Testing/Debug" C-m
         fi
     fi
     
     # Focus on first pane
-    tmux select-pane -t "$SESSION_NAME:main.0"
+    tmux select-pane -t "$SESSION_NAME:main.1"
     
     # Create additional windows for organization
     tmux new-window -t "$SESSION_NAME:2" -n "editor"
@@ -132,19 +136,22 @@ create_smart_layout() {
     
     # Display session info
     echo -e "${GREEN}✓ Session '$SESSION_NAME' created successfully!${NC}"
+    echo -e "${GREEN}✓ $(ls ~/.tmux/plugins/ | wc -l) professional plugins loaded${NC}"
     echo -e "${CYAN}Windows:${NC}"
     echo -e "  1. main   - Development workspace"
     echo -e "  2. editor - File editing"
     echo -e "  3. servers - Background services"
     echo ""
-    echo -e "${CYAN}Shortcuts:${NC}"
-    echo -e "  Ctrl-a + |  : Split vertically"
-    echo -e "  Ctrl-a + -  : Split horizontally"
-    echo -e "  Alt + Arrow : Navigate panes"
-    echo -e "  Ctrl-a + c  : New window"
-    echo -e "  Ctrl-a + n  : Next window"
-    echo -e "  Ctrl-a + p  : Previous window"
-    echo -e "  Ctrl-a + d  : Detach session"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}                     ESSENTIAL SHORTCUTS                     ${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}Split & Navigate:${NC}  ${YELLOW}Ctrl-a + |/-${NC} split  ${YELLOW}Alt+arrows${NC} navigate"
+    echo -e "${GREEN}Windows:${NC}          ${YELLOW}Ctrl-a + c${NC} new  ${YELLOW}Ctrl-a + n/p${NC} switch  ${YELLOW}Ctrl-a + 1-9${NC} goto"
+    echo -e "${GREEN}Sessions:${NC}         ${YELLOW}Ctrl-a + d${NC} detach  ${YELLOW}Ctrl-a + s${NC} browser  ${YELLOW}tmux attach${NC}"
+    echo -e "${GREEN}Power Features:${NC}   ${YELLOW}Ctrl-a + z${NC} zoom  ${YELLOW}Ctrl-a + S${NC} sync  ${YELLOW}Ctrl-a + Space${NC} layouts"
+    echo ""
+    echo -e "${CYAN}Pro tip:${NC} Auto-save enabled • Sessions persist across reboots"
+    echo -e "${CYAN}More help:${NC} ${YELLOW}dex --shortcuts${NC} (all keys) • ${YELLOW}dex --plugins${NC} (features)"
     echo ""
 }
 
@@ -168,6 +175,79 @@ restore_or_create() {
     create_smart_layout
 }
 
+# Show comprehensive help
+show_help() {
+    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║                           AKAOIO DEX v2.0                               ║${NC}"
+    echo -e "${CYAN}║                    Professional Tmux Session Manager                    ║${NC}"
+    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${GREEN}USAGE:${NC}"
+    echo -e "  ${YELLOW}dex${NC}                    Create smart session (auto-named)"
+    echo -e "  ${YELLOW}dex <name>${NC}             Create named session"  
+    echo -e "  ${YELLOW}dex --help${NC}             Show this help"
+    echo -e "  ${YELLOW}dex --shortcuts${NC}        Complete shortcut reference"
+    echo -e "  ${YELLOW}dex --plugins${NC}          Plugin management & status"
+    echo ""
+    echo -e "${GREEN}FEATURES:${NC}"
+    echo -e "  ${CYAN}Smart Layouts${NC}      Adapts to terminal size automatically"
+    echo -e "  ${CYAN}Plugin System${NC}      10 professional tmux plugins included"
+    echo -e "  ${CYAN}Session Persistence${NC} Auto-save/restore across reboots"
+    echo -e "  ${CYAN}Mobile Friendly${NC}    Optimized shortcuts for small screens"
+    echo ""
+    echo -e "${GREEN}ADAPTIVE LAYOUTS:${NC}"
+    echo -e "  ${YELLOW}Mobile Portrait${NC}   2 vertical panes (narrow screens)"
+    echo -e "  ${YELLOW}Mobile Landscape${NC}  2 horizontal panes (small screens)"  
+    echo -e "  ${YELLOW}Desktop Standard${NC}  4 panes: 1 main + 3 auxiliary"
+    echo -e "  ${YELLOW}Desktop Wide${NC}      4 panes in 2×2 grid (wide screens)"
+    echo -e "  ${YELLOW}Desktop Portrait${NC}  3 stacked panes (tall screens)"
+    echo ""
+    echo -e "${GREEN}EXAMPLES:${NC}"
+    echo -e "  ${YELLOW}dex${NC}                    # Create 'dev' session"
+    echo -e "  ${YELLOW}dex frontend${NC}           # Create 'frontend' session"
+    echo -e "  ${YELLOW}dex api-server${NC}         # Create 'api-server' session"
+    echo ""
+    exit 0
+}
+
+# Install and setup tmux plugins
+setup_tmux_plugins() {
+    echo -e "${CYAN}Checking tmux plugins...${NC}"
+    
+    # Check if TPM is installed
+    if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+        echo -e "${YELLOW}Installing TPM (Tmux Plugin Manager)...${NC}"
+        git clone --quiet https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    fi
+    
+    # Check if plugins are installed
+    local plugins_installed=false
+    for plugin in "tmux-sensible" "tmux-resurrect" "tmux-continuum" "tmux-pain-control" "tmux-copycat" "tmux-yank" "tmux-open" "vim-tmux-navigator" "tmux-prefix-highlight"; do
+        if [ ! -d "$HOME/.tmux/plugins/$plugin" ]; then
+            plugins_installed=false
+            break
+        fi
+    done
+    
+    # Install plugins if not present
+    if [ "$plugins_installed" = false ]; then
+        echo -e "${YELLOW}Installing tmux plugins (this may take a moment)...${NC}"
+        
+        # Start a temporary tmux session to install plugins
+        tmux new-session -d -s plugin_install 2>/dev/null || true
+        
+        # Run plugin installation
+        ~/.tmux/plugins/tpm/bin/install_plugins >/dev/null 2>&1 || true
+        
+        # Kill the temporary session
+        tmux kill-session -t plugin_install 2>/dev/null || true
+        
+        echo -e "${GREEN}✓ Tmux plugins installed${NC}"
+    else
+        echo -e "${GREEN}✓ Tmux plugins already installed${NC}"
+    fi
+}
+
 # Main execution
 main() {
     # Check if tmux is installed
@@ -176,6 +256,9 @@ main() {
         echo -e "curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/install.sh | bash"
         exit 1
     fi
+    
+    # Setup plugins before creating session
+    setup_tmux_plugins
     
     # If already in tmux, just create new window
     if [ -n "$TMUX" ]; then
@@ -193,23 +276,147 @@ main() {
     tmux attach-session -t "$SESSION_NAME"
 }
 
-# Show help if requested
-if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-    echo "AKAOIO DEX - Smart tmux session manager"
+# Show complete shortcuts reference
+show_shortcuts() {
+    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║                        TMUX SHORTCUTS REFERENCE                         ║${NC}"
+    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo "Usage: dex [session-name]"
+    echo -e "${GREEN}PANE MANAGEMENT:${NC}"
+    echo -e "  ${YELLOW}Ctrl-a + |${NC}           Split horizontally (side by side)"
+    echo -e "  ${YELLOW}Ctrl-a + -${NC}           Split vertically (top/bottom)"
+    echo -e "  ${YELLOW}Ctrl-a + h${NC}           Split horizontal (alternative)"
+    echo -e "  ${YELLOW}Ctrl-a + v${NC}           Split vertical (alternative)"
+    echo -e "  ${YELLOW}Ctrl-a + z${NC}           Toggle pane zoom (fullscreen)"
+    echo -e "  ${YELLOW}Ctrl-a + x${NC}           Close current pane (with confirmation)"
     echo ""
-    echo "Creates an intelligently laid out tmux session based on your screen size."
+    echo -e "${GREEN}PANE NAVIGATION:${NC}"
+    echo -e "  ${YELLOW}Alt + ↑↓←→${NC}           Navigate panes (no prefix needed)"
+    echo -e "  ${YELLOW}Ctrl-a + j/k/h/l${NC}     Navigate panes (vim-style)"
+    echo -e "  ${YELLOW}Ctrl-a + q${NC}           Show pane numbers"
+    echo -e "  ${YELLOW}Ctrl-a + Space${NC}       Cycle through layouts"
     echo ""
-    echo "Layouts:"
-    echo "  • Mobile Portrait  : 2 vertical panes"
-    echo "  • Mobile Landscape : 2 horizontal panes"
-    echo "  • Desktop Standard : 4 panes (1 main + 3 side)"
-    echo "  • Desktop Wide     : 4 panes in 2x2 grid"
-    echo "  • Desktop Portrait : 3 stacked panes"
+    echo -e "${GREEN}WINDOW MANAGEMENT:${NC}"
+    echo -e "  ${YELLOW}Ctrl-a + c${NC}           Create new window"
+    echo -e "  ${YELLOW}Ctrl-a + n/p${NC}         Next/previous window"
+    echo -e "  ${YELLOW}Ctrl-a + 0-9${NC}         Switch to window by number"
+    echo -e "  ${YELLOW}Ctrl-a + w${NC}           Interactive window browser"
+    echo -e "  ${YELLOW}Ctrl-a + ,${NC}           Rename current window"
+    echo -e "  ${YELLOW}Ctrl-a + &${NC}           Close window (with confirmation)"
     echo ""
-    echo "The layout automatically adapts to your terminal size!"
+    echo -e "${GREEN}SESSION CONTROL:${NC}"
+    echo -e "  ${YELLOW}Ctrl-a + d${NC}           Detach from session"
+    echo -e "  ${YELLOW}Ctrl-a + s${NC}           Interactive session browser"
+    echo -e "  ${YELLOW}Ctrl-a + \$${NC}           Rename session"
+    echo -e "  ${YELLOW}tmux ls${NC}              List all sessions"
+    echo -e "  ${YELLOW}tmux attach${NC}          Attach to last session"
+    echo -e "  ${YELLOW}tmux attach -t <name>${NC} Attach to named session"
+    echo ""
+    echo -e "${GREEN}PROFESSIONAL FEATURES (Plugins):${NC}"
+    echo -e "  ${YELLOW}Ctrl-a + S${NC}           Toggle pane synchronization"
+    echo -e "  ${YELLOW}Ctrl-a + Escape${NC}      Enter copy mode (vim-like)"
+    echo -e "  ${YELLOW}Ctrl-a + Ctrl-s${NC}      Save session state"
+    echo -e "  ${YELLOW}Ctrl-a + Ctrl-r${NC}      Restore session state"
+    echo -e "  ${YELLOW}Ctrl-a + /${NC}           Search in pane history"
+    echo -e "  ${YELLOW}Ctrl-a + u${NC}           Search & open URLs"
+    echo -e "  ${YELLOW}Ctrl-a + I${NC}           Install new plugins"
+    echo -e "  ${YELLOW}Ctrl-a + U${NC}           Update all plugins"
+    echo ""
+    echo -e "${GREEN}COPY MODE (after Ctrl-a + Escape):${NC}"
+    echo -e "  ${YELLOW}v${NC}                    Start selection"
+    echo -e "  ${YELLOW}y${NC}                    Copy selection to clipboard"
+    echo -e "  ${YELLOW}r${NC}                    Rectangle selection mode"
+    echo -e "  ${YELLOW}q${NC}                    Exit copy mode"
+    echo ""
     exit 0
+}
+
+# Show plugin info if requested
+show_plugins() {
+    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║                    TMUX PROFESSIONAL PLUGINS                 ║${NC}"
+    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${GREEN}Installed Plugins:${NC}"
+    
+    if [ -d "$HOME/.tmux/plugins" ]; then
+        for plugin_dir in ~/.tmux/plugins/*/; do
+            if [ -d "$plugin_dir" ]; then
+                plugin_name=$(basename "$plugin_dir")
+                case "$plugin_name" in
+                    "tpm")
+                        echo -e "  ${YELLOW}$plugin_name${NC}              - Tmux Plugin Manager"
+                        ;;
+                    "tmux-sensible")
+                        echo -e "  ${YELLOW}$plugin_name${NC}      - Basic tmux settings everyone can agree on"
+                        ;;
+                    "tmux-resurrect")
+                        echo -e "  ${YELLOW}$plugin_name${NC}     - Restore tmux environment after system restart"
+                        ;;
+                    "tmux-continuum")
+                        echo -e "  ${YELLOW}$plugin_name${NC}     - Continuous saving of tmux environment"
+                        ;;
+                    "tmux-pain-control")
+                        echo -e "  ${YELLOW}$plugin_name${NC}  - Standard pane key-bindings for tmux"
+                        ;;
+                    "tmux-copycat")
+                        echo -e "  ${YELLOW}$plugin_name${NC}       - Enhanced search & copy functionality"
+                        ;;
+                    "tmux-yank")
+                        echo -e "  ${YELLOW}$plugin_name${NC}          - Copy to system clipboard"
+                        ;;
+                    "tmux-open")
+                        echo -e "  ${YELLOW}$plugin_name${NC}          - Open highlighted selection"
+                        ;;
+                    "vim-tmux-navigator")
+                        echo -e "  ${YELLOW}$plugin_name${NC} - Seamless vim/tmux navigation"
+                        ;;
+                    "tmux-prefix-highlight")
+                        echo -e "  ${YELLOW}$plugin_name${NC} - Show when prefix key is pressed"
+                        ;;
+                    *)
+                        echo -e "  ${YELLOW}$plugin_name${NC}"
+                        ;;
+                esac
+            fi
+        done
+        echo ""
+        echo -e "${CYAN}Total: $(ls ~/.tmux/plugins/ | wc -l) plugins installed${NC}"
+    else
+        echo -e "  ${YELLOW}No plugins installed${NC}"
+    fi
+    
+    echo ""
+    echo ""
+    echo -e "${GREEN}PLUGIN MANAGEMENT:${NC}"
+    echo -e "  ${YELLOW}Ctrl-a + I${NC}             Install new plugins from config"
+    echo -e "  ${YELLOW}Ctrl-a + U${NC}             Update all installed plugins"  
+    echo -e "  ${YELLOW}Ctrl-a + alt + u${NC}       Clean unused plugins"
+    echo -e "  ${YELLOW}dex --shortcuts${NC}        View shortcuts provided by plugins"
+    echo ""
+    echo -e "${GREEN}AUTO-ENABLED FEATURES:${NC}"
+    echo -e "  ${CYAN}• Session Persistence${NC}   Auto-save/restore every 15 minutes"
+    echo -e "  ${CYAN}• System Clipboard${NC}      Copy/paste integrates with OS"
+    echo -e "  ${CYAN}• Enhanced Search${NC}       Advanced search & URL opening"
+    echo -e "  ${CYAN}• Vim Integration${NC}       Seamless navigation with vim/nvim"
+    echo -e "  ${CYAN}• Smart Defaults${NC}        Optimized tmux settings included"
+    echo ""
+    exit 0
+}
+
+# Check for help flag first  
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    show_help
+fi
+
+# Check for shortcuts flag
+if [ "$1" = "--shortcuts" ] || [ "$1" = "-s" ]; then
+    show_shortcuts
+fi
+
+# Check for plugins flag
+if [ "$1" = "--plugins" ] || [ "$1" = "-p" ]; then
+    show_plugins
 fi
 
 # Run main function
