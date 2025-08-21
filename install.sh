@@ -1377,9 +1377,15 @@ theme() {
     local theme_cmd="${1:-list}"
     local theme_dir="$HOME/.config/terminal/theme"
     
+    # Check if theme system is installed in config directory
     if [ ! -f "$theme_dir/cli.sh" ]; then
-        echo "Theme system not installed. Run the installer first."
-        return 1
+        # Try development directory
+        if [ -f "$HOME/Projects/terminal/theme/cli.sh" ]; then
+            theme_dir="$HOME/Projects/terminal/theme"
+        else
+            echo "Theme system not installed. Run the installer first."
+            return 1
+        fi
     fi
     
     case "$theme_cmd" in
