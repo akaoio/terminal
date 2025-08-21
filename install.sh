@@ -80,12 +80,16 @@ trap 'cleanup 130' INT
 trap 'cleanup 143' TERM
 trap 'cleanup $?' EXIT
 
-# Mobile-first colors - high contrast, minimal
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
+# Dracula theme colors - beautiful and consistent
+PURPLE='\033[38;2;189;147;249m'  # BD93F9
+GREEN='\033[38;2;80;250;123m'    # 50FA7B
+CYAN='\033[38;2;139;233;253m'    # 8BE9FD
+PINK='\033[38;2;255;121;198m'    # FF79C6
+YELLOW='\033[38;2;241;250;140m'  # F1FA8C
+RED='\033[38;2;255;85;85m'       # FF5555
+ORANGE='\033[38;2;255;184;108m'  # FFB86C
+BLUE='\033[38;2;139;233;253m'    # 8BE9FD (same as cyan for compatibility)
+COMMENT='\033[38;2;98;114;164m'  # 6272A4
 NC='\033[0m' # No Color
 
 # Script directory
@@ -152,12 +156,12 @@ show_loading() {
     
     # If animations are disabled or terminal doesn't support them, use simple progress
     if [ "$ENABLE_ANIMATIONS" = "0" ] || ! check_terminal_support; then
-        printf "${NEON_BLUE}[*] $text...${NC}"
+        printf "${CYAN}[*] $text...${NC}"
         return 0
     fi
     
     # For compatible terminals, use dots animation instead of spinners
-    printf "${NEON_BLUE}[*] $text${NC}"
+    printf "${CYAN}[*] $text${NC}"
     
     (
         trap 'exit 0' TERM INT
@@ -166,7 +170,7 @@ show_loading() {
         local count=0
         
         while true; do
-            printf "\r${NEON_BLUE}[*] $text$dots${NC}   "
+            printf "\r${CYAN}[*] $text$dots${NC}   "
             
             count=$((count + 1))
             if [ $count -le $max_dots ]; then
@@ -1392,9 +1396,9 @@ show_complete() {
     echo -e "${YELLOW}  ▸ BACKUP LOCATION:${NC}"
     echo -e "${WHITE}    $BACKUP_DIR${NC}"
     echo ""
-    echo -e "${NEON_BLUE}═══════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${PURPLE}═══════════════════════════════════════════════════════════════════════${NC}"
     echo -e "${NEON_GREEN}         Welcome to the future of terminal experience!${NC}"
-    echo -e "${NEON_BLUE}═══════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${PURPLE}═══════════════════════════════════════════════════════════════════════${NC}"
     echo ""
 }
 
