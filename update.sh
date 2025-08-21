@@ -146,8 +146,11 @@ fi
 
 # Sync any other config files from repo
 if [ -d "$REPO_DIR/configs" ]; then
-    # Copy tmux config if exists
-    [ -f "$REPO_DIR/configs/.tmux.conf" ] && cp -f "$REPO_DIR/configs/.tmux.conf" "$HOME/.tmux.conf" && echo -e "${GREEN}  ✓ tmux config synced${NC}"
+    # FORCE copy tmux config (without dot prefix in repo)
+    if [ -f "$REPO_DIR/configs/tmux.conf" ]; then
+        cp -f "$REPO_DIR/configs/tmux.conf" "$HOME/.tmux.conf"
+        echo -e "${GREEN}  ✓ tmux config force synced from repo${NC}"
+    fi
     
     # Copy nvim configs if exists
     if [ -d "$REPO_DIR/configs/nvim" ]; then
@@ -169,10 +172,7 @@ else
     echo -e "${YELLOW}  ⚠ dex script not found in repo${NC}"
 fi
 
-# Update tmux config
-if [ -f "$HOME/.tmux.conf" ]; then
-    echo -e "${YELLOW}  Keeping existing tmux config${NC}"
-fi
+# Note: tmux config already synced from repo above
 
 # Check and update Neovim to latest version
 echo -e "${BLUE}▸ Checking Neovim version...${NC}"

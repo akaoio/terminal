@@ -504,9 +504,12 @@ install_tmux() {
             ;;
     esac
     
-    # Create tmux config for better defaults
+    # Copy tmux config from repo or create default
     show_loading "Configuring tmux"
-    cat > "$HOME/.tmux.conf" << 'TMUX'
+    if [ -f "$SCRIPT_DIR/configs/tmux.conf" ]; then
+        cp "$SCRIPT_DIR/configs/tmux.conf" "$HOME/.tmux.conf"
+    else
+        cat > "$HOME/.tmux.conf" << 'TMUX'
 # AKAOIO TMUX CONFIGURATION
 
 # Enable 256 colors
@@ -592,6 +595,7 @@ bind '"' split-window -c "#{pane_current_path}"
 bind % split-window -h -c "#{pane_current_path}"
 bind c new-window -c "#{pane_current_path}"
 TMUX
+    fi
     stop_loading
     
     echo -e "${GREEN}✓ tmux installed and configured${NC}"
