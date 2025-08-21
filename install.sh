@@ -1005,6 +1005,12 @@ alias path='echo -e ${PATH//:/\\n}'
 alias now='date +"%Y-%m-%d %H:%M:%S"'
 alias week='date +%V'
 
+# Claude CLI aliases (override system cc compiler)
+unalias cc 2>/dev/null
+unalias dex 2>/dev/null
+alias cc='claude'
+alias dex='claude --dangerously-skip-permissions'
+
 # Safety nets
 alias rm='rm -iv'
 alias cp='cp -iv'

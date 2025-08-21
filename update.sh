@@ -187,6 +187,33 @@ else
     echo -e "${YELLOW}  Claude Code not installed${NC}"
 fi
 
+# Fix Claude CLI aliases if missing
+echo -e "${BLUE}▸ Checking Claude CLI aliases...${NC}"
+if ! grep -q "alias cc='claude'" "$HOME/.zshrc" 2>/dev/null; then
+    echo -e "${YELLOW}  Adding Claude CLI aliases...${NC}"
+    # Find the line with "# System shortcuts" and add after it
+    if grep -q "# System shortcuts" "$HOME/.zshrc"; then
+        # Add Claude aliases after System shortcuts section
+        sed -i '/^alias week=/a\\n# Claude CLI aliases (override system cc compiler)\nunalias cc 2>/dev/null\nunalias dex 2>/dev/null\nalias cc='"'"'claude'"'"'\nalias dex='"'"'claude --dangerously-skip-permissions'"'"'' "$HOME/.zshrc" 2>/dev/null || \
+        # macOS compatibility
+        sed -i '' '/^alias week=/a\\
+# Claude CLI aliases (override system cc compiler)\\
+unalias cc 2>/dev/null\\
+unalias dex 2>/dev/null\\
+alias cc='"'"'claude'"'"'\\
+alias dex='"'"'claude --dangerously-skip-permissions'"'"'
+' "$HOME/.zshrc" 2>/dev/null || \
+        # Fallback: append to end of file
+        echo -e "\n# Claude CLI aliases (override system cc compiler)\nunalias cc 2>/dev/null\nunalias dex 2>/dev/null\nalias cc='claude'\nalias dex='claude --dangerously-skip-permissions'" >> "$HOME/.zshrc"
+    else
+        # Append to end of file if pattern not found
+        echo -e "\n# Claude CLI aliases (override system cc compiler)\nunalias cc 2>/dev/null\nunalias dex 2>/dev/null\nalias cc='claude'\nalias dex='claude --dangerously-skip-permissions'" >> "$HOME/.zshrc"
+    fi
+    echo -e "${GREEN}✓ Claude CLI aliases added${NC}"
+else
+    echo -e "${GREEN}✓ Claude CLI aliases already configured${NC}"
+fi
+
 echo -e "${GREEN}✓ Configurations updated${NC}"
 
 # Complete
