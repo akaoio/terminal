@@ -1367,32 +1367,32 @@ bindkey '^[[Z' autosuggest-accept
 
 # Theme management functions
 theme() {
-    local theme_cmd="\${1:-list}"
-    local theme_dir="\$HOME/.config/terminal/theme"
+    local theme_cmd="${1:-list}"
+    local theme_dir="$HOME/.config/terminal/theme"
     
-    if [ ! -f "\$theme_dir/cli.js" ]; then
+    if [ ! -f "$theme_dir/cli.js" ]; then
         echo "Theme system not installed. Run the installer first."
         return 1
     fi
     
-    case "\$theme_cmd" in
+    case "$theme_cmd" in
         list)
-            node "\$theme_dir/cli.js" list
+            node "$theme_dir/cli.js" list
             ;;
         set)
-            if [ -z "\$2" ]; then
+            if [ -z "$2" ]; then
                 echo "Usage: theme set <name>"
                 return 1
             fi
-            node "\$theme_dir/cli.js" set "\$2"
-            export TERMINAL_THEME="\$2"
+            node "$theme_dir/cli.js" set "$2"
+            export TERMINAL_THEME="$2"
             # Save preference
-            echo "export TERMINAL_THEME='\$2'" > ~/.terminal-theme
+            echo "export TERMINAL_THEME='$2'" > ~/.terminal-theme
             # Reload shell to apply
             exec zsh
             ;;
         get|current)
-            node "\$theme_dir/cli.js" get | grep '"name"' | cut -d'"' -f4
+            node "$theme_dir/cli.js" get | grep '"name"' | cut -d'"' -f4
             ;;
         *)
             echo "Usage: theme [list|set <name>|get]"
