@@ -1435,8 +1435,8 @@ theme() {
                     ;;
             esac
             
-            # Apply ZSH syntax highlighting colors if in ZSH
-            if [ -n "$ZSH_VERSION" ]; then
+            # Apply ZSH syntax highlighting colors if plugin is loaded
+            if [ -n "$ZSH_VERSION" ] && [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ]; then
                 case "$THEME_NAME" in
                     dracula)
                         ZSH_HIGHLIGHT_STYLES[default]='fg=248'
@@ -1468,9 +1468,9 @@ theme() {
                         ;;
                 esac
                 
-                # Force syntax highlighting refresh
-                if typeset -f _zsh_highlight > /dev/null; then
-                    _zsh_highlight
+                # Force syntax highlighting refresh only if function exists
+                if typeset -f _zsh_highlight > /dev/null 2>&1; then
+                    _zsh_highlight 2>/dev/null || true
                 fi
             fi
             
@@ -1532,8 +1532,8 @@ if [ -n "$TERMINAL_THEME" ]; then
             ;;
     esac
     
-    # Apply ZSH syntax highlighting if available
-    if [ -n "$ZSH_VERSION" ]; then
+    # Apply ZSH syntax highlighting if plugin is loaded
+    if [ -n "$ZSH_VERSION" ] && [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ]; then
         case "$TERMINAL_THEME" in
             dracula)
                 ZSH_HIGHLIGHT_STYLES[default]='fg=248'
