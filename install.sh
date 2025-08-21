@@ -1008,7 +1008,7 @@ alias week='date +%V'
 # Claude CLI aliases (override system cc compiler)
 unalias cc 2>/dev/null
 unalias dex 2>/dev/null
-alias cc='claude'
+alias cc='claude --dangerously-skip-permissions'
 alias dex='claude --dangerously-skip-permissions'
 
 # Safety nets
