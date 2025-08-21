@@ -74,20 +74,20 @@ apply_theme() {
     # Extract ANSI colors
     echo "# Theme: $theme_name"
     
-    # Parse colors from JSON more reliably
-    # Extract and process ANSI colors
-    grep '"purple"' "$theme_file" | head -1 | sed 's/.*"purple": *"\(.*\)".*/export PURPLE='\''\1'\''/'
-    grep '"green"' "$theme_file" | head -1 | sed 's/.*"green": *"\(.*\)".*/export GREEN='\''\1'\''/'
-    grep '"cyan"' "$theme_file" | head -1 | sed 's/.*"cyan": *"\(.*\)".*/export CYAN='\''\1'\''/'
-    grep '"pink"' "$theme_file" | head -1 | sed 's/.*"pink": *"\(.*\)".*/export PINK='\''\1'\''/'
-    grep '"yellow"' "$theme_file" | head -1 | sed 's/.*"yellow": *"\(.*\)".*/export YELLOW='\''\1'\''/'
-    grep '"red"' "$theme_file" | head -1 | sed 's/.*"red": *"\(.*\)".*/export RED='\''\1'\''/'
-    grep '"orange"' "$theme_file" | head -1 | sed 's/.*"orange": *"\(.*\)".*/export ORANGE='\''\1'\''/'
-    grep '"blue"' "$theme_file" | head -1 | sed 's/.*"blue": *"\(.*\)".*/export BLUE='\''\1'\''/'
-    grep '"comment"' "$theme_file" | head -1 | sed 's/.*"comment": *"\(.*\)".*/export COMMENT='\''\1'\''/'
-    grep '"white"' "$theme_file" | head -1 | sed 's/.*"white": *"\(.*\)".*/export WHITE='\''\1'\''/'
-    grep '"background"' "$theme_file" | head -1 | sed 's/.*"background": *"\(.*\)".*/export BACKGROUND='\''\1'\''/'
-    grep '"selection"' "$theme_file" | head -1 | sed 's/.*"selection": *"\(.*\)".*/export SELECTION='\''\1'\''/'
+    # Parse colors from JSON and unescape the backslashes
+    # Extract and process ANSI colors (removing the double backslash)
+    grep '"purple"' "$theme_file" | head -1 | sed 's/.*"purple": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export PURPLE='&'/"
+    grep '"green"' "$theme_file" | head -1 | sed 's/.*"green": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export GREEN='&'/"
+    grep '"cyan"' "$theme_file" | head -1 | sed 's/.*"cyan": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export CYAN='&'/"
+    grep '"pink"' "$theme_file" | head -1 | sed 's/.*"pink": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export PINK='&'/"
+    grep '"yellow"' "$theme_file" | head -1 | sed 's/.*"yellow": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export YELLOW='&'/"
+    grep '"red"' "$theme_file" | head -1 | sed 's/.*"red": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export RED='&'/"
+    grep '"orange"' "$theme_file" | head -1 | sed 's/.*"orange": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export ORANGE='&'/"
+    grep '"blue"' "$theme_file" | head -1 | sed 's/.*"blue": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export BLUE='&'/"
+    grep '"comment"' "$theme_file" | head -1 | sed 's/.*"comment": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export COMMENT='&'/"
+    grep '"white"' "$theme_file" | head -1 | sed 's/.*"white": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export WHITE='&'/"
+    grep '"background"' "$theme_file" | head -1 | sed 's/.*"background": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export BACKGROUND='&'/"
+    grep '"selection"' "$theme_file" | head -1 | sed 's/.*"selection": *"\(.*\)".*/\1/' | sed 's/\\\\033/\\033/g' | sed "s/.*/export SELECTION='&'/"
     
     echo "export NC='\\033[0m'"
     
