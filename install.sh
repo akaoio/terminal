@@ -1384,12 +1384,16 @@ theme() {
                 echo "Usage: theme set <name>"
                 return 1
             fi
-            node "$theme_dir/cli.js" set "$2"
-            export TERMINAL_THEME="$2"
-            # Save preference
-            echo "export TERMINAL_THEME='$2'" > ~/.terminal-theme
-            # Reload shell to apply
-            exec zsh
+            # Use the switch.sh script to update colors in current session
+            if [ -f "$theme_dir/switch.sh" ]; then
+                source "$theme_dir/switch.sh" "$2"
+            else
+                # Fallback to old method
+                node "$theme_dir/cli.js" set "$2"
+                export TERMINAL_THEME="$2"
+                echo "export TERMINAL_THEME='$2'" > ~/.terminal-theme
+                echo "Theme set. Restart shell to apply colors."
+            fi
             ;;
         get|current)
             node "$theme_dir/cli.js" get | grep '"name"' | cut -d'"' -f4
@@ -1406,8 +1410,25 @@ alias theme-cyberpunk='theme set cyberpunk'
 alias theme-nord='theme set nord'
 alias theme-gruvbox='theme set gruvbox'
 
+# Theme reload function (applies current theme colors)
+theme-reload() {
+    local current_theme="${TERMINAL_THEME:-cyberpunk}"
+    local theme_dir="$HOME/.config/terminal/theme"
+    
+    if [ -f "$theme_dir/switch.sh" ]; then
+        source "$theme_dir/switch.sh" "$current_theme"
+    else
+        echo "Theme system not installed"
+    fi
+}
+
 # Load saved theme preference
 [ -f ~/.terminal-theme ] && source ~/.terminal-theme
+
+# Apply theme colors on shell startup
+if [ -n "$TERMINAL_THEME" ] && [ -f "$HOME/.config/terminal/theme/switch.sh" ]; then
+    source "$HOME/.config/terminal/theme/switch.sh" "$TERMINAL_THEME" > /dev/null 2>&1
+fi
 
 # Load additional configs
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
