@@ -11,14 +11,18 @@ const theme = new Theme()
 // Get command from arguments
 const [,, command, ...args] = process.argv
 
-// Handle current theme storage
-const THEME_FILE = process.env.HOME + '/.terminal-theme-current'
+// Handle current theme storage - use same file as shell
+const THEME_FILE = process.env.HOME + '/.terminal-theme'
 
 // Load saved theme preference
 if (existsSync(THEME_FILE)) {
     try {
         const saved = readFileSync(THEME_FILE, 'utf8').trim()
-        if (saved) theme.current = saved
+        // Extract theme name from shell export statement
+        const match = saved.match(/TERMINAL_THEME=['"]?([^'"]+)/)
+        if (match) {
+            theme.current = match[1]
+        }
     } catch(e) {}
 }
 
@@ -67,8 +71,8 @@ switch(command) {
         }
         try {
             theme.set(args[0])
-            // Save current theme preference
-            writeFileSync(THEME_FILE, args[0])
+            // Save current theme preference in shell format
+            writeFileSync(THEME_FILE, `export TERMINAL_THEME='${args[0]}'`)
             console.log(`Theme set to: ${args[0]}`)
         } catch(e) {
             console.error(e.message)

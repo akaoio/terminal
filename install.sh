@@ -1013,7 +1013,14 @@ export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Terminal Theme System
-export TERMINAL_THEME="${TERMINAL_THEME:-dracula}"
+# Load saved theme preference first
+if [ -f ~/.terminal-theme ]; then
+    source ~/.terminal-theme
+else
+    export TERMINAL_THEME="${TERMINAL_THEME:-cyberpunk}"
+fi
+
+# Load theme colors
 if [ -f "$HOME/.config/terminal/theme/load.sh" ]; then
     source "$HOME/.config/terminal/theme/load.sh" "$TERMINAL_THEME" 2>/dev/null
 fi
@@ -1422,10 +1429,7 @@ theme-reload() {
     fi
 }
 
-# Load saved theme preference
-[ -f ~/.terminal-theme ] && source ~/.terminal-theme
-
-# Apply theme colors on shell startup
+# Apply theme colors on shell startup (theme preference already loaded above)
 if [ -n "$TERMINAL_THEME" ] && [ -f "$HOME/.config/terminal/theme/switch.sh" ]; then
     source "$HOME/.config/terminal/theme/switch.sh" "$TERMINAL_THEME" > /dev/null 2>&1
 fi
