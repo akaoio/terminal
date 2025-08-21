@@ -1035,6 +1035,7 @@ alias tn='tmux new -s'
 
 # Claude Code AI Assistant
 alias cc='claude'
+alias cld='claude --dangerously-skip-permissions'
 alias ccode='claude code'
 alias cchat='claude chat'
 alias capi='claude api'
