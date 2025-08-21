@@ -113,11 +113,15 @@ interactive_loop() {
         echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo -e "${DIM}DEX Enhanced UI - Ready for input...${NC}"
         
-        # Use stty for better input control in tmux pane
-        exec < /dev/tty
-        stty -echo
-        key=$(dd bs=1 count=1 2>/dev/null)
-        stty echo
+        # Better input handling for tmux pane
+        if [ -t 0 ]; then
+            # Direct terminal input
+            read -rsn1 key
+        else
+            # Fallback for tmux pane
+            exec < /dev/tty
+            read -rsn1 key
+        fi
         
         case "$key" in
             n|N) # New session
@@ -164,10 +168,12 @@ interactive_loop() {
             k|K) # Kill current
                 echo ""
                 echo -e "${RED}Kill current window? (y/n): ${NC}"
-                exec < /dev/tty
-                stty -echo
-                confirm=$(dd bs=1 count=1 2>/dev/null)
-                stty echo
+                if [ -t 0 ]; then
+                    read -rsn1 confirm
+                else
+                    exec < /dev/tty
+                    read -rsn1 confirm
+                fi
                 if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
                     tmux kill-window 2>/dev/null
                     echo -e "${GREEN}✓ Window killed${NC}"
@@ -206,10 +212,12 @@ interactive_loop() {
                 echo -e "  q - Close sidebar"
                 echo ""
                 echo -e "${DIM}Press any key to continue...${NC}"
-                exec < /dev/tty
-                stty -echo
-                dd bs=1 count=1 2>/dev/null >/dev/null
-                stty echo
+                if [ -t 0 ]; then
+                    read -rsn1
+                else
+                    exec < /dev/tty
+                    read -rsn1
+                fi
                 ;;
             q|Q|$'\x1b') # Quit (q, Q, or Escape)
                 echo -e "\n${CYAN}Closing sidebar...${NC}"
