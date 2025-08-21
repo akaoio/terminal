@@ -770,8 +770,26 @@ install_claude_code() {
 install_lazyvim() {
     echo -e "${BLUE}▸ Installing LazyVim (Neovim)${NC}"
     
-    # Install Neovim based on platform
-    case "$ENV_TYPE" in
+    # Check if Neovim is already installed and version is sufficient
+    if command -v nvim &> /dev/null; then
+        NVIM_VERSION=$(nvim --version 2>/dev/null | head -1 | grep -o '[0-9]\+\.[0-9]\+' | head -1 || echo "0.0")
+        NVIM_MAJOR=$(echo "$NVIM_VERSION" | cut -d. -f1)
+        NVIM_MINOR=$(echo "$NVIM_VERSION" | cut -d. -f2)
+        
+        if [ "$NVIM_MAJOR" -gt 0 ] || [ "$NVIM_MINOR" -ge 8 ]; then
+            echo -e "${GREEN}  ✓ Neovim v$NVIM_VERSION already installed${NC}"
+            NEED_INSTALL=false
+        else
+            echo -e "${YELLOW}  ⚠ Neovim v$NVIM_VERSION is too old, need >= 0.8.0${NC}"
+            NEED_INSTALL=true
+        fi
+    else
+        NEED_INSTALL=true
+    fi
+    
+    # Install Neovim if needed
+    if [ "$NEED_INSTALL" = "true" ]; then
+        case "$ENV_TYPE" in
         termux)
             show_loading "Installing Neovim"
             pkg install -y neovim nodejs-lts python > /dev/null 2>&1
@@ -872,7 +890,8 @@ install_lazyvim() {
                 brew install neovim node > /dev/null 2>&1
             fi
             ;;
-    esac
+        esac
+    fi
     
     # Backup existing Neovim config if exists
     if [ -d "$HOME/.config/nvim" ]; then
