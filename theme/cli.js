@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import Theme from './index.js'
-import { writeFileSync, readFileSync } from 'fs'
+import { writeFileSync, readFileSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -13,7 +13,6 @@ const [,, command, ...args] = process.argv
 
 // Handle current theme storage
 const THEME_FILE = process.env.HOME + '/.terminal-theme-current'
-import { existsSync, readFileSync } from 'fs'
 
 // Load saved theme preference
 if (existsSync(THEME_FILE)) {
