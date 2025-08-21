@@ -174,6 +174,42 @@ if [ -f "$HOME/.tmux.conf" ]; then
     echo -e "${YELLOW}  Keeping existing tmux config${NC}"
 fi
 
+# Check and update Neovim to latest version
+echo -e "${BLUE}▸ Checking Neovim version...${NC}"
+if command -v nvim &> /dev/null; then
+    NVIM_VERSION=$(nvim --version 2>/dev/null | head -1 | grep -o '[0-9]\+\.[0-9]\+' || echo "0.0")
+    NVIM_MAJOR=$(echo $NVIM_VERSION | cut -d. -f1)
+    NVIM_MINOR=$(echo $NVIM_VERSION | cut -d. -f2)
+    
+    if [ "$NVIM_MAJOR" -eq 0 ] && [ "$NVIM_MINOR" -lt 8 ]; then
+        echo -e "${YELLOW}  Neovim v$NVIM_VERSION is too old, updating...${NC}"
+        
+        # Install latest Neovim based on platform
+        case "$ENV_TYPE" in
+            debian)
+                # Download latest binary
+                if [ "$(uname -m)" = "x86_64" ]; then
+                    wget -q https://github.com/neovim/neovim/releases/download/v0.10.2/nvim-linux64.tar.gz -O /tmp/nvim.tar.gz
+                    sudo tar -xzf /tmp/nvim.tar.gz -C /opt/
+                    sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
+                    rm /tmp/nvim.tar.gz
+                    echo -e "${GREEN}  ✓ Neovim updated to v0.10.2${NC}"
+                fi
+                ;;
+            termux)
+                pkg upgrade -y neovim
+                ;;
+            macos)
+                brew upgrade neovim
+                ;;
+        esac
+    else
+        echo -e "${GREEN}  ✓ Neovim v$NVIM_VERSION is sufficient${NC}"
+    fi
+else
+    echo -e "${YELLOW}  Neovim not found, please run install.sh${NC}"
+fi
+
 # Install or Update LazyVim
 echo -e "${BLUE}▸ Setting up LazyVim...${NC}"
 if command -v nvim &> /dev/null; then

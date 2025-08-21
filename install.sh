@@ -714,38 +714,78 @@ install_lazyvim() {
             show_loading "Installing Neovim"
             # Force install latest Neovim (LazyVim requires >= 0.8.0)
             
-            # Method 1: Try official PPA
-            if sudo apt-get install -y -qq software-properties-common > /dev/null 2>&1 && \
-               sudo add-apt-repository -y ppa:neovim-ppa/unstable > /dev/null 2>&1 && \
-               sudo apt-get update -qq > /dev/null 2>&1 && \
-               sudo apt-get install -y -qq neovim python3-neovim nodejs npm > /dev/null 2>&1; then
-                echo -e "${GREEN}  ✓ Neovim installed from PPA${NC}"
-            # Method 2: Try AppImage (always latest)
-            elif wget -q https://github.com/neovim/neovim/releases/latest/download/nvim.appimage -O /tmp/nvim.appimage > /dev/null 2>&1; then
-                chmod +x /tmp/nvim.appimage
-                sudo mv /tmp/nvim.appimage /usr/local/bin/nvim
-                sudo apt-get install -y -qq python3-neovim nodejs npm > /dev/null 2>&1 || true
-                echo -e "${GREEN}  ✓ Neovim AppImage installed${NC}"
-            # Method 3: Snap package
-            elif command -v snap &> /dev/null && sudo snap install nvim --classic > /dev/null 2>&1; then
-                sudo apt-get install -y -qq python3-neovim nodejs npm > /dev/null 2>&1 || true
-                echo -e "${GREEN}  ✓ Neovim installed via Snap${NC}"
-            # Method 4: Fallback to default repos (may be old)
-            else
-                sudo apt-get install -y -qq neovim python3-neovim nodejs npm > /dev/null 2>&1 || true
-                echo -e "${YELLOW}  ⚠ Using default repo Neovim (may be old)${NC}"
+            # Method 1: Download pre-built binary (fastest, always latest)
+            ARCH=$(uname -m)
+            if [ "$ARCH" = "x86_64" ]; then
+                if wget -q https://github.com/neovim/neovim/releases/download/v0.10.2/nvim-linux64.tar.gz -O /tmp/nvim.tar.gz > /dev/null 2>&1; then
+                    sudo tar -xzf /tmp/nvim.tar.gz -C /opt/ > /dev/null 2>&1
+                    sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
+                    rm /tmp/nvim.tar.gz
+                    sudo apt-get install -y -qq python3-neovim nodejs npm > /dev/null 2>&1 || true
+                    stop_loading
+                    echo -e "${GREEN}  ✓ Neovim v0.10.2 installed${NC}"
+                else
+                    # Fallback to other methods if download fails
+                    stop_loading
+                    echo -e "${YELLOW}  Binary download failed, trying alternatives...${NC}"
+                fi
             fi
-            stop_loading
+            
+            # Method 2: Try AppImage if binary failed
+            if ! command -v nvim &> /dev/null || [ "$(nvim --version 2>/dev/null | head -1 | grep -o '[0-9]\+\.[0-9]\+' | cut -d. -f2)" -lt 8 ] 2>/dev/null; then
+                show_loading "Trying AppImage method"
+                if wget -q https://github.com/neovim/neovim/releases/latest/download/nvim.appimage -O /tmp/nvim.appimage > /dev/null 2>&1; then
+                    chmod +x /tmp/nvim.appimage
+                    cd /tmp && ./nvim.appimage --appimage-extract > /dev/null 2>&1
+                    sudo mv squashfs-root /opt/nvim 2>/dev/null || mv squashfs-root $HOME/.local/nvim
+                    sudo ln -sf /opt/nvim/AppRun /usr/local/bin/nvim 2>/dev/null || ln -sf $HOME/.local/nvim/AppRun $HOME/.local/bin/nvim
+                    cd - > /dev/null
+                    rm -f /tmp/nvim.appimage
+                    stop_loading
+                    echo -e "${GREEN}  ✓ Neovim AppImage installed${NC}"
+                else
+                    # Last resort: use system package
+                    sudo apt-get install -y -qq neovim > /dev/null 2>&1 || true
+                    stop_loading
+                    echo -e "${YELLOW}  ⚠ Using system Neovim (may be old)${NC}"
+                fi
+            fi
+            
+            # Install dependencies
+            sudo apt-get install -y -qq python3-neovim nodejs npm > /dev/null 2>&1 || true
             ;;
         redhat)
             show_loading "Installing Neovim"
-            if command -v dnf &> /dev/null; then
-                sudo dnf install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
+            # Try to install latest binary first
+            ARCH=$(uname -m)
+            if [ "$ARCH" = "x86_64" ]; then
+                if wget -q https://github.com/neovim/neovim/releases/download/v0.10.2/nvim-linux64.tar.gz -O /tmp/nvim.tar.gz > /dev/null 2>&1; then
+                    sudo tar -xzf /tmp/nvim.tar.gz -C /opt/
+                    sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
+                    rm /tmp/nvim.tar.gz
+                    stop_loading
+                    echo -e "${GREEN}  ✓ Neovim v0.10.2 installed${NC}"
+                else
+                    # Fallback to package manager
+                    if command -v dnf &> /dev/null; then
+                        sudo dnf install -y epel-release > /dev/null 2>&1
+                        sudo dnf install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
+                    else
+                        sudo yum install -y epel-release > /dev/null 2>&1
+                        sudo yum install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
+                    fi
+                    stop_loading
+                fi
             else
-                sudo yum install -y epel-release > /dev/null 2>&1
-                sudo yum install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
+                # Non-x86_64 arch, use package manager
+                if command -v dnf &> /dev/null; then
+                    sudo dnf install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
+                else
+                    sudo yum install -y epel-release > /dev/null 2>&1
+                    sudo yum install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
+                fi
+                stop_loading
             fi
-            stop_loading
             ;;
         arch)
             show_loading "Installing Neovim"
