@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+# AKAOIO DEX - Smart tmux session manager with adaptive layouts
+# Automatically adjusts panel layout based on screen size and orientation
+
+set -e
+
+# Colors for output
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Session name (can be customized via argument)
+SESSION_NAME="${1:-dev}"
+
+# Detect screen dimensions
+get_screen_info() {
+    # Try to get terminal dimensions
+    COLS=$(tput cols 2>/dev/null || echo 80)
+    LINES=$(tput lines 2>/dev/null || echo 24)
+    
+    # Determine if mobile/narrow screen
+    if [ "$COLS" -lt 100 ]; then
+        SCREEN_TYPE="mobile"
+    else
+        SCREEN_TYPE="desktop"
+    fi
+    
+    # Determine orientation
+    if [ "$COLS" -gt "$LINES" ]; then
+        ORIENTATION="landscape"
+    else
+        ORIENTATION="portrait"
+    fi
+}
+
+# Create smart layout based on screen
+create_smart_layout() {
+    get_screen_info
+    
+    echo -e "${CYAN}Screen: ${SCREEN_TYPE} (${COLS}x${LINES}) - ${ORIENTATION}${NC}"
+    
+    # Check if session exists
+    if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+        echo -e "${YELLOW}Session '$SESSION_NAME' exists. Attaching...${NC}"
+        tmux attach-session -t "$SESSION_NAME"
+        exit 0
+    fi
+    
+    echo -e "${GREEN}Creating new session '$SESSION_NAME' with smart layout...${NC}"
+    
+    # Create new session with first window
+    tmux new-session -d -s "$SESSION_NAME" -n "main"
+    
+    # Adaptive layout based on screen type and orientation
+    if [ "$SCREEN_TYPE" = "mobile" ]; then
+        if [ "$ORIENTATION" = "portrait" ]; then
+            # Mobile portrait: 2 vertical panes
+            echo -e "${CYAN}Layout: Mobile Portrait (2 vertical panes)${NC}"
+            tmux split-window -v -t "$SESSION_NAME:main"
+            
+            # Adjust pane sizes (60/40 split)
+            tmux resize-pane -t "$SESSION_NAME:main.0" -y 60%
+            
+        else
+            # Mobile landscape: 2 horizontal panes
+            echo -e "${CYAN}Layout: Mobile Landscape (2 horizontal panes)${NC}"
+            tmux split-window -h -t "$SESSION_NAME:main"
+            
+            # Equal split
+            tmux select-layout -t "$SESSION_NAME:main" even-horizontal
+        fi
+    else
+        # Desktop: 4 panes in grid
+        if [ "$COLS" -gt 160 ]; then
+            # Wide desktop: 4 panes in 2x2 grid
+            echo -e "${CYAN}Layout: Desktop Wide (2x2 grid)${NC}"
+            
+            # Create 4 panes in grid layout
+            tmux split-window -h -t "$SESSION_NAME:main"
+            tmux split-window -v -t "$SESSION_NAME:main.0"
+            tmux split-window -v -t "$SESSION_NAME:main.2"
+            
+            # Arrange in tiled layout
+            tmux select-layout -t "$SESSION_NAME:main" tiled
+            
+        elif [ "$ORIENTATION" = "portrait" ]; then
+            # Desktop portrait: 3 panes stacked
+            echo -e "${CYAN}Layout: Desktop Portrait (3 stacked panes)${NC}"
+            
+            tmux split-window -v -t "$SESSION_NAME:main"
+            tmux split-window -v -t "$SESSION_NAME:main.1"
+            
+            # Adjust sizes for better balance
+            tmux select-layout -t "$SESSION_NAME:main" even-vertical
+            
+        else
+            # Standard desktop: 4 panes with main + 3 small
+            echo -e "${CYAN}Layout: Desktop Standard (1 main + 3 side)${NC}"
+            
+            # Create main pane on left, 3 smaller on right
+            tmux split-window -h -t "$SESSION_NAME:main" -p 40
+            tmux split-window -v -t "$SESSION_NAME:main.1" -p 66
+            tmux split-window -v -t "$SESSION_NAME:main.2" -p 50
+        fi
+    fi
+    
+    # Set pane titles based on their purpose
+    if [ "$SCREEN_TYPE" = "mobile" ]; then
+        tmux send-keys -t "$SESSION_NAME:main.0" "# Main workspace" C-m
+        tmux send-keys -t "$SESSION_NAME:main.1" "# Terminal" C-m
+    else
+        tmux send-keys -t "$SESSION_NAME:main.0" "# Main workspace" C-m
+        tmux send-keys -t "$SESSION_NAME:main.1" "# Git/Commands" C-m
+        if tmux list-panes -t "$SESSION_NAME:main" | grep -q "^2:"; then
+            tmux send-keys -t "$SESSION_NAME:main.2" "# Logs/Output" C-m
+        fi
+        if tmux list-panes -t "$SESSION_NAME:main" | grep -q "^3:"; then
+            tmux send-keys -t "$SESSION_NAME:main.3" "# Testing/Debug" C-m
+        fi
+    fi
+    
+    # Focus on first pane
+    tmux select-pane -t "$SESSION_NAME:main.0"
+    
+    # Create additional windows for organization
+    tmux new-window -t "$SESSION_NAME:2" -n "editor"
+    tmux new-window -t "$SESSION_NAME:3" -n "servers"
+    
+    # Return to main window
+    tmux select-window -t "$SESSION_NAME:main"
+    
+    # Display session info
+    echo -e "${GREEN}✓ Session '$SESSION_NAME' created successfully!${NC}"
+    echo -e "${CYAN}Windows:${NC}"
+    echo -e "  1. main   - Development workspace"
+    echo -e "  2. editor - File editing"
+    echo -e "  3. servers - Background services"
+    echo ""
+    echo -e "${CYAN}Shortcuts:${NC}"
+    echo -e "  Ctrl-a + |  : Split vertically"
+    echo -e "  Ctrl-a + -  : Split horizontally"
+    echo -e "  Alt + Arrow : Navigate panes"
+    echo -e "  Ctrl-a + c  : New window"
+    echo -e "  Ctrl-a + n  : Next window"
+    echo -e "  Ctrl-a + p  : Previous window"
+    echo -e "  Ctrl-a + d  : Detach session"
+    echo ""
+}
+
+# Handle session restoration
+restore_or_create() {
+    # Check if we should restore previous session
+    if [ -f "$HOME/.tmux-resurrect/last" ]; then
+        echo -e "${YELLOW}Found previous session data${NC}"
+        read -p "Restore previous session? (y/n): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            tmux new-session -d -s temp 2>/dev/null || true
+            tmux send-keys -t temp "tmux resurrect-restore" C-m
+            sleep 2
+            tmux kill-session -t temp 2>/dev/null || true
+            tmux attach-session -t "$SESSION_NAME" 2>/dev/null || create_smart_layout
+            return
+        fi
+    fi
+    
+    create_smart_layout
+}
+
+# Main execution
+main() {
+    # Check if tmux is installed
+    if ! command -v tmux &> /dev/null; then
+        echo -e "${YELLOW}tmux is not installed. Please run the terminal installer first.${NC}"
+        echo -e "curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/install.sh | bash"
+        exit 1
+    fi
+    
+    # If already in tmux, just create new window
+    if [ -n "$TMUX" ]; then
+        echo -e "${YELLOW}Already in tmux session${NC}"
+        echo -e "${CYAN}Creating new window instead...${NC}"
+        tmux new-window -n "dev"
+        exit 0
+    fi
+    
+    # Create or attach to session
+    restore_or_create
+    
+    # Attach to the session
+    echo -e "${CYAN}Attaching to session '$SESSION_NAME'...${NC}"
+    tmux attach-session -t "$SESSION_NAME"
+}
+
+# Show help if requested
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "AKAOIO DEX - Smart tmux session manager"
+    echo ""
+    echo "Usage: dex [session-name]"
+    echo ""
+    echo "Creates an intelligently laid out tmux session based on your screen size."
+    echo ""
+    echo "Layouts:"
+    echo "  • Mobile Portrait  : 2 vertical panes"
+    echo "  • Mobile Landscape : 2 horizontal panes"
+    echo "  • Desktop Standard : 4 panes (1 main + 3 side)"
+    echo "  • Desktop Wide     : 4 panes in 2x2 grid"
+    echo "  • Desktop Portrait : 3 stacked panes"
+    echo ""
+    echo "The layout automatically adapts to your terminal size!"
+    exit 0
+fi
+
+# Run main function
+main

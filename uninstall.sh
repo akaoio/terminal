@@ -146,6 +146,34 @@ fi
 rm -f "$HOME/.p10k.zsh"
 echo -e "${GREEN}✓ P10k config removed${NC}"
 
+# Remove tmux config
+rm -f "$HOME/.tmux.conf"
+echo -e "${GREEN}✓ tmux config removed${NC}"
+
+# Remove dex script
+rm -f "$HOME/.local/bin/dex"
+echo -e "${GREEN}✓ dex script removed${NC}"
+
+# Remove LazyVim if installed
+if [ -d "$HOME/.config/nvim" ]; then
+    echo -e "${YELLOW}Remove LazyVim configuration? (y/N): ${NC}"
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        # Check for nvim-backup in backup directory
+        if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR/nvim-backup" ]; then
+            rm -rf "$HOME/.config/nvim"
+            mv "$BACKUP_DIR/nvim-backup" "$HOME/.config/nvim"
+            echo -e "${GREEN}✓ Original Neovim config restored${NC}"
+        else
+            rm -rf "$HOME/.config/nvim"
+            echo -e "${GREEN}✓ LazyVim removed${NC}"
+        fi
+    else
+        echo -e "${YELLOW}  LazyVim kept${NC}"
+    fi
+fi
+
 # Remove repository
 REPO_DIR="$HOME/.akaoio-terminal"
 if [ -d "$REPO_DIR" ]; then
@@ -173,6 +201,13 @@ echo ""
 echo -e "${GREEN}═══════════════════════════════════════════${NC}"
 echo -e "${CYAN}     UNINSTALL COMPLETE!${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════${NC}"
+echo ""
+echo -e "${RED}❌ Removed Components:${NC}"
+echo -e "  • Oh My Zsh & plugins"
+echo -e "  • Powerlevel10k theme"
+echo -e "  • tmux configuration"
+echo -e "  • dex smart workspace"
+echo -e "  • LazyVim (if requested)"
 echo ""
 echo -e "${YELLOW}Terminal has been restored to defaults.${NC}"
 echo -e "${CYAN}Restart your terminal to apply changes.${NC}"

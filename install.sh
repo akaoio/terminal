@@ -258,7 +258,7 @@ install_packages() {
             pkg update -y > /dev/null 2>&1
             pkg install -y zsh git curl wget nano \
                 fzf bat ripgrep fd neofetch htop ncdu \
-                python nodejs > /dev/null 2>&1
+                cmatrix python nodejs > /dev/null 2>&1
             stop_loading
             ;;
             
@@ -289,7 +289,7 @@ install_packages() {
             show_loading "Installing packages via APT"
             sudo apt-get update -qq > /dev/null 2>&1
             sudo apt-get install -y -qq zsh git curl wget \
-                fzf ripgrep fd-find neofetch htop ncdu > /dev/null 2>&1
+                fzf ripgrep fd-find neofetch htop ncdu cmatrix > /dev/null 2>&1
             # Try to install bat (might not be available on older versions)
             sudo apt-get install -y -qq bat 2>/dev/null || true
             stop_loading
@@ -299,10 +299,12 @@ install_packages() {
             show_loading "Installing packages via DNF/YUM"
             if command -v dnf &> /dev/null; then
                 sudo dnf install -y zsh git curl wget nano \
-                    fzf ripgrep fd-find neofetch htop ncdu \
+                    fzf ripgrep fd-find neofetch htop ncdu cmatrix \
                     util-linux-user > /dev/null 2>&1
+                # Try to install bat
+                sudo dnf install -y bat 2>/dev/null || true
             else
-                sudo yum install -y zsh git curl wget nano > /dev/null 2>&1
+                sudo yum install -y zsh git curl wget nano cmatrix > /dev/null 2>&1
             fi
             stop_loading
             ;;
@@ -311,21 +313,23 @@ install_packages() {
             show_loading "Installing packages via Pacman"
             sudo pacman -Syu --noconfirm > /dev/null 2>&1
             sudo pacman -S --noconfirm zsh git curl wget nano \
-                fzf bat ripgrep fd neofetch htop ncdu > /dev/null 2>&1
+                fzf bat ripgrep fd neofetch htop ncdu cmatrix > /dev/null 2>&1
             stop_loading
             ;;
             
         suse)
             show_loading "Installing packages via Zypper"
             sudo zypper install -y zsh git curl wget nano \
-                fzf ripgrep fd neofetch htop ncdu > /dev/null 2>&1
+                fzf ripgrep fd neofetch htop ncdu cmatrix > /dev/null 2>&1
+            # Try to install bat
+            sudo zypper install -y bat 2>/dev/null || true
             stop_loading
             ;;
             
         alpine)
             show_loading "Installing packages via APK"
             sudo apk add --no-cache zsh git curl wget nano \
-                fzf bat ripgrep fd neofetch htop ncdu > /dev/null 2>&1
+                fzf bat ripgrep fd neofetch htop ncdu cmatrix > /dev/null 2>&1
             stop_loading
             ;;
             
@@ -333,14 +337,14 @@ install_packages() {
             echo -e "${YELLOW}  Using Homebrew for macOS${NC}"
             install_homebrew
             show_loading "Installing packages"
-            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu eza > /dev/null 2>&1
+            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu eza cmatrix > /dev/null 2>&1
             stop_loading
             ;;
             
         *)
             echo -e "${YELLOW}⚠ Unknown environment, attempting Homebrew installation${NC}"
             install_homebrew
-            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu eza > /dev/null 2>&1
+            brew install zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu eza cmatrix > /dev/null 2>&1
             ;;
     esac
     
@@ -452,6 +456,356 @@ install_fonts() {
     fi
     
     echo -e "${GREEN}✓ Font setup complete${NC}"
+    sleep 1
+}
+
+# Install tmux with smart configuration
+install_tmux() {
+    echo -e "${BLUE}▸ Installing tmux${NC}"
+    
+    # Install tmux based on platform
+    case "$ENV_TYPE" in
+        termux)
+            show_loading "Installing tmux"
+            pkg install -y tmux > /dev/null 2>&1
+            stop_loading
+            ;;
+        debian|wsl)
+            show_loading "Installing tmux"
+            sudo apt-get install -y -qq tmux > /dev/null 2>&1
+            stop_loading
+            ;;
+        redhat)
+            show_loading "Installing tmux"
+            if command -v dnf &> /dev/null; then
+                sudo dnf install -y tmux > /dev/null 2>&1
+            else
+                sudo yum install -y tmux > /dev/null 2>&1
+            fi
+            stop_loading
+            ;;
+        arch)
+            show_loading "Installing tmux"
+            sudo pacman -S --noconfirm tmux > /dev/null 2>&1
+            stop_loading
+            ;;
+        macos)
+            show_loading "Installing tmux"
+            brew install tmux > /dev/null 2>&1
+            stop_loading
+            ;;
+        *)
+            echo -e "${YELLOW}  Attempting tmux installation via package manager${NC}"
+            if command -v apt-get &> /dev/null; then
+                sudo apt-get install -y tmux > /dev/null 2>&1
+            elif command -v brew &> /dev/null; then
+                brew install tmux > /dev/null 2>&1
+            fi
+            ;;
+    esac
+    
+    # Create tmux config for better defaults
+    show_loading "Configuring tmux"
+    cat > "$HOME/.tmux.conf" << 'TMUX'
+# AKAOIO TMUX CONFIGURATION
+
+# Enable 256 colors
+set -g default-terminal "screen-256color"
+set -ga terminal-overrides ",*256col*:Tc"
+
+# Enable mouse support
+set -g mouse on
+
+# Set prefix to Ctrl-a (easier to reach than Ctrl-b)
+unbind C-b
+set-option -g prefix C-a
+bind-key C-a send-prefix
+
+# Split panes using | and -
+bind | split-window -h
+bind - split-window -v
+unbind '"'
+unbind %
+
+# Reload config with r
+bind r source-file ~/.tmux.conf \; display-message "Config reloaded!"
+
+# Switch panes using Alt-arrow without prefix
+bind -n M-Left select-pane -L
+bind -n M-Right select-pane -R
+bind -n M-Up select-pane -U
+bind -n M-Down select-pane -D
+
+# Don't rename windows automatically
+set-option -g allow-rename off
+
+# Start windows and panes at 1, not 0
+set -g base-index 1
+setw -g pane-base-index 1
+
+# Renumber windows on close
+set -g renumber-windows on
+
+# Increase history limit
+set -g history-limit 10000
+
+# No delay for escape key press
+set -sg escape-time 0
+
+# Status bar customization - Cyberpunk theme
+set -g status-bg colour235
+set -g status-fg colour198
+set -g status-interval 60
+set -g status-left-length 30
+set -g status-left '#[fg=colour51,bold][#S] '
+set -g status-right '#[fg=colour226]#(whoami)@#H #[fg=colour51]%H:%M'
+
+# Window status
+setw -g window-status-format '#[fg=colour245]#I:#W'
+setw -g window-status-current-format '#[fg=colour198,bold]#I:#W'
+
+# Pane borders
+set -g pane-border-style fg=colour238
+set -g pane-active-border-style fg=colour51
+
+# Messages
+set -g message-style bg=colour235,fg=colour198
+
+# Activity monitoring
+setw -g monitor-activity on
+set -g visual-activity off
+
+# Preserve working directory when splitting
+bind '"' split-window -c "#{pane_current_path}"
+bind % split-window -h -c "#{pane_current_path}"
+bind c new-window -c "#{pane_current_path}"
+TMUX
+    stop_loading
+    
+    echo -e "${GREEN}✓ tmux installed and configured${NC}"
+    sleep 1
+}
+
+# Install Claude Code - Anthropic's AI coding assistant
+install_claude_code() {
+    echo -e "${BLUE}▸ Installing Claude Code${NC}"
+    
+    # Check if already installed
+    if command -v claude &> /dev/null; then
+        echo -e "${GREEN}✓ Claude Code already installed${NC}"
+        claude --version 2>/dev/null || true
+        return 0
+    fi
+    
+    # Method 1: Try official binary installer (fastest and recommended)
+    show_loading "Installing Claude Code via official installer"
+    if curl -fsSL https://claude.ai/install.sh | bash > /dev/null 2>&1; then
+        stop_loading
+        echo -e "${GREEN}✓ Claude Code binary installed${NC}"
+        
+        # Verify installation
+        if command -v claude &> /dev/null; then
+            # Run claude doctor to verify everything is working
+            claude doctor > /dev/null 2>&1 || true
+            echo -e "${CYAN}  Run 'claude doctor' to verify installation${NC}"
+            return 0
+        fi
+    else
+        stop_loading
+        echo -e "${YELLOW}  Official installer failed, trying npm/bun${NC}"
+    fi
+    
+    # Method 2: Fall back to npm/bun installation
+    # Try bun first (faster)
+    if command -v bun &> /dev/null; then
+        show_loading "Installing Claude Code via bun"
+        bun install -g @anthropic/claude > /dev/null 2>&1
+        stop_loading
+        if command -v claude &> /dev/null; then
+            echo -e "${GREEN}✓ Claude Code installed via bun${NC}"
+            return 0
+        fi
+    fi
+    
+    # Try npm
+    if command -v npm &> /dev/null; then
+        show_loading "Installing Claude Code via npm"
+        npm install -g @anthropic/claude > /dev/null 2>&1
+        stop_loading
+        if command -v claude &> /dev/null; then
+            echo -e "${GREEN}✓ Claude Code installed via npm${NC}"
+            return 0
+        fi
+    fi
+    
+    # Install Node.js first if needed, then try npm
+    if ! command -v npm &> /dev/null; then
+        echo -e "${YELLOW}  Installing Node.js first${NC}"
+        case "$ENV_TYPE" in
+            termux)
+                pkg install -y nodejs-lts > /dev/null 2>&1
+                ;;
+            debian|wsl)
+                sudo apt-get install -y -qq nodejs npm > /dev/null 2>&1
+                ;;
+            redhat)
+                if command -v dnf &> /dev/null; then
+                    sudo dnf install -y nodejs npm > /dev/null 2>&1
+                else
+                    sudo yum install -y nodejs npm > /dev/null 2>&1
+                fi
+                ;;
+            arch)
+                sudo pacman -S --noconfirm nodejs npm > /dev/null 2>&1
+                ;;
+            macos)
+                brew install node > /dev/null 2>&1
+                ;;
+        esac
+        
+        if command -v npm &> /dev/null; then
+            show_loading "Installing Claude Code via npm"
+            npm install -g @anthropic/claude > /dev/null 2>&1
+            stop_loading
+            if command -v claude &> /dev/null; then
+                echo -e "${GREEN}✓ Claude Code installed via npm${NC}"
+                return 0
+            fi
+        fi
+    fi
+    
+    # Final check and user message
+    if command -v claude &> /dev/null; then
+        echo -e "${GREEN}✓ Claude Code ready to use!${NC}"
+        echo -e "${CYAN}  Run 'claude doctor' to verify installation${NC}"
+        echo -e "${CYAN}  Run 'claude --help' for usage${NC}"
+    else
+        echo -e "${YELLOW}⚠ Claude Code installation incomplete${NC}"
+        echo -e "${CYAN}  You can install manually: curl -fsSL https://claude.ai/install.sh | bash${NC}"
+    fi
+    
+    sleep 1
+}
+
+# Install LazyVim - modern Neovim configuration
+install_lazyvim() {
+    echo -e "${BLUE}▸ Installing LazyVim (Neovim)${NC}"
+    
+    # Install Neovim based on platform
+    case "$ENV_TYPE" in
+        termux)
+            show_loading "Installing Neovim"
+            pkg install -y neovim nodejs-lts python > /dev/null 2>&1
+            stop_loading
+            ;;
+        debian|wsl)
+            show_loading "Installing Neovim"
+            # Try to install from official sources or PPA
+            if ! command -v nvim &> /dev/null; then
+                sudo apt-get install -y -qq software-properties-common > /dev/null 2>&1
+                sudo add-apt-repository -y ppa:neovim-ppa/unstable > /dev/null 2>&1
+                sudo apt-get update -qq > /dev/null 2>&1
+                sudo apt-get install -y -qq neovim python3-neovim nodejs npm > /dev/null 2>&1
+            fi
+            stop_loading
+            ;;
+        redhat)
+            show_loading "Installing Neovim"
+            if command -v dnf &> /dev/null; then
+                sudo dnf install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
+            else
+                sudo yum install -y epel-release > /dev/null 2>&1
+                sudo yum install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
+            fi
+            stop_loading
+            ;;
+        arch)
+            show_loading "Installing Neovim"
+            sudo pacman -S --noconfirm neovim python-pynvim nodejs npm > /dev/null 2>&1
+            stop_loading
+            ;;
+        macos)
+            show_loading "Installing Neovim"
+            brew install neovim node python > /dev/null 2>&1
+            stop_loading
+            ;;
+        *)
+            echo -e "${YELLOW}  Attempting Neovim installation${NC}"
+            if command -v apt-get &> /dev/null; then
+                sudo apt-get install -y neovim nodejs npm > /dev/null 2>&1
+            elif command -v brew &> /dev/null; then
+                brew install neovim node > /dev/null 2>&1
+            fi
+            ;;
+    esac
+    
+    # Backup existing Neovim config if exists
+    if [ -d "$HOME/.config/nvim" ]; then
+        echo -e "${YELLOW}  Backing up existing Neovim config${NC}"
+        mv "$HOME/.config/nvim" "$BACKUP_DIR/nvim-backup" 2>/dev/null || true
+    fi
+    
+    # Install LazyVim
+    show_loading "Setting up LazyVim"
+    git clone https://github.com/LazyVim/starter "$HOME/.config/nvim" > /dev/null 2>&1
+    
+    # Remove .git folder to make it your own
+    rm -rf "$HOME/.config/nvim/.git"
+    
+    # Create a simple init configuration
+    cat > "$HOME/.config/nvim/lua/config/options.lua" << 'LAZYVIM'
+-- AKAOIO LazyVim Configuration
+vim.g.mapleader = " "
+vim.g.maplocalleader = ","
+
+local opt = vim.opt
+
+opt.autowrite = true
+opt.clipboard = "unnamedplus"
+opt.completeopt = "menu,menuone,noselect"
+opt.conceallevel = 3
+opt.confirm = true
+opt.cursorline = true
+opt.expandtab = true
+opt.formatoptions = "jcroqlnt"
+opt.grepformat = "%f:%l:%c:%m"
+opt.grepprg = "rg --vimgrep"
+opt.ignorecase = true
+opt.inccommand = "nosplit"
+opt.laststatus = 0
+opt.list = true
+opt.mouse = "a"
+opt.number = true
+opt.pumblend = 10
+opt.pumheight = 10
+opt.relativenumber = true
+opt.scrolloff = 4
+opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize" }
+opt.shiftround = true
+opt.shiftwidth = 2
+opt.shortmess:append({ W = true, I = true, c = true })
+opt.showmode = false
+opt.sidescrolloff = 8
+opt.signcolumn = "yes"
+opt.smartcase = true
+opt.smartindent = true
+opt.spelllang = { "en" }
+opt.splitbelow = true
+opt.splitright = true
+opt.tabstop = 2
+opt.termguicolors = true
+opt.timeoutlen = 300
+opt.undofile = true
+opt.undolevels = 10000
+opt.updatetime = 200
+opt.wildmode = "longest:full,full"
+opt.winminwidth = 5
+opt.wrap = false
+LAZYVIM
+    stop_loading
+    
+    echo -e "${GREEN}✓ LazyVim installed${NC}"
+    echo -e "${YELLOW}  First launch will install plugins automatically${NC}"
     sleep 1
 }
 
@@ -621,6 +975,21 @@ alias free='free -m'
 alias top='htop'
 alias vim='nvim'
 
+# AKAOIO DEX - Smart tmux workspace
+alias dex='$HOME/.local/bin/dex'
+alias dx='dex'
+alias tmux-kill='tmux kill-server'
+alias tks='tmux kill-session -t'
+alias tls='tmux list-sessions'
+alias ta='tmux attach -t'
+alias tn='tmux new -s'
+
+# Claude Code AI Assistant
+alias cc='claude'
+alias ccode='claude code'
+alias cchat='claude chat'
+alias capi='claude api'
+
 # Fun stuff
 alias matrix='cmatrix -B'
 alias weather='curl wttr.in'
@@ -664,7 +1033,7 @@ ff() {
 }
 
 # Find directories
-fd() {
+fdir() {
     find . -type d -iname "*$1*"
 }
 
@@ -899,7 +1268,10 @@ show_complete() {
     echo -e "${WHITE}    • FZF Integration with Tab Completion${NC}"
     echo -e "${WHITE}    • Enhanced CLI Tools (bat, exa, ripgrep)${NC}"
     echo -e "${WHITE}    • Nerd Fonts for Icons${NC}"
-    echo -e "${WHITE}    • 50+ Useful Aliases & Functions${NC}"
+    echo -e "${WHITE}    • tmux with Smart Layouts (dex command)${NC}"
+    echo -e "${WHITE}    • LazyVim - Modern Neovim IDE${NC}"
+    echo -e "${WHITE}    • Claude Code - AI Coding Assistant${NC}"
+    echo -e "${WHITE}    • 60+ Useful Aliases & Functions${NC}"
     echo ""
     echo -e "${NEON_PURPLE}  ▸ KEYBOARD SHORTCUTS:${NC}"
     echo -e "${WHITE}    • Tab         → Auto-complete with FZF${NC}"
@@ -907,6 +1279,9 @@ show_complete() {
     echo -e "${WHITE}    • Ctrl+Space  → Accept auto-suggestion${NC}"
     echo -e "${WHITE}    • Ctrl+T      → Find files${NC}"
     echo -e "${WHITE}    • Alt+C       → Navigate directories${NC}"
+    echo -e "${WHITE}    • dex         → Smart tmux workspace${NC}"
+    echo -e "${WHITE}    • claude      → AI coding assistant${NC}"
+    echo -e "${WHITE}    • Ctrl+A      → tmux prefix key${NC}"
     echo ""
     echo -e "${NEON_PINK}  ▸ NEXT STEPS:${NC}"
     echo -e "${WHITE}    1. Restart your terminal or run: ${CYAN}zsh${NC}"
@@ -923,6 +1298,35 @@ show_complete() {
     echo ""
 }
 
+# Install and configure dex script
+install_dex() {
+    echo -e "${BLUE}▸ Installing dex smart workspace${NC}"
+    
+    # Create local bin directory
+    mkdir -p "$HOME/.local/bin"
+    
+    # Copy dex script
+    if [ -f "$SCRIPT_DIR/dex" ]; then
+        cp "$SCRIPT_DIR/dex" "$HOME/.local/bin/dex"
+    else
+        # Download from repository if not local
+        show_loading "Downloading dex script"
+        curl -fsSL https://raw.githubusercontent.com/akaoio/terminal/main/dex -o "$HOME/.local/bin/dex" 2>/dev/null
+        stop_loading
+    fi
+    
+    # Make executable
+    chmod +x "$HOME/.local/bin/dex"
+    
+    # Add to PATH if not already there
+    if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+    fi
+    
+    echo -e "${GREEN}✓ dex installed${NC}"
+    sleep 1
+}
+
 # Main installation flow
 main() {
     print_banner
@@ -932,7 +1336,11 @@ main() {
     install_p10k
     install_plugins
     install_fonts
+    install_tmux
+    install_lazyvim
+    install_claude_code
     configure_zsh
+    install_dex
     set_default_shell
     show_complete
 }

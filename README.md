@@ -31,7 +31,7 @@ wget -qO- https://raw.githubusercontent.com/akaoio/terminal/main/install.sh | ba
 
 ---
 
-## ✨ FEATURES
+## ✨ FEATURES 🆕
 
 ### 🎨 **Visual Excellence**
 - **Powerlevel10k Theme** - Cyberpunk edition with neon colors
@@ -41,6 +41,8 @@ wget -qO- https://raw.githubusercontent.com/akaoio/terminal/main/install.sh | ba
 - **FZF Integration** - Fuzzy finder with preview windows
 
 ### ⚡ **Productivity Boosters**
+- **DEX Smart Workspace** 🆕 - Adaptive tmux layouts for any screen size
+- **LazyVim IDE** 🆕 - Modern Neovim with plugins pre-configured
 - **Smart Tab Completion** - Visual menu with descriptions
 - **Directory Jumper** - Type `z folder` to jump anywhere
 - **History Search** - Ctrl+R with fuzzy matching
@@ -48,6 +50,9 @@ wget -qO- https://raw.githubusercontent.com/akaoio/terminal/main/install.sh | ba
 - **Auto-correction** - Fixes typos automatically
 
 ### 🛠️ **Enhanced CLI Tools**
+- `tmux` 🆕 - Terminal multiplexer with smart layouts
+- `nvim` 🆕 - Neovim with LazyVim configuration
+- `dex` 🆕 - Smart workspace manager (auto-adapts to screen)
 - `exa` - Better ls with icons and tree view
 - `bat` - Better cat with syntax highlighting
 - `ripgrep` - Blazing fast grep alternative
@@ -56,7 +61,7 @@ wget -qO- https://raw.githubusercontent.com/akaoio/terminal/main/install.sh | ba
 - `htop` - Interactive process viewer
 - `neofetch` - System info with style
 
-### 🚀 **50+ Aliases & Functions**
+### 🚀 **60+ Aliases & Functions**
 - `ll` - Detailed list with icons
 - `extract` - Extract any archive format
 - `mkcd` - Create and enter directory
@@ -142,12 +147,16 @@ alias mycommand='your command here'
 - ✅ Oh My Zsh framework
 - ✅ Powerlevel10k theme
 - ✅ Nerd Fonts (MesloLGS NF)
+- ✅ tmux (terminal multiplexer)
+- ✅ Neovim with LazyVim IDE
+- ✅ Claude Code AI assistant
 
 ### Plugins
 - ✅ zsh-autosuggestions
 - ✅ zsh-syntax-highlighting
 - ✅ zsh-completions
 - ✅ fzf-tab
+- ✅ LazyVim plugins (auto-installed on first launch)
 
 ### CLI Tools
 - ✅ fzf (fuzzy finder)
@@ -157,12 +166,16 @@ alias mycommand='your command here'
 - ✅ fd (better find)
 - ✅ htop (process manager)
 - ✅ neofetch (system info)
+- ✅ dex (smart workspace manager)
 
 ### Configurations
-- ✅ 50+ useful aliases
+- ✅ 70+ useful aliases
 - ✅ Smart functions
-- ✅ Optimized settings
-- ✅ Cyberpunk color scheme
+- ✅ tmux with cyberpunk theme
+- ✅ LazyVim modern IDE setup
+- ✅ Adaptive screen layouts
+- ✅ Session persistence
+- ✅ Claude Code integration
 
 ---
 
@@ -276,7 +289,6 @@ After installation, try these commands for fun:
 - `weather` - Check weather
 - `moon` - Moon phases
 - `crypto` - Cryptocurrency rates
-- `parrot` - Party parrot
 - `neofetch` - Show system info with style
 
 ---
