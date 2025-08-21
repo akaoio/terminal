@@ -7,12 +7,12 @@ THEME_NAME="${1:-cyberpunk}"
 THEME_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Get theme colors from Node.js CLI
-if [ -f "$THEME_DIR/cli.js" ]; then
+if [ -f "$THEME_DIR/cli.sh" ]; then
     # Set the theme first
-    node "$THEME_DIR/cli.js" set "$THEME_NAME" > /dev/null 2>&1
+    "$THEME_DIR/cli.sh" set "$THEME_NAME" > /dev/null 2>&1
     
     # Apply theme and evaluate the export commands
-    eval "$(node "$THEME_DIR/cli.js" apply)"
+    eval "$("$THEME_DIR/cli.sh" apply)"
     
     # Update LS_COLORS based on theme
     case "$THEME_NAME" in
@@ -84,4 +84,6 @@ if [ -f "$THEME_DIR/cli.js" ]; then
     
     echo "Theme switched to: $THEME_NAME"
     echo "Colors updated in current session"
+else
+    echo "Theme system not found"
 fi

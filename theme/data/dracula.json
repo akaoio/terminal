@@ -1,0 +1,62 @@
+{
+  "name": "dracula",
+  "style": "dark",
+  "colors": {
+    "ansi": {
+      "purple": "\\033[38;2;189;147;249m",
+      "green": "\\033[38;2;80;250;123m",
+      "cyan": "\\033[38;2;139;233;253m",
+      "pink": "\\033[38;2;255;121;198m",
+      "yellow": "\\033[38;2;241;250;140m",
+      "red": "\\033[38;2;255;85;85m",
+      "orange": "\\033[38;2;255;184;108m",
+      "blue": "\\033[38;2;139;233;253m",
+      "comment": "\\033[38;2;98;114;164m",
+      "white": "\\033[38;2;248;248;242m",
+      "background": "\\033[38;2;40;42;54m",
+      "selection": "\\033[38;2;68;71;90m"
+    },
+    "rgb": {
+      "purple": "189,147,249",
+      "green": "80,250,123",
+      "cyan": "139,233,253",
+      "pink": "255,121,198",
+      "yellow": "241,250,140",
+      "red": "255,85,85",
+      "orange": "255,184,108",
+      "blue": "139,233,253",
+      "comment": "98,114,164",
+      "white": "248,248,242",
+      "background": "40,42,54",
+      "selection": "68,71,90"
+    },
+    "hex": {
+      "purple": "#BD93F9",
+      "green": "#50FA7B",
+      "cyan": "#8BE9FD",
+      "pink": "#FF79C6",
+      "yellow": "#F1FA8C",
+      "red": "#FF5555",
+      "orange": "#FFB86C",
+      "blue": "#8BE9FD",
+      "comment": "#6272A4",
+      "white": "#F8F8F2",
+      "background": "#282A36",
+      "selection": "#44475A"
+    },
+    "term": {
+      "purple": 141,
+      "green": 84,
+      "cyan": 117,
+      "pink": 212,
+      "yellow": 228,
+      "red": 203,
+      "orange": 215,
+      "blue": 117,
+      "comment": 61,
+      "white": 253,
+      "background": 236,
+      "selection": 239
+    }
+  }
+}

@@ -1377,14 +1377,14 @@ theme() {
     local theme_cmd="${1:-list}"
     local theme_dir="$HOME/.config/terminal/theme"
     
-    if [ ! -f "$theme_dir/cli.js" ]; then
+    if [ ! -f "$theme_dir/cli.sh" ]; then
         echo "Theme system not installed. Run the installer first."
         return 1
     fi
     
     case "$theme_cmd" in
         list)
-            node "$theme_dir/cli.js" list
+            "$theme_dir/cli.sh" list
             ;;
         set)
             if [ -z "$2" ]; then
@@ -1403,7 +1403,7 @@ theme() {
             fi
             ;;
         get|current)
-            node "$theme_dir/cli.js" get | grep '"name"' | cut -d'"' -f4
+            "$theme_dir/cli.sh" get | grep '"name"' | cut -d'"' -f4
             ;;
         *)
             echo "Usage: theme [list|set <name>|get]"

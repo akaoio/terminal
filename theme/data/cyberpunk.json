@@ -1,0 +1,62 @@
+{
+  "name": "cyberpunk",
+  "style": "dark",
+  "colors": {
+    "ansi": {
+      "purple": "\\033[38;2;138;43;226m",
+      "green": "\\033[38;2;0;255;0m",
+      "cyan": "\\033[38;2;0;255;255m",
+      "pink": "\\033[38;2;255;20;147m",
+      "yellow": "\\033[38;2;255;255;0m",
+      "red": "\\033[38;2;255;0;0m",
+      "orange": "\\033[38;2;255;165;0m",
+      "blue": "\\033[38;2;0;191;255m",
+      "comment": "\\033[38;2;128;128;128m",
+      "white": "\\033[38;2;255;255;255m",
+      "background": "\\033[38;2;0;0;0m",
+      "selection": "\\033[38;2;75;0;130m"
+    },
+    "rgb": {
+      "purple": "138,43,226",
+      "green": "0,255,0",
+      "cyan": "0,255,255",
+      "pink": "255,20,147",
+      "yellow": "255,255,0",
+      "red": "255,0,0",
+      "orange": "255,165,0",
+      "blue": "0,191,255",
+      "comment": "128,128,128",
+      "white": "255,255,255",
+      "background": "0,0,0",
+      "selection": "75,0,130"
+    },
+    "hex": {
+      "purple": "#8A2BE2",
+      "green": "#00FF00",
+      "cyan": "#00FFFF",
+      "pink": "#FF1493",
+      "yellow": "#FFFF00",
+      "red": "#FF0000",
+      "orange": "#FFA500",
+      "blue": "#00BFFF",
+      "comment": "#808080",
+      "white": "#FFFFFF",
+      "background": "#000000",
+      "selection": "#4B0082"
+    },
+    "term": {
+      "purple": 92,
+      "green": 46,
+      "cyan": 51,
+      "pink": 198,
+      "yellow": 226,
+      "red": 196,
+      "orange": 208,
+      "blue": 39,
+      "comment": 244,
+      "white": 15,
+      "background": 0,
+      "selection": 54
+    }
+  }
+}

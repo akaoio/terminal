@@ -6,14 +6,15 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 THEME_NAME="${1:-dracula}"
 
-# Check if node is available
-if ! command -v node &> /dev/null; then
-    echo "Error: Node.js is required for theme system"
+# Check if theme CLI exists
+if [ ! -f "$SCRIPT_DIR/cli.sh" ]; then
+    echo "Error: Theme CLI not found"
     return 1 2>/dev/null || exit 1
 fi
 
 # Apply theme and source variables
-eval "$(node "$SCRIPT_DIR/cli.js" set "$THEME_NAME" > /dev/null && node "$SCRIPT_DIR/cli.js" apply)"
+"$SCRIPT_DIR/cli.sh" set "$THEME_NAME" > /dev/null 2>&1
+eval "$("$SCRIPT_DIR/cli.sh" apply)"
 
 # Verify theme loaded
 if [ -n "$THEME_NAME" ]; then
