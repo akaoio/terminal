@@ -1391,12 +1391,14 @@ theme() {
                 echo "Usage: theme set <name>"
                 return 1
             fi
-            # Use the switch.sh script to update colors in current session
-            if [ -f "$theme_dir/switch.sh" ]; then
+            # Use the visual applier for actual visible changes
+            if [ -f "$theme_dir/apply-visual.sh" ]; then
+                source "$theme_dir/apply-visual.sh" "$2"
+            elif [ -f "$theme_dir/switch.sh" ]; then
                 source "$theme_dir/switch.sh" "$2"
             else
-                # Fallback to old method
-                node "$theme_dir/cli.js" set "$2"
+                # Fallback to basic method
+                "$theme_dir/cli.sh" set "$2"
                 export TERMINAL_THEME="$2"
                 echo "export TERMINAL_THEME='$2'" > ~/.terminal-theme
                 echo "Theme set. Restart shell to apply colors."
@@ -1430,8 +1432,12 @@ theme-reload() {
 }
 
 # Apply theme colors on shell startup (theme preference already loaded above)
-if [ -n "$TERMINAL_THEME" ] && [ -f "$HOME/.config/terminal/theme/switch.sh" ]; then
-    source "$HOME/.config/terminal/theme/switch.sh" "$TERMINAL_THEME" > /dev/null 2>&1
+if [ -n "$TERMINAL_THEME" ]; then
+    if [ -f "$HOME/.config/terminal/theme/apply-visual.sh" ]; then
+        source "$HOME/.config/terminal/theme/apply-visual.sh" "$TERMINAL_THEME" > /dev/null 2>&1
+    elif [ -f "$HOME/.config/terminal/theme/switch.sh" ]; then
+        source "$HOME/.config/terminal/theme/switch.sh" "$TERMINAL_THEME" > /dev/null 2>&1
+    fi
 fi
 
 # Load additional configs
