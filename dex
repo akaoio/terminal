@@ -34,6 +34,297 @@ get_screen_info() {
     fi
 }
 
+# Setup enhanced UI with header and sidebar
+setup_enhanced_ui() {
+    # Configure custom status bar (header)
+    tmux set -t "$SESSION_NAME" status-position top
+    tmux set -t "$SESSION_NAME" status-interval 1
+    tmux set -t "$SESSION_NAME" status-style "bg=colour235,fg=colour198"
+    
+    # Header left: Burger menu + session name
+    tmux set -t "$SESSION_NAME" status-left-length 40
+    tmux set -t "$SESSION_NAME" status-left "#[fg=colour226,bold] ≡ #[fg=colour51,bold][#S] #[fg=colour245]│ "
+    
+    # Header center: Current window with nice formatting
+    tmux set -t "$SESSION_NAME" status-justify centre
+    tmux setw -t "$SESSION_NAME" window-status-format "#[fg=colour245]#I:#W"
+    tmux setw -t "$SESSION_NAME" window-status-current-format "#[fg=colour198,bold,bg=colour237] #I:#W "
+    
+    # Header right: Pane info + time
+    tmux set -t "$SESSION_NAME" status-right-length 60
+    tmux set -t "$SESSION_NAME" status-right "#[fg=colour245]│ #[fg=colour226]P:#{pane_index}/#{window_panes} #[fg=colour51]%H:%M "
+    
+    # Setup key bindings for UI controls
+    setup_ui_keybindings
+    
+    # Create sidebar management script
+    create_sidebar_script
+}
+
+# Setup UI keybindings
+setup_ui_keybindings() {
+    # Menu toggle (Ctrl-a + m)
+    tmux bind -T prefix m run-shell "bash ~/.tmux/dex-menu.sh toggle"
+    
+    # Sidebar toggle (Ctrl-a + M)
+    tmux bind -T prefix M run-shell "bash ~/.tmux/dex-sidebar.sh toggle"
+    
+    # Quick help (Ctrl-a + ?)
+    tmux bind -T prefix ? display-popup -E -w 80% -h 80% "bash ~/.tmux/dex-help.sh"
+    
+    # Session manager popup (Ctrl-a + Ctrl-s)
+    tmux bind -T prefix C-s display-popup -E -w 60% -h 60% "bash ~/.tmux/dex-sessions.sh"
+    
+    # Window manager popup (Ctrl-a + Ctrl-w)
+    tmux bind -T prefix C-w display-popup -E -w 60% -h 60% "bash ~/.tmux/dex-windows.sh"
+    
+    # Pane manager popup (Ctrl-a + Ctrl-p)
+    tmux bind -T prefix C-p display-popup -E -w 60% -h 60% "bash ~/.tmux/dex-panes.sh"
+}
+
+# Create sidebar management script
+create_sidebar_script() {
+    mkdir -p ~/.tmux
+    
+    # Main sidebar toggle script
+    cat > ~/.tmux/dex-sidebar.sh << 'EOF'
+#!/usr/bin/env bash
+# DEX Sidebar Manager
+
+ACTION="${1:-toggle}"
+SIDEBAR_WIDTH=30
+SIDEBAR_FILE="/tmp/tmux-sidebar-${USER}"
+
+# Check if sidebar is visible
+is_sidebar_visible() {
+    [ -f "$SIDEBAR_FILE" ] && tmux list-panes -t "$(tmux display -p '#S')" -F "#{pane_id}" | grep -q "$(cat $SIDEBAR_FILE)"
+}
+
+# Show sidebar
+show_sidebar() {
+    if ! is_sidebar_visible; then
+        # Create sidebar pane on the left
+        SIDEBAR_ID=$(tmux split-window -h -b -l $SIDEBAR_WIDTH -t "$(tmux display -p '#{pane_id}')" "bash ~/.tmux/dex-sidebar-content.sh")
+        echo "$SIDEBAR_ID" > "$SIDEBAR_FILE"
+        tmux select-pane -t "$(tmux display -p '#{pane_id}')"
+    fi
+}
+
+# Hide sidebar
+hide_sidebar() {
+    if is_sidebar_visible; then
+        tmux kill-pane -t "$(cat $SIDEBAR_FILE)" 2>/dev/null
+        rm -f "$SIDEBAR_FILE"
+    fi
+}
+
+# Toggle sidebar
+case "$ACTION" in
+    show)   show_sidebar ;;
+    hide)   hide_sidebar ;;
+    toggle) 
+        if is_sidebar_visible; then
+            hide_sidebar
+        else
+            show_sidebar
+        fi
+        ;;
+esac
+EOF
+    chmod +x ~/.tmux/dex-sidebar.sh
+    
+    # Sidebar content script
+    cat > ~/.tmux/dex-sidebar-content.sh << 'EOF'
+#!/usr/bin/env bash
+# DEX Sidebar Content
+
+# Colors
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+PURPLE='\033[0;35m'
+RED='\033[0;31m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+# Clear screen
+clear
+
+# Draw sidebar UI
+draw_sidebar() {
+    local selected="${1:-1}"
+    
+    # Header
+    echo -e "${BOLD}${CYAN}╔════════════════════════════╗${NC}"
+    echo -e "${BOLD}${CYAN}║      DEX CONTROL PANEL     ║${NC}"
+    echo -e "${BOLD}${CYAN}╠════════════════════════════╣${NC}"
+    
+    # Sessions section
+    echo -e "${BOLD}${GREEN}║ SESSIONS                   ║${NC}"
+    echo -e "${CYAN}╟────────────────────────────╢${NC}"
+    
+    local sessions=$(tmux list-sessions -F "#{session_name}:#{?session_attached,*,}")
+    local i=1
+    while IFS= read -r session; do
+        local name="${session%:*}"
+        local attached="${session#*:}"
+        if [ "$attached" = "*" ]; then
+            echo -e "║ ${GREEN}▶ $name${NC}"
+        else
+            echo -e "║   $name"
+        fi
+        ((i++))
+    done <<< "$sessions"
+    
+    # Windows section
+    echo -e "${CYAN}╟────────────────────────────╢${NC}"
+    echo -e "${BOLD}${YELLOW}║ WINDOWS                    ║${NC}"
+    echo -e "${CYAN}╟────────────────────────────╢${NC}"
+    
+    local windows=$(tmux list-windows -F "#{window_index}:#{window_name}:#{?window_active,*,}")
+    while IFS= read -r window; do
+        local idx="${window%%:*}"
+        local rest="${window#*:}"
+        local name="${rest%:*}"
+        local active="${rest#*:}"
+        if [ "$active" = "*" ]; then
+            echo -e "║ ${YELLOW}▶ $idx: $name${NC}"
+        else
+            echo -e "║   $idx: $name"
+        fi
+    done <<< "$windows"
+    
+    # Panes section
+    echo -e "${CYAN}╟────────────────────────────╢${NC}"
+    echo -e "${BOLD}${PURPLE}║ PANES                      ║${NC}"
+    echo -e "${CYAN}╟────────────────────────────╢${NC}"
+    
+    local panes=$(tmux list-panes -F "#{pane_index}:#{?pane_active,active,}")
+    while IFS= read -r pane; do
+        local idx="${pane%:*}"
+        local active="${pane#*:}"
+        if [ "$active" = "active" ]; then
+            echo -e "║ ${PURPLE}▶ Pane $idx (active)${NC}"
+        else
+            echo -e "║   Pane $idx"
+        fi
+    done <<< "$panes"
+    
+    # Actions section
+    echo -e "${CYAN}╟────────────────────────────╢${NC}"
+    echo -e "${BOLD}${RED}║ ACTIONS                    ║${NC}"
+    echo -e "${CYAN}╟────────────────────────────╢${NC}"
+    echo -e "║ ${BOLD}[n]${NC} New session"
+    echo -e "║ ${BOLD}[w]${NC} New window"
+    echo -e "║ ${BOLD}[p]${NC} Split pane"
+    echo -e "║ ${BOLD}[r]${NC} Rename current"
+    echo -e "║ ${BOLD}[k]${NC} Kill current"
+    echo -e "║ ${BOLD}[s]${NC} Switch session"
+    echo -e "║ ${BOLD}[h]${NC} Help"
+    echo -e "║ ${BOLD}[q]${NC} Close sidebar"
+    echo -e "${CYAN}╚════════════════════════════╝${NC}"
+    
+    # Status line
+    echo ""
+    echo -e "${GREEN}Use keys or click to select${NC}"
+}
+
+# Main loop
+while true; do
+    draw_sidebar
+    
+    # Read user input
+    read -rsn1 key
+    
+    case "$key" in
+        n) # New session
+            echo -e "\n${YELLOW}Enter session name: ${NC}"
+            read session_name
+            if [ -n "$session_name" ]; then
+                tmux new-session -d -s "$session_name"
+                echo -e "${GREEN}✓ Created session: $session_name${NC}"
+                sleep 1
+            fi
+            ;;
+        w) # New window
+            tmux new-window
+            echo -e "${GREEN}✓ Created new window${NC}"
+            sleep 1
+            ;;
+        p) # Split pane
+            tmux split-window -h
+            break
+            ;;
+        r) # Rename
+            echo -e "\n${YELLOW}Rename to: ${NC}"
+            read new_name
+            if [ -n "$new_name" ]; then
+                tmux rename-window "$new_name"
+                echo -e "${GREEN}✓ Renamed to: $new_name${NC}"
+                sleep 1
+            fi
+            ;;
+        k) # Kill current
+            echo -e "\n${RED}Kill current window? (y/n): ${NC}"
+            read -rsn1 confirm
+            if [ "$confirm" = "y" ]; then
+                tmux kill-window
+                break
+            fi
+            ;;
+        s) # Switch session
+            tmux choose-session
+            break
+            ;;
+        h) # Help
+            clear
+            echo -e "${CYAN}DEX Sidebar Help${NC}"
+            echo -e "────────────────"
+            echo -e "Navigate with keyboard shortcuts"
+            echo -e "Press any key to continue..."
+            read -rsn1
+            ;;
+        q) # Quit
+            tmux kill-pane -t "$(tmux display -p '#{pane_id}')"
+            break
+            ;;
+    esac
+    
+    clear
+done
+EOF
+    chmod +x ~/.tmux/dex-sidebar-content.sh
+    
+    # Help popup script
+    cat > ~/.tmux/dex-help.sh << 'EOF'
+#!/usr/bin/env bash
+# DEX Quick Help
+
+echo -e "\033[1;36m╔══════════════════════════════════════════════════════════════╗\033[0m"
+echo -e "\033[1;36m║                     DEX QUICK REFERENCE                     ║\033[0m"
+echo -e "\033[1;36m╚══════════════════════════════════════════════════════════════╝\033[0m"
+echo ""
+echo -e "\033[1;32mUI CONTROLS:\033[0m"
+echo -e "  \033[1;33mCtrl-a + m\033[0m      Toggle menu"
+echo -e "  \033[1;33mCtrl-a + M\033[0m      Toggle sidebar"
+echo -e "  \033[1;33mCtrl-a + ?\033[0m      This help"
+echo ""
+echo -e "\033[1;32mQUICK ACTIONS:\033[0m"
+echo -e "  \033[1;33mCtrl-a + Ctrl-s\033[0m Session manager"
+echo -e "  \033[1;33mCtrl-a + Ctrl-w\033[0m Window manager"
+echo -e "  \033[1;33mCtrl-a + Ctrl-p\033[0m Pane manager"
+echo ""
+echo -e "\033[1;32mNAVIGATION:\033[0m"
+echo -e "  \033[1;33mAlt + arrows\033[0m    Navigate panes"
+echo -e "  \033[1;33mCtrl-a + n/p\033[0m    Next/prev window"
+echo -e "  \033[1;33mCtrl-a + 0-9\033[0m    Jump to window"
+echo ""
+echo -e "Press any key to close..."
+read -rsn1
+EOF
+    chmod +x ~/.tmux/dex-help.sh
+}
+
 # Create smart layout based on screen
 create_smart_layout() {
     get_screen_info
@@ -43,6 +334,7 @@ create_smart_layout() {
     # Check if session exists
     if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
         echo -e "${YELLOW}Session '$SESSION_NAME' exists. Attaching...${NC}"
+        setup_enhanced_ui
         tmux attach-session -t "$SESSION_NAME"
         exit 0
     fi
@@ -134,6 +426,9 @@ create_smart_layout() {
     # Return to main window
     tmux select-window -t "$SESSION_NAME:main"
     
+    # Setup enhanced UI
+    setup_enhanced_ui
+    
     # Display session info
     echo -e "${GREEN}✓ Session '$SESSION_NAME' created successfully!${NC}"
     echo -e "${GREEN}✓ $(ls ~/.tmux/plugins/ | wc -l) professional plugins loaded${NC}"
@@ -145,6 +440,7 @@ create_smart_layout() {
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${CYAN}                     ESSENTIAL SHORTCUTS                     ${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}UI Controls:${NC}      ${YELLOW}Ctrl-a + m${NC} menu  ${YELLOW}Ctrl-a + M${NC} sidebar  ${YELLOW}Ctrl-a + ?${NC} help"
     echo -e "${GREEN}Split & Navigate:${NC}  ${YELLOW}Ctrl-a + |/-${NC} split  ${YELLOW}Alt+arrows${NC} navigate"
     echo -e "${GREEN}Windows:${NC}          ${YELLOW}Ctrl-a + c${NC} new  ${YELLOW}Ctrl-a + n/p${NC} switch  ${YELLOW}Ctrl-a + 1-9${NC} goto"
     echo -e "${GREEN}Sessions:${NC}         ${YELLOW}Ctrl-a + d${NC} detach  ${YELLOW}Ctrl-a + s${NC} browser  ${YELLOW}tmux attach${NC}"
@@ -281,6 +577,14 @@ show_shortcuts() {
     echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${CYAN}║                        TMUX SHORTCUTS REFERENCE                         ║${NC}"
     echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${GREEN}🎯 UI CONTROLS (NEW!):${NC}"
+    echo -e "  ${YELLOW}Ctrl-a + m${NC}           Toggle quick menu"
+    echo -e "  ${YELLOW}Ctrl-a + M${NC}           Toggle sidebar panel"
+    echo -e "  ${YELLOW}Ctrl-a + ?${NC}           Quick help popup"
+    echo -e "  ${YELLOW}Ctrl-a + Ctrl-s${NC}      Session manager popup"
+    echo -e "  ${YELLOW}Ctrl-a + Ctrl-w${NC}      Window manager popup"
+    echo -e "  ${YELLOW}Ctrl-a + Ctrl-p${NC}      Pane manager popup"
     echo ""
     echo -e "${GREEN}PANE MANAGEMENT:${NC}"
     echo -e "  ${YELLOW}Ctrl-a + |${NC}           Split horizontally (side by side)"
