@@ -1,5 +1,5 @@
-# AKAOIO Terminal - Professional Dracula Theme
-# Format: user@host ~/dir (git) $ 
+# AKAOIO Terminal - Universal Dracula Theme (Works Everywhere)
+# Format: user@host ~/dir (git) > 
 
 'builtin' 'local' '-a' 'p10k_config_opts'
 [[ ! -o 'aliases'         ]] || p10k_config_opts+=('aliases')
@@ -12,6 +12,10 @@
   unset -m '(POWERLEVEL9K_*|DEFAULT_USER)~POWERLEVEL9K_GITSTATUS_DIR'
   [[ $ZSH_VERSION == (5.<1->*|<6->.*) ]] || return
 
+  # Disable icons for universal compatibility
+  typeset -g POWERLEVEL9K_MODE='compatible'
+  typeset -g POWERLEVEL9K_VISUAL_IDENTIFIER_EXPANSION=
+  
   # Two-line prompt for better readability on small screens
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
     # First line: path and git info
@@ -19,7 +23,7 @@
     dir                     # current directory  
     vcs                     # git status
     newline                 # line break
-    prompt_char            # ❯ on second line
+    prompt_char            # > on second line
   )
 
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=()
@@ -46,12 +50,27 @@
   typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND='#FFB86C' # orange text
   typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=          # no background
   
-  # Dracula prompt character - no background
+  # Disable folder icons
+  typeset -g POWERLEVEL9K_DIR_SHOW_WRITABLE=false
+  typeset -g POWERLEVEL9K_HOME_ICON=
+  typeset -g POWERLEVEL9K_HOME_SUB_ICON=
+  typeset -g POWERLEVEL9K_FOLDER_ICON=
+  typeset -g POWERLEVEL9K_ETC_ICON=
+  
+  # ASCII git symbols
+  typeset -g POWERLEVEL9K_VCS_GIT_ICON=
+  typeset -g POWERLEVEL9K_VCS_GIT_GITHUB_ICON=
+  typeset -g POWERLEVEL9K_VCS_BRANCH_ICON=
+  typeset -g POWERLEVEL9K_VCS_STAGED_ICON='+'
+  typeset -g POWERLEVEL9K_VCS_UNSTAGED_ICON='!'
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_ICON='?'
+  
+  # ASCII prompt character - no background
   typeset -g POWERLEVEL9K_PROMPT_CHAR_BACKGROUND=            # no background
   typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND='#FF79C6'    # pink
   typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND='#FF5555'  # red  
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='❯'
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_VIINS_CONTENT_EXPANSION='❯'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='>'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_VIINS_CONTENT_EXPANSION='>'
   typeset -g POWERLEVEL9K_PROMPT_CHAR_LEFT_PROMPT_LAST_SEGMENT_END_SYMBOL=''
   
   # Disable multiline prompt decorations
