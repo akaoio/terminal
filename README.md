@@ -50,7 +50,7 @@ wget -qO- https://raw.githubusercontent.com/akaoio/terminal/main/install.sh | ba
 - **Auto-correction** - Fixes typos automatically
 
 ### 🛠️ **Enhanced CLI Tools**
-- `tmux` 🆕 - Terminal multiplexer with smart layouts
+- `tmux` 🆕 - Terminal multiplexer with mobile-friendly keybindings
 - `nvim` 🆕 - Neovim with LazyVim configuration
 - `dex` 🆕 - Smart workspace manager (auto-adapts to screen)
 - `exa` - Better ls with icons and tree view
@@ -111,6 +111,20 @@ wget -qO- https://raw.githubusercontent.com/akaoio/terminal/main/install.sh | ba
 | `Ctrl + U` | Delete to beginning |
 | `Ctrl + W` | Delete word backward |
 | `↑` / `↓` | Navigate history |
+
+### 📱 Mobile/Termux Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl + A` | tmux prefix key |
+| `Ctrl + A, h` | Split horizontally (mobile-friendly) |
+| `Ctrl + A, v` | Split vertically (mobile-friendly) |
+| `Ctrl + A, j` | Navigate to pane below |
+| `Ctrl + A, k` | Navigate to pane above |
+| `Ctrl + A, b` | Navigate to left pane |
+| `Ctrl + A, l` | Navigate to right pane |
+| `Ctrl + A, +` | Resize pane up |
+| `Ctrl + A, =` | Resize pane down |
 
 ---
 

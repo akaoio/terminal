@@ -521,11 +521,23 @@ unbind C-b
 set-option -g prefix C-a
 bind-key C-a send-prefix
 
-# Split panes using | and -
-bind | split-window -h
-bind - split-window -v
+# Split panes using mobile-friendly keys
+bind h split-window -h  # Horizontal split (side by side)
+bind v split-window -v  # Vertical split (top/bottom)
 unbind '"'
 unbind %
+
+# Mobile-friendly pane navigation (easier than arrow keys)
+bind j select-pane -D  # Down
+bind k select-pane -U  # Up
+bind l select-pane -R  # Right
+bind b select-pane -L  # Left (b for back)
+
+# Quick pane resizing (mobile-friendly)
+bind + resize-pane -U 5
+bind = resize-pane -D 5
+bind 9 resize-pane -L 5
+bind 0 resize-pane -R 5
 
 # Reload config with r
 bind r source-file ~/.tmux.conf \; display-message "Config reloaded!"
@@ -1319,6 +1331,10 @@ show_complete() {
     echo -e "${WHITE}    • dex         → Smart tmux workspace${NC}"
     echo -e "${WHITE}    • claude      → AI coding assistant${NC}"
     echo -e "${WHITE}    • Ctrl+A      → tmux prefix key${NC}"
+    echo -e "${WHITE}    • Ctrl+A h    → split horizontal (mobile-friendly)${NC}"
+    echo -e "${WHITE}    • Ctrl+A v    → split vertical (mobile-friendly)${NC}"
+    echo -e "${WHITE}    • Ctrl+A j/k  → navigate up/down panes${NC}"
+    echo -e "${WHITE}    • Ctrl+A b/l  → navigate left/right panes${NC}"
     echo ""
     echo -e "${NEON_PINK}  ▸ NEXT STEPS:${NC}"
     echo -e "${WHITE}    1. Restart your terminal or run: ${CYAN}zsh${NC}"
