@@ -700,17 +700,28 @@ install_lazyvim() {
             ;;
         debian|wsl)
             show_loading "Installing Neovim"
-            # Try to install from official sources or PPA
-            if ! command -v nvim &> /dev/null; then
-                # Try PPA first, fallback to default repos
-                if sudo apt-get install -y -qq software-properties-common > /dev/null 2>&1 && \
-                   sudo add-apt-repository -y ppa:neovim-ppa/unstable > /dev/null 2>&1 && \
-                   sudo apt-get update -qq > /dev/null 2>&1; then
-                    sudo apt-get install -y -qq neovim python3-neovim nodejs npm > /dev/null 2>&1
-                else
-                    # Fallback to default repos
-                    sudo apt-get install -y -qq neovim python3-neovim nodejs npm > /dev/null 2>&1 || true
-                fi
+            # Force install latest Neovim (LazyVim requires >= 0.8.0)
+            
+            # Method 1: Try official PPA
+            if sudo apt-get install -y -qq software-properties-common > /dev/null 2>&1 && \
+               sudo add-apt-repository -y ppa:neovim-ppa/unstable > /dev/null 2>&1 && \
+               sudo apt-get update -qq > /dev/null 2>&1 && \
+               sudo apt-get install -y -qq neovim python3-neovim nodejs npm > /dev/null 2>&1; then
+                echo -e "${GREEN}  ✓ Neovim installed from PPA${NC}"
+            # Method 2: Try AppImage (always latest)
+            elif wget -q https://github.com/neovim/neovim/releases/latest/download/nvim.appimage -O /tmp/nvim.appimage > /dev/null 2>&1; then
+                chmod +x /tmp/nvim.appimage
+                sudo mv /tmp/nvim.appimage /usr/local/bin/nvim
+                sudo apt-get install -y -qq python3-neovim nodejs npm > /dev/null 2>&1 || true
+                echo -e "${GREEN}  ✓ Neovim AppImage installed${NC}"
+            # Method 3: Snap package
+            elif command -v snap &> /dev/null && sudo snap install nvim --classic > /dev/null 2>&1; then
+                sudo apt-get install -y -qq python3-neovim nodejs npm > /dev/null 2>&1 || true
+                echo -e "${GREEN}  ✓ Neovim installed via Snap${NC}"
+            # Method 4: Fallback to default repos (may be old)
+            else
+                sudo apt-get install -y -qq neovim python3-neovim nodejs npm > /dev/null 2>&1 || true
+                echo -e "${YELLOW}  ⚠ Using default repo Neovim (may be old)${NC}"
             fi
             stop_loading
             ;;
@@ -750,15 +761,31 @@ install_lazyvim() {
         mv "$HOME/.config/nvim" "$BACKUP_DIR/nvim-backup" 2>/dev/null || true
     fi
     
-    # Install LazyVim
-    show_loading "Setting up LazyVim"
-    if git clone https://github.com/LazyVim/starter "$HOME/.config/nvim" > /dev/null 2>&1; then
-        # Remove .git folder to make it your own
-        rm -rf "$HOME/.config/nvim/.git" 2>/dev/null || true
-        stop_loading
+    # Check Neovim version before installing LazyVim
+    if command -v nvim &> /dev/null; then
+        NVIM_VERSION=$(nvim --version | head -1 | grep -o 'v[0-9]\+\.[0-9]\+' | cut -c2-)
+        NVIM_MAJOR=$(echo $NVIM_VERSION | cut -d. -f1)
+        NVIM_MINOR=$(echo $NVIM_VERSION | cut -d. -f2)
+        
+        if [ "$NVIM_MAJOR" -lt 1 ] && [ "$NVIM_MINOR" -lt 8 ]; then
+            echo -e "${YELLOW}  ⚠ Neovim v$NVIM_VERSION detected (LazyVim needs >= 0.8.0)${NC}"
+            echo -e "${YELLOW}  Creating basic config instead of LazyVim${NC}"
+            mkdir -p "$HOME/.config/nvim/lua/config"
+        else
+            # Install LazyVim
+            show_loading "Setting up LazyVim"
+            if git clone https://github.com/LazyVim/starter "$HOME/.config/nvim" > /dev/null 2>&1; then
+                # Remove .git folder to make it your own
+                rm -rf "$HOME/.config/nvim/.git" 2>/dev/null || true
+                stop_loading
+            else
+                stop_loading
+                echo -e "${YELLOW}  LazyVim clone failed, creating basic Neovim config${NC}"
+                mkdir -p "$HOME/.config/nvim/lua/config"
+            fi
+        fi
     else
-        stop_loading
-        echo -e "${YELLOW}  LazyVim clone failed, creating basic Neovim config${NC}"
+        echo -e "${YELLOW}  Neovim not found, creating basic config${NC}"
         mkdir -p "$HOME/.config/nvim/lua/config"
     fi
     
