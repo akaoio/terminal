@@ -1012,17 +1012,17 @@ export ZSH="$HOME/.oh-my-zsh"
 # Theme
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
-# Terminal Theme System
+# Terminal Theme System (silent - no output to avoid p10k warning)
 # Load saved theme preference first
 if [ -f ~/.terminal-theme ]; then
-    source ~/.terminal-theme
+    source ~/.terminal-theme 2>/dev/null
 else
     export TERMINAL_THEME="${TERMINAL_THEME:-cyberpunk}"
 fi
 
-# Load theme colors
+# Load theme colors (silent)
 if [ -f "$HOME/.config/terminal/theme/load.sh" ]; then
-    source "$HOME/.config/terminal/theme/load.sh" "$TERMINAL_THEME" 2>/dev/null
+    source "$HOME/.config/terminal/theme/load.sh" "$TERMINAL_THEME" >/dev/null 2>&1
 fi
 
 # Plugins
@@ -1071,55 +1071,20 @@ HIST_STAMPS="yyyy-mm-dd"
 # Load Oh My Zsh
 source $ZSH/oh-my-zsh.sh
 
-# ZSH SYNTAX HIGHLIGHTING - Dracula Theme Colors
-# These colors ensure command input matches the Dracula color scheme
-typeset -A ZSH_HIGHLIGHT_STYLES
-ZSH_HIGHLIGHT_STYLES[default]='fg=#f8f8f2'                      # Default text - white
-ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#ff5555,bold'           # Unknown - red
-ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#ff79c6'                # Reserved words - pink
-ZSH_HIGHLIGHT_STYLES[alias]='fg=#50fa7b'                        # Aliases - green
-ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#50fa7b'                 # Suffix aliases - green
-ZSH_HIGHLIGHT_STYLES[global-alias]='fg=#50fa7b'                 # Global aliases - green
-ZSH_HIGHLIGHT_STYLES[builtin]='fg=#8be9fd'                      # Builtins - cyan
-ZSH_HIGHLIGHT_STYLES[function]='fg=#50fa7b'                     # Functions - green
-ZSH_HIGHLIGHT_STYLES[command]='fg=#8be9fd'                      # Commands - cyan
-ZSH_HIGHLIGHT_STYLES[precommand]='fg=#50fa7b,underline'         # Precommands - green underlined
-ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#ff79c6'             # Command separators - pink
-ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#8be9fd'               # Hashed commands - cyan
-ZSH_HIGHLIGHT_STYLES[autodirectory]='fg=#ffb86c,underline'      # Auto directories - orange
-ZSH_HIGHLIGHT_STYLES[path]='fg=#f8f8f2,underline'               # Paths - white underlined
-ZSH_HIGHLIGHT_STYLES[path_pathseparator]='fg=#ff79c6'           # Path separators - pink
-ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=#f8f8f2,underline'        # Path prefix - white underlined
-ZSH_HIGHLIGHT_STYLES[path_prefix_pathseparator]='fg=#ff79c6'    # Path prefix separators - pink
-ZSH_HIGHLIGHT_STYLES[globbing]='fg=#8be9fd'                     # Globbing - cyan
-ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#bd93f9'            # History expansion - purple
-ZSH_HIGHLIGHT_STYLES[command-substitution]='fg=#f1fa8c'         # Command substitution - yellow
-ZSH_HIGHLIGHT_STYLES[command-substitution-unquoted]='fg=#f1fa8c' # Unquoted substitution - yellow
-ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]='fg=#ff79c6' # Substitution delimiters - pink
-ZSH_HIGHLIGHT_STYLES[process-substitution]='fg=#f1fa8c'         # Process substitution - yellow
-ZSH_HIGHLIGHT_STYLES[process-substitution-delimiter]='fg=#ff79c6' # Process delimiters - pink
-ZSH_HIGHLIGHT_STYLES[arithmetic-expansion]='fg=#bd93f9'         # Arithmetic - purple
-ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#ffb86c'         # Single hyphen options - orange
-ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#ffb86c'         # Double hyphen options - orange
-ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=#bd93f9'         # Back quotes - purple
-ZSH_HIGHLIGHT_STYLES[back-quoted-argument-unclosed]='fg=#ff5555' # Unclosed back quotes - red
-ZSH_HIGHLIGHT_STYLES[back-quoted-argument-delimiter]='fg=#ff79c6' # Back quote delimiters - pink
-ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#f1fa8c'       # Single quotes - yellow
-ZSH_HIGHLIGHT_STYLES[single-quoted-argument-unclosed]='fg=#ff5555' # Unclosed single quotes - red
-ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#f1fa8c'       # Double quotes - yellow
-ZSH_HIGHLIGHT_STYLES[double-quoted-argument-unclosed]='fg=#ff5555' # Unclosed double quotes - red
-ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#f1fa8c'       # Dollar quotes - yellow
-ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument-unclosed]='fg=#ff5555' # Unclosed dollar quotes - red
-ZSH_HIGHLIGHT_STYLES[rc-quote]='fg=#f1fa8c'                     # RC quotes - yellow
-ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]='fg=#bd93f9' # Dollar double quotes - purple
-ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]='fg=#bd93f9'  # Back double quotes - purple
-ZSH_HIGHLIGHT_STYLES[back-dollar-quoted-argument]='fg=#bd93f9'  # Back dollar quotes - purple
-ZSH_HIGHLIGHT_STYLES[assign]='fg=#f8f8f2'                       # Assignments - white
-ZSH_HIGHLIGHT_STYLES[redirection]='fg=#ff79c6'                  # Redirections - pink
-ZSH_HIGHLIGHT_STYLES[comment]='fg=#6272a4'                      # Comments - gray
-ZSH_HIGHLIGHT_STYLES[named-fd]='fg=#f8f8f2'                     # Named file descriptors - white
-ZSH_HIGHLIGHT_STYLES[numeric-fd]='fg=#f8f8f2'                   # Numeric file descriptors - white
-ZSH_HIGHLIGHT_STYLES[arg0]='fg=#50fa7b'                         # First argument - green
+# ZSH SYNTAX HIGHLIGHTING - Generated from theme engine
+# Source theme engine to generate colors
+if [ -f "$SCRIPT_DIR/theme-engine.sh" ]; then
+    source "$SCRIPT_DIR/theme-engine.sh"
+    eval "$(generate_zsh_syntax_colors "${TERMINAL_THEME:-dracula}")"
+else
+    # Fallback if theme engine not available
+    typeset -A ZSH_HIGHLIGHT_STYLES
+    ZSH_HIGHLIGHT_STYLES[default]='fg=248'
+    ZSH_HIGHLIGHT_STYLES[command]='fg=141'
+    ZSH_HIGHLIGHT_STYLES[builtin]='fg=212'
+    ZSH_HIGHLIGHT_STYLES[function]='fg=84'
+    ZSH_HIGHLIGHT_STYLES[alias]='fg=84'
+fi
 
 # CYBERPUNK ALIASES
 
@@ -1202,9 +1167,9 @@ alias dex='claude --dangerously-skip-permissions'
 
 # Safety nets
 alias rm='rm -iv'
-alias cp='cp -iv'
+alias cp='cp -i'
 alias mv='mv -iv'
-alias mkdir='mkdir -pv'
+alias mkdir='mkdir -p'
 
 # Power user
 alias grep='grep --color=auto'
@@ -1411,41 +1376,34 @@ theme() {
             "$theme_dir/cli.sh" set "$THEME_NAME" > /dev/null 2>&1
             export TERMINAL_THEME="$THEME_NAME"
             
-            # Apply colors dynamically using jq if available
-            if command -v jq &> /dev/null; then
-                # Get colors from JSON using jq
-                local purple=$(jq -r '.colors.term.purple' "$theme_dir/data/${THEME_NAME}.json")
-                local green=$(jq -r '.colors.term.green' "$theme_dir/data/${THEME_NAME}.json")
-                local cyan=$(jq -r '.colors.term.cyan' "$theme_dir/data/${THEME_NAME}.json")
-                local pink=$(jq -r '.colors.term.pink' "$theme_dir/data/${THEME_NAME}.json")
-                local yellow=$(jq -r '.colors.term.yellow' "$theme_dir/data/${THEME_NAME}.json")
-                local red=$(jq -r '.colors.term.red' "$theme_dir/data/${THEME_NAME}.json")
-                local blue=$(jq -r '.colors.term.blue' "$theme_dir/data/${THEME_NAME}.json")
+            # Source theme engine if available
+            local theme_engine=""
+            if [ -f "$theme_dir/theme-engine.sh" ]; then
+                theme_engine="$theme_dir/theme-engine.sh"
+            elif [ -f "$HOME/Projects/terminal/theme-engine.sh" ]; then
+                theme_engine="$HOME/Projects/terminal/theme-engine.sh"
+            fi
+            
+            if [ -n "$theme_engine" ] && command -v jq &> /dev/null; then
+                # Use theme engine to generate colors dynamically
+                source "$theme_engine"
                 
-                # Generate LS_COLORS based on theme's actual colors
+                # Apply LS_COLORS from theme engine
+                eval "export LS_COLORS='$(generate_ls_colors "$THEME_NAME")'"
+                
+                # Apply FZF colors
+                eval "export FZF_DEFAULT_OPTS=\"$(generate_fzf_colors "$THEME_NAME")\""
+                
+                # Set BAT_THEME based on theme
                 case "$THEME_NAME" in
-                    dracula)
-                        export LS_COLORS="di=1;${purple}:ln=1;${cyan}:so=1;${green}:pi=${yellow}:ex=1;${pink}:bd=${blue};46:cd=${blue};43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                        export BAT_THEME="Dracula"
-                        ;;
-                    cyberpunk)
-                        export LS_COLORS="di=1;${pink}:ln=1;${cyan}:so=1;${green}:pi=1;${yellow}:ex=1;${green}:bd=1;${red}:cd=1;${red}:su=1;97;41:sg=1;97;44:tw=1;97;42:ow=1;97;43"
-                        export BAT_THEME="TwoDark"
-                        ;;
-                    nord)
-                        export LS_COLORS="di=1;${blue}:ln=1;${cyan}:so=1;${purple}:pi=${yellow}:ex=1;${green}:bd=${blue};46:cd=${blue};43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                        export BAT_THEME="Nord"
-                        ;;
-                    gruvbox)
-                        export LS_COLORS="di=1;${yellow}:ln=1;${cyan}:so=1;${purple}:pi=${yellow}:ex=1;${green}:bd=${blue};46:cd=${blue};43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                        export BAT_THEME="gruvbox-dark"
-                        ;;
+                    dracula) export BAT_THEME="Dracula" ;;
+                    cyberpunk) export BAT_THEME="TwoDark" ;;
+                    nord) export BAT_THEME="Nord" ;;
+                    gruvbox) export BAT_THEME="gruvbox-dark" ;;
+                    *) export BAT_THEME="TwoDark" ;;
                 esac
-                
-                # Generate EXA_COLORS dynamically
-                export EXA_COLORS="di=1;${purple}:ex=1;${green}:ln=1;${cyan}:*.md=1;${yellow}:*.json=1;${blue}:*.js=1;${green}:*.ts=1;${green}:*.sh=1;${red}"
             else
-                # Fallback if jq not available - still hardcoded but at least works
+                # Fallback if theme engine or jq not available
                 case "$THEME_NAME" in
                     dracula)
                         export LS_COLORS="di=1;35:ln=1;36:so=1;32:pi=33:ex=1;35:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
@@ -1466,17 +1424,49 @@ theme() {
                 esac
             fi
             
-            # Note: ZSH syntax highlighting can't be changed dynamically
-            # It requires restart to apply properly
+            # Initialize region_highlight if needed (prevents error)
+            if [ -n "$ZSH_VERSION" ]; then
+                typeset -ga region_highlight 2>/dev/null || true
+            fi
+            
+            # Apply ZSH syntax highlighting colors from theme engine
+            if [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ] && [ -n "$theme_engine" ]; then
+                eval "$(generate_zsh_syntax_colors "$THEME_NAME")"
+                
+                # Force zsh-syntax-highlighting to refresh
+                if (( $+functions[_zsh_highlight] )); then
+                    _zsh_highlight
+                fi
+            fi
+            
+            # Apply tmux theme to ALL sessions (works from inside or outside tmux)
+            if [ -f "$HOME/.config/terminal/configs/tmux-themes.sh" ]; then
+                bash "$HOME/.config/terminal/configs/tmux-themes.sh" "$THEME_NAME"
+            elif [ -f "$HOME/Projects/terminal/configs/tmux-themes.sh" ]; then
+                bash "$HOME/Projects/terminal/configs/tmux-themes.sh" "$THEME_NAME"
+            fi
+            
+            # Setup nvim to use the new theme (silent, no prompts)
+            mkdir -p "$HOME/.config/nvim/plugin" 2>/dev/null
+            if [ -f "$HOME/.config/terminal/configs/nvim-themes.lua" ]; then
+                cp -f "$HOME/.config/terminal/configs/nvim-themes.lua" "$HOME/.config/nvim/plugin/theme.lua" 2>/dev/null
+            elif [ -f "$HOME/Projects/terminal/configs/nvim-themes.lua" ]; then
+                cp -f "$HOME/Projects/terminal/configs/nvim-themes.lua" "$HOME/.config/nvim/plugin/theme.lua" 2>/dev/null
+            fi
+            
+            # Force reload Powerlevel10k configuration with new theme
+            export TERMINAL_THEME="$THEME_NAME"
+            source ~/.p10k.zsh
             
             echo "✓ Theme changed to: $THEME_NAME"
+            echo "  • Terminal prompt colors updated"
+            echo "  • File colors (ls/exa) updated"
+            echo "  • Syntax highlighting updated"
+            echo "  • Tmux colors updated (all sessions)"
+            echo "  • Neovim will use $THEME_NAME on next launch"
             echo ""
-            echo "Applied immediately:"
-            echo "  • File colors (ls/exa)"
-            echo "  • BAT syntax highlighting"
             echo ""
-            echo "To update syntax highlighting colors:"
-            echo "  Run: exec zsh"
+            echo "  Run 'exec zsh' to fully apply all changes"
             ;;
         get|current)
             "$theme_dir/cli.sh" get | grep '"name"' | cut -d'"' -f4
@@ -1507,62 +1497,89 @@ theme-reload() {
 
 # Apply theme colors on shell startup (theme preference already loaded above)
 if [ -n "$TERMINAL_THEME" ]; then
-    # Apply the theme using the same logic as theme set
-    case "$TERMINAL_THEME" in
-        dracula)
-            export LS_COLORS="di=1;35:ln=1;36:so=1;32:pi=33:ex=1;35:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-            export EXA_COLORS="di=1;35:ex=1;35:ln=1;36:*.md=1;33:*.json=1;34:*.js=1;32:*.ts=1;32:*.sh=1;31"
-            export BAT_THEME="Dracula"
-            ;;
-        cyberpunk)
-            export LS_COLORS="di=1;95:ln=1;96:so=1;92:pi=1;93:ex=1;92:bd=1;91:cd=1;91:su=1;97;41:sg=1;97;44:tw=1;97;42:ow=1;97;43"
-            export EXA_COLORS="di=1;95:ex=1;92:ln=1;96:*.md=1;93:*.json=1;94:*.js=1;92:*.ts=1;92:*.sh=1;91"
-            export BAT_THEME="TwoDark"
-            ;;
-        nord)
-            export LS_COLORS="di=1;34:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-            export EXA_COLORS="di=1;34:ex=1;32:ln=1;36:*.md=1;33:*.json=1;34:*.js=1;32:*.ts=1;32:*.sh=1;31"
-            export BAT_THEME="Nord"
-            ;;
-        gruvbox)
-            export LS_COLORS="di=1;33:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-            export EXA_COLORS="di=1;33:ex=1;32:ln=1;36:*.md=1;33:*.json=1;34:*.js=1;32:*.ts=1;32:*.sh=1;31"
-            export BAT_THEME="gruvbox-dark"
-            ;;
-    esac
+    # Try to use theme engine for dynamic color generation
+    local theme_engine=""
+    if [ -f "$HOME/.config/terminal/theme-engine.sh" ]; then
+        theme_engine="$HOME/.config/terminal/theme-engine.sh"
+    elif [ -f "$HOME/Projects/terminal/theme-engine.sh" ]; then
+        theme_engine="$HOME/Projects/terminal/theme-engine.sh"
+    fi
     
-    # Apply ZSH syntax highlighting if plugin is loaded
-    if [ -n "$ZSH_VERSION" ] && [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ]; then
+    if [ -n "$theme_engine" ] && command -v jq &> /dev/null; then
+        # Source theme engine and apply colors
+        source "$theme_engine"
+        
+        # Apply all colors from theme engine
+        eval "export LS_COLORS='$(generate_ls_colors "$TERMINAL_THEME")'"
+        eval "export FZF_DEFAULT_OPTS=\"$(generate_fzf_colors "$TERMINAL_THEME")\""
+        
+        # Apply ZSH syntax highlighting if available
+        if [ -n "$ZSH_VERSION" ] && [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ]; then
+            eval "$(generate_zsh_syntax_colors "$TERMINAL_THEME")"
+        fi
+        
+        # Set BAT_THEME
+        case "$TERMINAL_THEME" in
+            dracula) export BAT_THEME="Dracula" ;;
+            cyberpunk) export BAT_THEME="TwoDark" ;;
+            nord) export BAT_THEME="Nord" ;;
+            gruvbox) export BAT_THEME="gruvbox-dark" ;;
+            *) export BAT_THEME="TwoDark" ;;
+        esac
+    else
+        # Fallback to hardcoded values if theme engine not available
         case "$TERMINAL_THEME" in
             dracula)
-                ZSH_HIGHLIGHT_STYLES[default]='fg=248'
-                ZSH_HIGHLIGHT_STYLES[command]='fg=141'
-                ZSH_HIGHLIGHT_STYLES[builtin]='fg=212'
-                ZSH_HIGHLIGHT_STYLES[function]='fg=84'
-                ZSH_HIGHLIGHT_STYLES[alias]='fg=84'
+                export LS_COLORS="di=1;35:ln=1;36:so=1;32:pi=33:ex=1;35:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+                export BAT_THEME="Dracula"
                 ;;
             cyberpunk)
-                ZSH_HIGHLIGHT_STYLES[default]='fg=15'
-                ZSH_HIGHLIGHT_STYLES[command]='fg=198'
-                ZSH_HIGHLIGHT_STYLES[builtin]='fg=51'
-                ZSH_HIGHLIGHT_STYLES[function]='fg=46'
-                ZSH_HIGHLIGHT_STYLES[alias]='fg=226'
+                export LS_COLORS="di=1;95:ln=1;96:so=1;92:pi=1;93:ex=1;92:bd=1;91:cd=1;91:su=1;97;41:sg=1;97;44:tw=1;97;42:ow=1;97;43"
+                export BAT_THEME="TwoDark"
                 ;;
             nord)
-                ZSH_HIGHLIGHT_STYLES[default]='fg=252'
-                ZSH_HIGHLIGHT_STYLES[command]='fg=81'
-                ZSH_HIGHLIGHT_STYLES[builtin]='fg=139'
-                ZSH_HIGHLIGHT_STYLES[function]='fg=109'
-                ZSH_HIGHLIGHT_STYLES[alias]='fg=109'
+                export LS_COLORS="di=1;34:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+                export BAT_THEME="Nord"
                 ;;
             gruvbox)
-                ZSH_HIGHLIGHT_STYLES[default]='fg=223'
-                ZSH_HIGHLIGHT_STYLES[command]='fg=142'
-                ZSH_HIGHLIGHT_STYLES[builtin]='fg=167'
-                ZSH_HIGHLIGHT_STYLES[function]='fg=109'
-                ZSH_HIGHLIGHT_STYLES[alias]='fg=108'
+                export LS_COLORS="di=1;33:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+                export BAT_THEME="gruvbox-dark"
                 ;;
         esac
+        
+        # Apply ZSH syntax highlighting if plugin is loaded
+        if [ -n "$ZSH_VERSION" ] && [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ]; then
+            case "$TERMINAL_THEME" in
+                dracula)
+                    ZSH_HIGHLIGHT_STYLES[default]='fg=248'
+                    ZSH_HIGHLIGHT_STYLES[command]='fg=141'
+                    ZSH_HIGHLIGHT_STYLES[builtin]='fg=212'
+                    ZSH_HIGHLIGHT_STYLES[function]='fg=84'
+                    ZSH_HIGHLIGHT_STYLES[alias]='fg=84'
+                    ;;
+                cyberpunk)
+                    ZSH_HIGHLIGHT_STYLES[default]='fg=15'
+                    ZSH_HIGHLIGHT_STYLES[command]='fg=198'
+                    ZSH_HIGHLIGHT_STYLES[builtin]='fg=51'
+                    ZSH_HIGHLIGHT_STYLES[function]='fg=46'
+                    ZSH_HIGHLIGHT_STYLES[alias]='fg=226'
+                    ;;
+                nord)
+                    ZSH_HIGHLIGHT_STYLES[default]='fg=252'
+                    ZSH_HIGHLIGHT_STYLES[command]='fg=81'
+                    ZSH_HIGHLIGHT_STYLES[builtin]='fg=139'
+                    ZSH_HIGHLIGHT_STYLES[function]='fg=109'
+                    ZSH_HIGHLIGHT_STYLES[alias]='fg=109'
+                    ;;
+                gruvbox)
+                    ZSH_HIGHLIGHT_STYLES[default]='fg=223'
+                    ZSH_HIGHLIGHT_STYLES[command]='fg=142'
+                    ZSH_HIGHLIGHT_STYLES[builtin]='fg=167'
+                    ZSH_HIGHLIGHT_STYLES[function]='fg=109'
+                    ZSH_HIGHLIGHT_STYLES[alias]='fg=108'
+                    ;;
+            esac
+        fi
     fi
 fi
 
@@ -1912,6 +1929,12 @@ select_theme() {
         echo -e "${CYAN}Installing theme system...${NC}"
         mkdir -p "$HOME/.config/terminal"
         cp -r "$SCRIPT_DIR/theme" "$HOME/.config/terminal/" 2>/dev/null || true
+        
+        # Also copy theme config files
+        mkdir -p "$HOME/.config/terminal/configs"
+        [ -f "$SCRIPT_DIR/configs/tmux-themes.sh" ] && cp "$SCRIPT_DIR/configs/tmux-themes.sh" "$HOME/.config/terminal/configs/"
+        [ -f "$SCRIPT_DIR/configs/nvim-themes.lua" ] && cp "$SCRIPT_DIR/configs/nvim-themes.lua" "$HOME/.config/terminal/configs/"
+        
         echo -e "${GREEN}✓ Theme system installed${NC}"
     fi
     

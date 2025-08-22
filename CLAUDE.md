@@ -211,3 +211,4 @@ Key commands for users:
 - Reload: `source ~/.zshrc` or `exec zsh`
 
 Remember: This is designed to be foolproof - no user interaction needed during installation!
+- Khi thực hiện một sự thay đổi, phải thay đổi ở mã nguồn gốc, chứ không phải là thay đổi ở các file được tạo ra tự động.
