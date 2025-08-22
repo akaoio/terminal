@@ -2,7 +2,11 @@
 # AKAOIO TERMINAL - UNIVERSAL UPDATE SCRIPT
 # Smart environment detection for all platforms
 
-set -e
+# Don't exit on error to prevent SSH disconnection
+set +e
+
+# Trap any exits to prevent SSH disconnection
+trap 'echo "Update script completed"; exit 0' EXIT ERR INT TERM
 
 # Environment detection
 detect_environment() {
@@ -33,7 +37,7 @@ THEME_NAME="${TERMINAL_THEME:-dracula}"
 
 # Try to load theme from user config first, then from script dir
 if [ -f "$HOME/.config/terminal/theme/load.sh" ]; then
-    source "$HOME/.config/terminal/theme/load.sh" "$THEME_NAME" 2>/dev/null || {
+    ( source "$HOME/.config/terminal/theme/load.sh" "$THEME_NAME" 2>/dev/null ) || {
         # Fallback colors
         GREEN='\033[38;5;84m'
         YELLOW='\033[38;5;228m'
@@ -47,7 +51,7 @@ if [ -f "$HOME/.config/terminal/theme/load.sh" ]; then
         NC='\033[0m'
     }
 elif [ -f "$SCRIPT_DIR/theme/load.sh" ]; then
-    source "$SCRIPT_DIR/theme/load.sh" "$THEME_NAME" 2>/dev/null || {
+    ( source "$SCRIPT_DIR/theme/load.sh" "$THEME_NAME" 2>/dev/null ) || {
         # Fallback colors
         GREEN='\033[38;5;84m'
         YELLOW='\033[38;5;228m'
@@ -74,10 +78,15 @@ else
     NC='\033[0m'
 fi
 
-# Banner
-clear
+# Banner (don't clear if in SSH)
+if [ -z "$SSH_CONNECTION" ]; then
+    clear
+fi
 echo -e "${CYAN}AKAOIO TERMINAL UPDATE${NC}"
 echo -e "${BLUE}Environment: $ENV_TYPE${NC}"
+if [ -n "$SSH_CONNECTION" ]; then
+    echo -e "${YELLOW}Running in SSH session - preserving connection${NC}"
+fi
 echo ""
 
 # Update repository
@@ -379,6 +388,13 @@ echo -e "  • tmux & dex script"
 echo -e "  • LazyVim (if installed)"
 echo -e "  • Claude Code AI assistant"
 echo ""
-echo -e "${YELLOW}Restart your terminal or run:${NC} ${CYAN}exec zsh${NC}"
+if [ -n "$SSH_CONNECTION" ]; then
+    echo -e "${YELLOW}Run to reload config:${NC} ${CYAN}source ~/.zshrc${NC}"
+else
+    echo -e "${YELLOW}Restart your terminal or run:${NC} ${CYAN}exec zsh${NC}"
+fi
 echo -e "${BLUE}Smart workspace:${NC} ${CYAN}dex${NC}"
 echo ""
+
+# Ensure proper exit for SSH sessions
+exit 0
