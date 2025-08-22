@@ -3,7 +3,7 @@
 # Generate all theme configurations from JSON data files
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-THEME_DATA_DIR="$SCRIPT_DIR/theme/data"
+THEME_DATA_DIR="$SCRIPT_DIR/data"
 
 # Function to get color from theme JSON
 get_theme_color() {
