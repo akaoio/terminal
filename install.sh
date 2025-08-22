@@ -1415,9 +1415,11 @@ theme() {
             if [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ] && [ -n "$theme_engine" ]; then
                 eval "$(generate_zsh_syntax_colors "$THEME_NAME")"
                 
-                # Force zsh-syntax-highlighting to refresh
-                if (( $+functions[_zsh_highlight] )); then
-                    _zsh_highlight
+                # Force zsh-syntax-highlighting to refresh (ZSH only)
+                if [ -n "$ZSH_VERSION" ]; then
+                    if type _zsh_highlight &>/dev/null 2>&1; then
+                        _zsh_highlight
+                    fi
                 fi
             fi
             
@@ -1438,7 +1440,11 @@ theme() {
             
             # Force reload Powerlevel10k configuration with new theme
             export TERMINAL_THEME="$THEME_NAME"
-            source ~/.p10k.zsh
+            
+            # Only reload p10k if in ZSH and file exists
+            if [ -n "$ZSH_VERSION" ] && [ -f "$HOME/.p10k.zsh" ]; then
+                source "$HOME/.p10k.zsh"
+            fi
             
             echo "✓ Theme changed to: $THEME_NAME"
             echo "  • Terminal prompt colors updated"
