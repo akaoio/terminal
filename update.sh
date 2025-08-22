@@ -5,8 +5,8 @@
 # Don't exit on error to prevent SSH disconnection
 set +e
 
-# Trap any exits to prevent SSH disconnection
-trap 'echo "Update script completed"; exit 0' EXIT ERR INT TERM
+# Trap errors but don't exit - let script continue naturally
+trap 'echo "Update script interrupted" >&2' INT TERM
 
 # Environment detection
 detect_environment() {
@@ -35,47 +35,26 @@ ENV_TYPE=$(detect_environment)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 THEME_NAME="${TERMINAL_THEME:-dracula}"
 
+# Default colors - always set first to ensure they exist
+GREEN='\033[38;5;84m'
+YELLOW='\033[38;5;228m'
+BLUE='\033[38;5;117m'
+CYAN='\033[38;5;117m'
+RED='\033[38;5;203m'
+PURPLE='\033[38;5;141m'
+PINK='\033[38;5;212m'
+ORANGE='\033[38;5;215m'
+WHITE='\033[38;5;253m'
+NC='\033[0m'
+
 # Try to load theme from user config first, then from script dir
+# Don't use subshells as they can cause issues with SSH sessions
 if [ -f "$HOME/.config/terminal/theme/load.sh" ]; then
-    ( source "$HOME/.config/terminal/theme/load.sh" "$THEME_NAME" 2>/dev/null ) || {
-        # Fallback colors
-        GREEN='\033[38;5;84m'
-        YELLOW='\033[38;5;228m'
-        BLUE='\033[38;5;117m'
-        CYAN='\033[38;5;117m'
-        RED='\033[38;5;203m'
-        PURPLE='\033[38;5;141m'
-        PINK='\033[38;5;212m'
-        ORANGE='\033[38;5;215m'
-        WHITE='\033[38;5;253m'
-        NC='\033[0m'
-    }
+    # Source in current shell but suppress errors
+    source "$HOME/.config/terminal/theme/load.sh" "$THEME_NAME" 2>/dev/null || true
 elif [ -f "$SCRIPT_DIR/theme/load.sh" ]; then
-    ( source "$SCRIPT_DIR/theme/load.sh" "$THEME_NAME" 2>/dev/null ) || {
-        # Fallback colors
-        GREEN='\033[38;5;84m'
-        YELLOW='\033[38;5;228m'
-        BLUE='\033[38;5;117m'
-        CYAN='\033[38;5;117m'
-        RED='\033[38;5;203m'
-        PURPLE='\033[38;5;141m'
-        PINK='\033[38;5;212m'
-        ORANGE='\033[38;5;215m'
-        WHITE='\033[38;5;253m'
-        NC='\033[0m'
-    }
-else
-    # Fallback colors
-    GREEN='\033[38;5;84m'
-    YELLOW='\033[38;5;228m'
-    BLUE='\033[38;5;117m'
-    CYAN='\033[38;5;117m'
-    RED='\033[38;5;203m'
-    PURPLE='\033[38;5;141m'
-    PINK='\033[38;5;212m'
-    ORANGE='\033[38;5;215m'
-    WHITE='\033[38;5;253m'
-    NC='\033[0m'
+    # Source in current shell but suppress errors
+    source "$SCRIPT_DIR/theme/load.sh" "$THEME_NAME" 2>/dev/null || true
 fi
 
 # Banner (don't clear if in SSH)
@@ -396,5 +375,4 @@ fi
 echo -e "${BLUE}Smart workspace:${NC} ${CYAN}dex${NC}"
 echo ""
 
-# Ensure proper exit for SSH sessions
-exit 0
+# Don't use exit - let script complete naturally
