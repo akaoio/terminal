@@ -1077,13 +1077,8 @@ if [ -f "$SCRIPT_DIR/theme-engine.sh" ]; then
     source "$SCRIPT_DIR/theme-engine.sh"
     eval "$(generate_zsh_syntax_colors "${TERMINAL_THEME:-dracula}")"
 else
-    # Fallback if theme engine not available
+    # Theme engine required for syntax highlighting colors
     typeset -A ZSH_HIGHLIGHT_STYLES
-    ZSH_HIGHLIGHT_STYLES[default]='fg=248'
-    ZSH_HIGHLIGHT_STYLES[command]='fg=141'
-    ZSH_HIGHLIGHT_STYLES[builtin]='fg=212'
-    ZSH_HIGHLIGHT_STYLES[function]='fg=84'
-    ZSH_HIGHLIGHT_STYLES[alias]='fg=84'
 fi
 
 # CYBERPUNK ALIASES
@@ -1289,12 +1284,8 @@ setopt HIST_VERIFY
 setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
 
-# FZF settings
+# FZF settings - Colors will be set by theme engine
 export FZF_DEFAULT_OPTS="
-    --color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9
-    --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9
-    --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6
-    --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4
     --height 40%
     --layout=reverse
     --border
@@ -1403,24 +1394,15 @@ theme() {
                     *) export BAT_THEME="TwoDark" ;;
                 esac
             else
-                # Fallback if theme engine or jq not available
+                # Theme engine required for color generation
+                echo "Warning: Theme engine or jq not available. Colors may not be applied."
+                # Set minimal BAT_THEME at least
                 case "$THEME_NAME" in
-                    dracula)
-                        export LS_COLORS="di=1;35:ln=1;36:so=1;32:pi=33:ex=1;35:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                        export BAT_THEME="Dracula"
-                        ;;
-                    cyberpunk)
-                        export LS_COLORS="di=1;95:ln=1;96:so=1;92:pi=1;93:ex=1;92:bd=1;91:cd=1;91:su=1;97;41:sg=1;97;44:tw=1;97;42:ow=1;97;43"
-                        export BAT_THEME="TwoDark"
-                        ;;
-                    nord)
-                        export LS_COLORS="di=1;34:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                        export BAT_THEME="Nord"
-                        ;;
-                    gruvbox)
-                        export LS_COLORS="di=1;33:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                        export BAT_THEME="gruvbox-dark"
-                        ;;
+                    dracula) export BAT_THEME="Dracula" ;;
+                    cyberpunk) export BAT_THEME="TwoDark" ;;
+                    nord) export BAT_THEME="Nord" ;;
+                    gruvbox) export BAT_THEME="gruvbox-dark" ;;
+                    *) export BAT_THEME="TwoDark" ;;
                 esac
             fi
             
@@ -1527,59 +1509,16 @@ if [ -n "$TERMINAL_THEME" ]; then
             *) export BAT_THEME="TwoDark" ;;
         esac
     else
-        # Fallback to hardcoded values if theme engine not available
+        # Theme engine required for color generation
+        echo "Warning: Theme engine or jq not available. Theme colors not applied."
+        # Set minimal BAT_THEME at least
         case "$TERMINAL_THEME" in
-            dracula)
-                export LS_COLORS="di=1;35:ln=1;36:so=1;32:pi=33:ex=1;35:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                export BAT_THEME="Dracula"
-                ;;
-            cyberpunk)
-                export LS_COLORS="di=1;95:ln=1;96:so=1;92:pi=1;93:ex=1;92:bd=1;91:cd=1;91:su=1;97;41:sg=1;97;44:tw=1;97;42:ow=1;97;43"
-                export BAT_THEME="TwoDark"
-                ;;
-            nord)
-                export LS_COLORS="di=1;34:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                export BAT_THEME="Nord"
-                ;;
-            gruvbox)
-                export LS_COLORS="di=1;33:ln=1;36:so=1;35:pi=33:ex=1;32:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
-                export BAT_THEME="gruvbox-dark"
-                ;;
+            dracula) export BAT_THEME="Dracula" ;;
+            cyberpunk) export BAT_THEME="TwoDark" ;;
+            nord) export BAT_THEME="Nord" ;;
+            gruvbox) export BAT_THEME="gruvbox-dark" ;;
+            *) export BAT_THEME="TwoDark" ;;
         esac
-        
-        # Apply ZSH syntax highlighting if plugin is loaded
-        if [ -n "$ZSH_VERSION" ] && [ -n "${ZSH_HIGHLIGHT_STYLES+x}" ]; then
-            case "$TERMINAL_THEME" in
-                dracula)
-                    ZSH_HIGHLIGHT_STYLES[default]='fg=248'
-                    ZSH_HIGHLIGHT_STYLES[command]='fg=141'
-                    ZSH_HIGHLIGHT_STYLES[builtin]='fg=212'
-                    ZSH_HIGHLIGHT_STYLES[function]='fg=84'
-                    ZSH_HIGHLIGHT_STYLES[alias]='fg=84'
-                    ;;
-                cyberpunk)
-                    ZSH_HIGHLIGHT_STYLES[default]='fg=15'
-                    ZSH_HIGHLIGHT_STYLES[command]='fg=198'
-                    ZSH_HIGHLIGHT_STYLES[builtin]='fg=51'
-                    ZSH_HIGHLIGHT_STYLES[function]='fg=46'
-                    ZSH_HIGHLIGHT_STYLES[alias]='fg=226'
-                    ;;
-                nord)
-                    ZSH_HIGHLIGHT_STYLES[default]='fg=252'
-                    ZSH_HIGHLIGHT_STYLES[command]='fg=81'
-                    ZSH_HIGHLIGHT_STYLES[builtin]='fg=139'
-                    ZSH_HIGHLIGHT_STYLES[function]='fg=109'
-                    ZSH_HIGHLIGHT_STYLES[alias]='fg=109'
-                    ;;
-                gruvbox)
-                    ZSH_HIGHLIGHT_STYLES[default]='fg=223'
-                    ZSH_HIGHLIGHT_STYLES[command]='fg=142'
-                    ZSH_HIGHLIGHT_STYLES[builtin]='fg=167'
-                    ZSH_HIGHLIGHT_STYLES[function]='fg=109'
-                    ZSH_HIGHLIGHT_STYLES[alias]='fg=108'
-                    ;;
-            esac
-        fi
     fi
 fi
 

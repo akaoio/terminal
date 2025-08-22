@@ -1,40 +1,33 @@
 #!/bin/bash
 # Tmux Theme Switcher
-# Apply theme colors to all tmux sessions
+# Apply theme colors to all tmux sessions using theme engine
 
 THEME="${1:-dracula}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+THEME_ENGINE="$SCRIPT_DIR/theme/theme-engine.sh"
 
-# Define colors for each theme
-case "$THEME" in
-    dracula)
-        STATUS_BG="colour236"
-        STATUS_FG="colour141"
-        BORDER="colour238"
-        ACTIVE_BORDER="colour141"
-        ;;
-    cyberpunk)
-        STATUS_BG="colour235"
-        STATUS_FG="colour198"
-        BORDER="colour238"
-        ACTIVE_BORDER="colour51"
-        ;;
-    nord)
-        STATUS_BG="colour237"
-        STATUS_FG="colour109"
-        BORDER="colour238"
-        ACTIVE_BORDER="colour109"
-        ;;
-    gruvbox)
-        STATUS_BG="colour237"
-        STATUS_FG="colour214"
-        BORDER="colour238"
-        ACTIVE_BORDER="colour175"
-        ;;
-    *)
-        echo "Unknown theme: $THEME"
-        exit 1
-        ;;
-esac
+# Source theme engine if available
+if [ -f "$THEME_ENGINE" ]; then
+    source "$THEME_ENGINE"
+    
+    # Get tmux colors from theme engine
+    TMUX_COLORS=$(generate_tmux_colors "$THEME")
+    
+    # Parse the color values
+    eval "$TMUX_COLORS"
+    
+    STATUS_BG="${status_bg:-colour235}"
+    STATUS_FG="${status_fg:-colour250}"
+    BORDER="${border:-colour238}"
+    ACTIVE_BORDER="${active_border:-colour250}"
+else
+    # Fallback to defaults if theme engine not found
+    echo "Warning: Theme engine not found, using defaults"
+    STATUS_BG="colour235"
+    STATUS_FG="colour250"
+    BORDER="colour238"
+    ACTIVE_BORDER="colour250"
+fi
 
 # Apply to all tmux sessions
 if command -v tmux &>/dev/null && tmux list-sessions &>/dev/null 2>&1; then
