@@ -630,17 +630,23 @@ set -g history-limit 10000
 # No delay for escape key press
 set -sg escape-time 0
 
-# Status bar customization - Cyberpunk theme
+# Status bar customization - compact and touch friendly
+set -g status-position bottom
+set -g status-justify centre
 set -g status-bg colour235
-set -g status-fg colour198
-set -g status-interval 60
-set -g status-left-length 30
-set -g status-left '#[fg=colour51,bold][#S] '
-set -g status-right '#[fg=colour226]#(whoami)@#H #[fg=colour51]%H:%M'
+set -g status-fg colour252
+set -g status-interval 15
+set -g status-left-length 18
+set -g status-right-length 8
+set -g status-left '#[fg=colour51] #S '
+set -g status-right '#[fg=colour245]%H:%M '
 
 # Window status
-setw -g window-status-format '#[fg=colour245]#I:#W'
-setw -g window-status-current-format '#[fg=colour198,bold]#I:#W'
+setw -g window-status-separator ''
+setw -g window-status-format '#[fg=colour245] #I #{=8:window_name} '
+setw -g window-status-current-format '#[fg=colour235,bg=colour51,bold] #I #{=12:window_name} '
+setw -g window-status-activity-style fg=colour228
+setw -g window-status-bell-style fg=colour235,bg=colour215
 
 # Pane borders
 set -g pane-border-style fg=colour238
@@ -648,10 +654,14 @@ set -g pane-active-border-style fg=colour51
 
 # Messages
 set -g message-style bg=colour235,fg=colour198
+set -g message-command-style bg=colour235,fg=colour51
 
 # Activity monitoring
 setw -g monitor-activity on
 set -g visual-activity off
+
+# Keep names stable so the compact tabs stay readable
+set -g automatic-rename off
 
 # Preserve working directory when splitting
 bind '"' split-window -c "#{pane_current_path}"

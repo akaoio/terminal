@@ -50,7 +50,7 @@ wget -qO- https://raw.githubusercontent.com/akaoio/terminal/main/install.sh | ba
 - **Auto-correction** - Fixes typos automatically
 
 ### 🛠️ **Enhanced CLI Tools**
-- `tmux` 🆕 - Terminal multiplexer with mobile-friendly keybindings
+- `tmux` 🆕 - Terminal multiplexer with compact status tabs and mobile-friendly keybindings
 - `nvim` 🆕 - Neovim with LazyVim configuration
 - `dex` 🆕 - Smart workspace manager (auto-adapts to screen)
 - `exa` - Better ls with icons and tree view
@@ -185,7 +185,7 @@ alias mycommand='your command here'
 ### Configurations
 - ✅ 70+ useful aliases
 - ✅ Smart functions
-- ✅ tmux with cyberpunk theme
+- ✅ tmux with compact touch-friendly status bar
 - ✅ LazyVim modern IDE setup
 - ✅ Adaptive screen layouts
 - ✅ Session persistence
