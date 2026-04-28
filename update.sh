@@ -31,6 +31,22 @@ detect_environment() {
 
 ENV_TYPE=$(detect_environment)
 
+can_run_privileged() {
+    if [ "$(id -u)" -eq 0 ]; then
+        return 0
+    fi
+
+    command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1
+}
+
+run_privileged() {
+    if [ "$(id -u)" -eq 0 ]; then
+        "$@"
+    else
+        sudo -n "$@"
+    fi
+}
+
 # Load theme system - single source of truth for colors
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 THEME_NAME="${TERMINAL_THEME:-dracula}"
@@ -131,34 +147,38 @@ echo -e "${GREEN}✓ Plugins updated${NC}"
 
 # Update system packages based on environment
 echo -e "${BLUE}▸ Updating packages...${NC}"
-case "$ENV_TYPE" in
-    termux)
-        pkg update -y > /dev/null 2>&1
-        pkg upgrade -y > /dev/null 2>&1
-        # Update tmux and neovim if installed
-        pkg upgrade -y tmux neovim nodejs-lts python 2>/dev/null || true
-        ;;
-    debian)
-        sudo apt-get update -qq > /dev/null 2>&1
-        sudo apt-get upgrade -y -qq zsh git curl wget \
-            fzf bat ripgrep fd-find neofetch htop ncdu \
-            tmux neovim nodejs npm 2>/dev/null || true
-        ;;
-    redhat)
-        sudo yum update -y zsh git curl wget tmux neovim nodejs npm 2>/dev/null || true
-        ;;
-    arch)
-        sudo pacman -Syu --noconfirm zsh git curl wget tmux neovim nodejs npm 2>/dev/null || true
-        ;;
-    macos)
-        if command -v brew &> /dev/null; then
-            brew update > /dev/null 2>&1
-            brew upgrade zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu \
-                tmux neovim node 2>/dev/null || true
-        fi
-        ;;
-esac
-echo -e "${GREEN}✓ Packages updated${NC}"
+if [ "$ENV_TYPE" = "termux" ]; then
+    pkg update -y > /dev/null 2>&1
+    pkg upgrade -y > /dev/null 2>&1
+    # Update tmux and neovim if installed
+    pkg upgrade -y tmux neovim nodejs-lts python 2>/dev/null || true
+    echo -e "${GREEN}✓ Packages updated${NC}"
+elif [ "$ENV_TYPE" = "macos" ]; then
+    if command -v brew &> /dev/null; then
+        brew update > /dev/null 2>&1
+        brew upgrade zsh git curl wget fzf bat ripgrep fd neofetch htop ncdu \
+            tmux neovim node 2>/dev/null || true
+    fi
+    echo -e "${GREEN}✓ Packages updated${NC}"
+elif can_run_privileged; then
+    case "$ENV_TYPE" in
+        debian)
+            run_privileged apt-get update -qq > /dev/null 2>&1
+            run_privileged apt-get upgrade -y -qq zsh git curl wget \
+                fzf bat ripgrep fd-find neofetch htop ncdu \
+                tmux neovim nodejs npm 2>/dev/null || true
+            ;;
+        redhat)
+            run_privileged yum update -y zsh git curl wget tmux neovim nodejs npm 2>/dev/null || true
+            ;;
+        arch)
+            run_privileged pacman -Syu --noconfirm zsh git curl wget tmux neovim nodejs npm 2>/dev/null || true
+            ;;
+    esac
+    echo -e "${GREEN}✓ Packages updated${NC}"
+else
+    echo -e "${YELLOW}⚠ Skipping package updates (sudo requires a password in this session)${NC}"
+fi
 
 # Force update ALL configs from repo (overwrite local changes)
 echo -e "${BLUE}▸ Syncing all configurations from GitHub...${NC}"
