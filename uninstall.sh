@@ -191,6 +191,9 @@ if [ -d "$CANONICAL_DIR" ]; then
     echo -e "${GREEN}✓ Terminal config directory removed${NC}"
 fi
 
+# Remove legacy theme state file (pre-XDG)
+rm -f "$HOME/.terminal-theme" 2>/dev/null || true
+
 # Clean up fonts (non-Termux only)
 if [ "$ENV_TYPE" != "termux" ]; then
     FONT_DIR="$HOME/.local/share/fonts"

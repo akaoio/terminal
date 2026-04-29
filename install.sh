@@ -915,6 +915,9 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# User executables (XDG)
+export PATH="$HOME/.local/bin:$PATH"
+
 # Add Homebrew to PATH if installed (for immutable systems)
 if [ -d "/home/linuxbrew/.linuxbrew" ]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -930,8 +933,8 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Terminal Theme System (silent - no output to avoid p10k warning)
 # Load saved theme preference first
-if [ -f ~/.terminal-theme ]; then
-    source ~/.terminal-theme 2>/dev/null
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/terminal/state" ]; then
+    source "${XDG_CONFIG_HOME:-$HOME/.config}/terminal/state" 2>/dev/null
 else
     export TERMINAL_THEME="${TERMINAL_THEME:-cyberpunk}"
 fi
@@ -1709,11 +1712,6 @@ install_dex() {
     
     # Make executable
     chmod +x "$HOME/.local/bin/dex"
-    
-    # Add to PATH if not already there
-    if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then
-        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
-    fi
     
     echo -e "${GREEN}✓ dex installed${NC}"
     sleep 1

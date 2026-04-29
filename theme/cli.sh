@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Theme Manager - Single source of truth for terminal colors
 # Pure shell implementation without Node.js dependency
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-THEME_FILE="$HOME/.terminal-theme"
+THEME_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/terminal/state"
 CURRENT_THEME="cyberpunk"
 
 # Load saved theme preference
@@ -55,6 +55,7 @@ set_theme() {
     fi
     
     # Save theme preference
+    mkdir -p "$(dirname "$THEME_FILE")"
     echo "export TERMINAL_THEME='$theme_name'" > "$THEME_FILE"
     CURRENT_THEME="$theme_name"
     echo "Theme set to: $theme_name"
