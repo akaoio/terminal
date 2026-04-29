@@ -182,7 +182,13 @@ fi
 REPO_DIR="$HOME/.akaoio-terminal"
 if [ -d "$REPO_DIR" ]; then
     rm -rf "$REPO_DIR"
-    echo -e "${GREEN}✓ Repository removed${NC}"
+    echo -e "${GREEN}✓ Repository removed (legacy path)${NC}"
+fi
+
+CANONICAL_DIR="$HOME/.config/terminal"
+if [ -d "$CANONICAL_DIR" ]; then
+    rm -rf "$CANONICAL_DIR"
+    echo -e "${GREEN}✓ Terminal config directory removed${NC}"
 fi
 
 # Clean up fonts (non-Termux only)

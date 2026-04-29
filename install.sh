@@ -572,103 +572,8 @@ install_tmux() {
     show_loading "Configuring tmux"
     if [ -f "$SCRIPT_DIR/configs/tmux.conf" ]; then
         cp "$SCRIPT_DIR/configs/tmux.conf" "$HOME/.tmux.conf"
-    else
-        cat > "$HOME/.tmux.conf" << 'TMUX'
-# AKAOIO TMUX CONFIGURATION
-
-# Enable 256 colors
-set -g default-terminal "screen-256color"
-set -ga terminal-overrides ",*256col*:Tc"
-
-# Enable mouse support
-set -g mouse on
-
-# Set prefix to Ctrl-a (easier to reach than Ctrl-b)
-unbind C-b
-set-option -g prefix C-a
-bind-key C-a send-prefix
-
-# Split panes using mobile-friendly keys
-bind h split-window -h  # Horizontal split (side by side)
-bind v split-window -v  # Vertical split (top/bottom)
-unbind '"'
-unbind %
-
-# Mobile-friendly pane navigation (easier than arrow keys)
-bind j select-pane -D  # Down
-bind k select-pane -U  # Up
-bind l select-pane -R  # Right
-bind b select-pane -L  # Left (b for back)
-
-# Quick pane resizing (mobile-friendly)
-bind + resize-pane -U 5
-bind = resize-pane -D 5
-bind 9 resize-pane -L 5
-bind 0 resize-pane -R 5
-
-# Reload config with r
-bind r source-file ~/.tmux.conf \; display-message "Config reloaded!"
-
-# Switch panes using Alt-arrow without prefix
-bind -n M-Left select-pane -L
-bind -n M-Right select-pane -R
-bind -n M-Up select-pane -U
-bind -n M-Down select-pane -D
-
-# Don't rename windows automatically
-set-option -g allow-rename off
-
-# Start windows and panes at 1, not 0
-set -g base-index 1
-setw -g pane-base-index 1
-
-# Renumber windows on close
-set -g renumber-windows on
-
-# Increase history limit
-set -g history-limit 10000
-
-# No delay for escape key press
-set -sg escape-time 0
-
-# Status bar customization - compact and touch friendly
-set -g status-position bottom
-set -g status-justify centre
-set -g status-bg colour235
-set -g status-fg colour252
-set -g status-interval 15
-set -g status-left-length 18
-set -g status-right-length 8
-set -g status-left '#[fg=colour51] #S '
-set -g status-right '#[fg=colour245]%H:%M '
-
-# Window status
-setw -g window-status-separator ''
-setw -g window-status-format '#[fg=colour245] #I #{=8:window_name} '
-setw -g window-status-current-format '#[fg=colour235,bg=colour51,bold] #I #{=12:window_name} '
-setw -g window-status-activity-style fg=colour228
-setw -g window-status-bell-style fg=colour235,bg=colour215
-
-# Pane borders
-set -g pane-border-style fg=colour238
-set -g pane-active-border-style fg=colour51
-
-# Messages
-set -g message-style bg=colour235,fg=colour198
-set -g message-command-style bg=colour235,fg=colour51
-
-# Activity monitoring
-setw -g monitor-activity on
-set -g visual-activity off
-
-# Keep names stable so the compact tabs stay readable
-set -g automatic-rename off
-
-# Preserve working directory when splitting
-bind '"' split-window -c "#{pane_current_path}"
-bind % split-window -h -c "#{pane_current_path}"
-bind c new-window -c "#{pane_current_path}"
-TMUX
+    elif [ -f "$HOME/.config/terminal/configs/tmux.conf" ]; then
+        cp "$HOME/.config/terminal/configs/tmux.conf" "$HOME/.tmux.conf"
     fi
     stop_loading
     
@@ -1084,11 +989,10 @@ source $ZSH/oh-my-zsh.sh
 
 # ZSH SYNTAX HIGHLIGHTING - Generated from theme engine
 # Source theme engine to generate colors
-if [ -f "$SCRIPT_DIR/theme-engine.sh" ]; then
-    source "$SCRIPT_DIR/theme-engine.sh"
+if [ -f "$SCRIPT_DIR/theme/theme-engine.sh" ]; then
+    source "$SCRIPT_DIR/theme/theme-engine.sh"
     eval "$(generate_zsh_syntax_colors "${TERMINAL_THEME:-dracula}")"
 else
-    # Theme engine required for syntax highlighting colors
     typeset -A ZSH_HIGHLIGHT_STYLES
 fi
 

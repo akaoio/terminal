@@ -97,12 +97,9 @@ setup_script_paths() {
     local script_source_dir
     
     # Try to find the terminal project directory
-    if [ -d "/home/$(whoami)/Projects/terminal/configs/tmux-scripts" ]; then
-        script_source_dir="/home/$(whoami)/Projects/terminal/configs/tmux-scripts"
-    elif [ -d "$HOME/akaoio/terminal/configs/tmux-scripts" ]; then
-        script_source_dir="$HOME/akaoio/terminal/configs/tmux-scripts"
+    if [ -d "$HOME/.config/terminal/configs/tmux-scripts" ]; then
+        script_source_dir="$HOME/.config/terminal/configs/tmux-scripts"
     elif [ -f "$0" ]; then
-        # Get directory where dex is located
         local dex_dir=$(dirname "$(readlink -f "$0")")
         script_source_dir="$dex_dir/configs/tmux-scripts"
     fi
