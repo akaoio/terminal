@@ -1346,9 +1346,12 @@ theme() {
     
     # Check if theme system is installed in config directory
     if [ ! -f "$theme_dir/cli.sh" ]; then
-        # Try development directory
         if [ -f "$HOME/Projects/terminal/theme/cli.sh" ]; then
             theme_dir="$HOME/Projects/terminal/theme"
+        elif [ -f "$HOME/terminal/theme/cli.sh" ]; then
+            theme_dir="$HOME/terminal/theme"
+        elif [ -f "$(dirname "${BASH_SOURCE[0]:-$0}")/theme/cli.sh" ]; then
+            theme_dir="$(dirname "${BASH_SOURCE[0]:-$0}")/theme"
         else
             echo "Theme system not installed. Run the installer first."
             return 1
@@ -1382,8 +1385,10 @@ theme() {
             local theme_engine=""
             if [ -f "$theme_dir/theme-engine.sh" ]; then
                 theme_engine="$theme_dir/theme-engine.sh"
-            elif [ -f "$HOME/Projects/terminal/theme-engine.sh" ]; then
-                theme_engine="$HOME/Projects/terminal/theme-engine.sh"
+            elif [ -f "$HOME/Projects/terminal/theme/theme-engine.sh" ]; then
+                theme_engine="$HOME/Projects/terminal/theme/theme-engine.sh"
+            elif [ -f "$HOME/terminal/theme/theme-engine.sh" ]; then
+                theme_engine="$HOME/terminal/theme/theme-engine.sh"
             fi
             
             if [ -n "$theme_engine" ] && command -v jq &> /dev/null; then
@@ -1439,6 +1444,8 @@ theme() {
                 bash "$HOME/.config/terminal/configs/tmux-themes.sh" "$THEME_NAME"
             elif [ -f "$HOME/Projects/terminal/configs/tmux-themes.sh" ]; then
                 bash "$HOME/Projects/terminal/configs/tmux-themes.sh" "$THEME_NAME"
+            elif [ -f "$HOME/terminal/configs/tmux-themes.sh" ]; then
+                bash "$HOME/terminal/configs/tmux-themes.sh" "$THEME_NAME"
             fi
             
             # Setup nvim to use the new theme (silent, no prompts)
