@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # AKAOIO Terminal Theme Engine
 # Generate all theme configurations from JSON data files
 

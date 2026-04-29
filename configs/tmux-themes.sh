@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Tmux Theme Switcher
 # Updates @bg/@fg/@accent/@comment/@highlight/@active user-variables in all
 # running tmux sessions. Layout and format strings in tmux.conf are never

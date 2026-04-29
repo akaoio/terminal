@@ -232,9 +232,7 @@ create_smart_layout() {
     echo -e "  2. editor - File editing"
     echo -e "  3. servers - Background services"
     echo ""
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${CYAN}                     ESSENTIAL SHORTCUTS                     ${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}  ESSENTIAL SHORTCUTS${NC}"
     echo -e "${GREEN}UI Controls:${NC}      ${YELLOW}Ctrl-a + ?${NC} help  ${YELLOW}Ctrl-a + f${NC} footer"
     echo -e "${GREEN}Split & Navigate:${NC}  ${YELLOW}Ctrl-a + |/-${NC} split  ${YELLOW}Alt+arrows${NC} navigate"
     echo -e "${GREEN}Windows:${NC}          ${YELLOW}Ctrl-a + c${NC} new  ${YELLOW}Ctrl-a + n/p${NC} switch  ${YELLOW}Ctrl-a + 1-9${NC} goto"
@@ -268,10 +266,7 @@ restore_or_create() {
 
 # Show comprehensive help
 show_help() {
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║                           AKAOIO DEX v2.0                               ║${NC}"
-    echo -e "${CYAN}║                    Professional Tmux Session Manager                    ║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${CYAN}  AKAOIO DEX v2.0 — Tmux Session Manager${NC}"
     echo ""
     echo -e "${GREEN}USAGE:${NC}"
     echo -e "  ${YELLOW}dex${NC}                    Create smart session (auto-named)"
@@ -369,9 +364,7 @@ main() {
 
 # Show complete shortcuts reference
 show_shortcuts() {
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║                        TMUX SHORTCUTS REFERENCE                         ║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${CYAN}  TMUX SHORTCUTS REFERENCE${NC}"
     echo ""
     echo -e "${GREEN}🎯 UI CONTROLS (NEW!):${NC}"
     echo -e "  ${YELLOW}Ctrl-a + ?${NC}           Quick help popup"
@@ -430,9 +423,7 @@ show_shortcuts() {
 
 # Show plugin info if requested
 show_plugins() {
-    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║                    TMUX PROFESSIONAL PLUGINS                 ║${NC}"
-    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${CYAN}  TMUX PROFESSIONAL PLUGINS${NC}"
     echo ""
     echo -e "${GREEN}Installed Plugins:${NC}"
     

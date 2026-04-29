@@ -374,9 +374,7 @@ echo -e "${GREEN}✓ Configurations updated${NC}"
 
 # Complete
 echo ""
-echo -e "${GREEN}═══════════════════════════════════════════${NC}"
-echo -e "${CYAN}     UPDATE COMPLETE!${NC}"
-echo -e "${GREEN}═══════════════════════════════════════════${NC}"
+echo -e "${CYAN}  UPDATE COMPLETE!${NC}"
 echo ""
 echo -e "${GREEN}✅ Updated Components:${NC}"
 echo -e "  • Oh My Zsh & plugins"

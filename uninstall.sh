@@ -211,9 +211,7 @@ rm -f "$HOME/install-termux.sh" 2>/dev/null || true
 
 # Complete
 echo ""
-echo -e "${GREEN}═══════════════════════════════════════════${NC}"
-echo -e "${CYAN}     UNINSTALL COMPLETE!${NC}"
-echo -e "${GREEN}═══════════════════════════════════════════${NC}"
+echo -e "${CYAN}  UNINSTALL COMPLETE!${NC}"
 echo ""
 echo -e "${RED}❌ Removed Components:${NC}"
 echo -e "  • Oh My Zsh & plugins"

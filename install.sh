@@ -1685,9 +1685,7 @@ show_complete() {
     echo -e "${YELLOW}  ▸ BACKUP LOCATION:${NC}"
     echo -e "${WHITE}    $BACKUP_DIR${NC}"
     echo ""
-    echo -e "${PURPLE}═══════════════════════════════════════════════════════════════════════${NC}"
-    echo -e "${NEON_GREEN}         Welcome to the future of terminal experience!${NC}"
-    echo -e "${PURPLE}═══════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${NEON_GREEN}  Welcome to the future of terminal experience!${NC}"
     echo ""
 }
 
