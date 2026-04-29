@@ -251,6 +251,7 @@ backup_configs() {
     [ -f "$HOME/.bashrc" ] && cp "$HOME/.bashrc" "$BACKUP_DIR/" 2>/dev/null || true
     [ -f "$HOME/.zshrc" ] && cp "$HOME/.zshrc" "$BACKUP_DIR/" 2>/dev/null || true
     [ -f "$HOME/.p10k.zsh" ] && cp "$HOME/.p10k.zsh" "$BACKUP_DIR/" 2>/dev/null || true
+    [ -f "$HOME/.tmux.conf" ] && cp "$HOME/.tmux.conf" "$BACKUP_DIR/" 2>/dev/null || true
     [ -d "$HOME/.oh-my-zsh" ] && echo "$HOME/.oh-my-zsh" > "$BACKUP_DIR/oh-my-zsh.path" || true
     
     echo -e "${GREEN}  ✓ Backup saved to: $BACKUP_DIR${NC}"
