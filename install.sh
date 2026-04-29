@@ -1249,11 +1249,24 @@ bindkey '^[[Z' autosuggest-accept
 # Terminal management
 terminal() {
     local cmd="${1:-help}"
-    local terminal_dir="$HOME/.config/terminal"
+    local terminal_dir="${XDG_CONFIG_HOME:-$HOME/.config}/terminal"
+    local base_url="https://raw.githubusercontent.com/akaoio/terminal/main"
     case "$cmd" in
-        update)    bash "$terminal_dir/update.sh" ;;
-        uninstall) bash "$terminal_dir/uninstall.sh" ;;
-        theme)     shift; theme "$@" ;;
+        update)
+            if [ -f "$terminal_dir/update.sh" ]; then
+                bash "$terminal_dir/update.sh"
+            else
+                bash <(curl -fsSL "$base_url/update.sh")
+            fi
+            ;;
+        uninstall)
+            if [ -f "$terminal_dir/uninstall.sh" ]; then
+                bash "$terminal_dir/uninstall.sh"
+            else
+                echo "Terminal not installed at $terminal_dir"
+            fi
+            ;;
+        theme) shift; theme "$@" ;;
         *)
             echo "Usage: terminal <command>"
             echo "  update      Update to latest version"
