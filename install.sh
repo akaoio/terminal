@@ -1343,19 +1343,10 @@ bindkey '^[[Z' autosuggest-accept
 theme() {
     local theme_cmd="${1:-list}"
     local theme_dir="$HOME/.config/terminal/theme"
-    
-    # Check if theme system is installed in config directory
+
     if [ ! -f "$theme_dir/cli.sh" ]; then
-        if [ -f "$HOME/Projects/terminal/theme/cli.sh" ]; then
-            theme_dir="$HOME/Projects/terminal/theme"
-        elif [ -f "$HOME/terminal/theme/cli.sh" ]; then
-            theme_dir="$HOME/terminal/theme"
-        elif [ -f "$(dirname "${BASH_SOURCE[0]:-$0}")/theme/cli.sh" ]; then
-            theme_dir="$(dirname "${BASH_SOURCE[0]:-$0}")/theme"
-        else
-            echo "Theme system not installed. Run the installer first."
-            return 1
-        fi
+        echo "Theme system not found at $theme_dir. Re-run the installer."
+        return 1
     fi
     
     case "$theme_cmd" in
@@ -1381,15 +1372,8 @@ theme() {
             "$theme_dir/cli.sh" set "$THEME_NAME" > /dev/null 2>&1
             export TERMINAL_THEME="$THEME_NAME"
             
-            # Source theme engine if available
-            local theme_engine=""
-            if [ -f "$theme_dir/theme-engine.sh" ]; then
-                theme_engine="$theme_dir/theme-engine.sh"
-            elif [ -f "$HOME/Projects/terminal/theme/theme-engine.sh" ]; then
-                theme_engine="$HOME/Projects/terminal/theme/theme-engine.sh"
-            elif [ -f "$HOME/terminal/theme/theme-engine.sh" ]; then
-                theme_engine="$HOME/terminal/theme/theme-engine.sh"
-            fi
+            # Source theme engine
+            local theme_engine="$theme_dir/theme-engine.sh"
             
             if [ -n "$theme_engine" ] && command -v jq &> /dev/null; then
                 # Use theme engine to generate colors dynamically
@@ -1440,21 +1424,13 @@ theme() {
             fi
             
             # Apply tmux theme to ALL sessions (works from inside or outside tmux)
-            if [ -f "$HOME/.config/terminal/configs/tmux-themes.sh" ]; then
-                bash "$HOME/.config/terminal/configs/tmux-themes.sh" "$THEME_NAME"
-            elif [ -f "$HOME/Projects/terminal/configs/tmux-themes.sh" ]; then
-                bash "$HOME/Projects/terminal/configs/tmux-themes.sh" "$THEME_NAME"
-            elif [ -f "$HOME/terminal/configs/tmux-themes.sh" ]; then
-                bash "$HOME/terminal/configs/tmux-themes.sh" "$THEME_NAME"
-            fi
+            local tmux_themes="$HOME/.config/terminal/configs/tmux-themes.sh"
+            [ -f "$tmux_themes" ] && bash "$tmux_themes" "$THEME_NAME"
             
             # Setup nvim to use the new theme (silent, no prompts)
             mkdir -p "$HOME/.config/nvim/plugin" 2>/dev/null
-            if [ -f "$HOME/.config/terminal/configs/nvim-themes.lua" ]; then
-                cp -f "$HOME/.config/terminal/configs/nvim-themes.lua" "$HOME/.config/nvim/plugin/theme.lua" 2>/dev/null
-            elif [ -f "$HOME/Projects/terminal/configs/nvim-themes.lua" ]; then
-                cp -f "$HOME/Projects/terminal/configs/nvim-themes.lua" "$HOME/.config/nvim/plugin/theme.lua" 2>/dev/null
-            fi
+            local nvim_theme="$HOME/.config/terminal/configs/nvim-themes.lua"
+            [ -f "$nvim_theme" ] && cp -f "$nvim_theme" "$HOME/.config/nvim/plugin/theme.lua" 2>/dev/null
             
             # Force reload Powerlevel10k configuration with new theme
             export TERMINAL_THEME="$THEME_NAME"
@@ -1503,13 +1479,7 @@ theme-reload() {
 
 # Apply theme colors on shell startup (theme preference already loaded above)
 if [ -n "$TERMINAL_THEME" ]; then
-    # Try to use theme engine for dynamic color generation
-    local theme_engine=""
-    if [ -f "$HOME/.config/terminal/theme-engine.sh" ]; then
-        theme_engine="$HOME/.config/terminal/theme-engine.sh"
-    elif [ -f "$HOME/Projects/terminal/theme-engine.sh" ]; then
-        theme_engine="$HOME/Projects/terminal/theme-engine.sh"
-    fi
+    local theme_engine="$HOME/.config/terminal/theme/theme-engine.sh"
     
     if [ -n "$theme_engine" ] && command -v jq &> /dev/null; then
         # Source theme engine and apply colors
@@ -1886,21 +1856,22 @@ select_theme() {
     if [ -f "$SCRIPT_DIR/theme/load.sh" ]; then
         source "$SCRIPT_DIR/theme/load.sh" "$TERMINAL_THEME" 2>/dev/null
     fi
-    
-    # Copy theme system to user config
-    if [ -d "$SCRIPT_DIR/theme" ]; then
-        echo -e "${CYAN}Installing theme system...${NC}"
-        mkdir -p "$HOME/.config/terminal"
-        cp -r "$SCRIPT_DIR/theme" "$HOME/.config/terminal/" 2>/dev/null || true
-        
-        # Also copy theme config files
-        mkdir -p "$HOME/.config/terminal/configs"
-        [ -f "$SCRIPT_DIR/configs/tmux-themes.sh" ] && cp "$SCRIPT_DIR/configs/tmux-themes.sh" "$HOME/.config/terminal/configs/"
-        [ -f "$SCRIPT_DIR/configs/nvim-themes.lua" ] && cp "$SCRIPT_DIR/configs/nvim-themes.lua" "$HOME/.config/terminal/configs/"
-        
-        echo -e "${GREEN}✓ Theme system installed${NC}"
+
+    # Clone/sync full repo to canonical POSIX path (~/.config/terminal)
+    # This ensures theme, update, and all commands always have one consistent path
+    local INSTALL_DIR="$HOME/.config/terminal"
+    echo -e "${CYAN}Installing to $INSTALL_DIR...${NC}"
+    if [ -d "$INSTALL_DIR/.git" ]; then
+        cd "$INSTALL_DIR" && git pull origin main > /dev/null 2>&1 || true
+    elif [ -d "$SCRIPT_DIR/.git" ]; then
+        # Running from local clone — just symlink or copy
+        cp -r "$SCRIPT_DIR/." "$INSTALL_DIR/" 2>/dev/null || true
+    else
+        git clone --depth=1 https://github.com/akaoio/terminal.git "$INSTALL_DIR" > /dev/null 2>&1 || \
+            { mkdir -p "$INSTALL_DIR" && cp -r "$SCRIPT_DIR/." "$INSTALL_DIR/" 2>/dev/null || true; }
     fi
-    
+    echo -e "${GREEN}✓ Terminal installed to $INSTALL_DIR${NC}"
+
     sleep 1
 }
 

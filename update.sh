@@ -86,29 +86,28 @@ echo ""
 
 # Update repository
 echo -e "${BLUE}▸ Updating repository...${NC}"
-# Detect if we're running from the repo or from curl
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-if [ -d "$SCRIPT_DIR/.git" ]; then
-    # Running from local repo - DON'T reset, just pull
+INSTALL_DIR="$HOME/.config/terminal"
+
+if [ -d "$INSTALL_DIR/.git" ]; then
+    # Canonical POSIX install path
+    REPO_DIR="$INSTALL_DIR"
+    cd "$REPO_DIR" && git fetch origin > /dev/null 2>&1
+    git reset --hard origin/main > /dev/null 2>&1
+elif [ -d "$SCRIPT_DIR/.git" ]; then
+    # Running from local repo
     REPO_DIR="$SCRIPT_DIR"
     cd "$REPO_DIR"
     git fetch origin > /dev/null 2>&1
-    # Only pull if no local changes
     if git diff-index --quiet HEAD --; then
         git pull origin main > /dev/null 2>&1
     else
         echo -e "${YELLOW}  Local changes detected, skipping pull${NC}"
     fi
 else
-    # Running from curl, use hidden directory
-    REPO_DIR="$HOME/.akaoio-terminal"
-    if [ ! -d "$REPO_DIR" ]; then
-        git clone https://github.com/akaoio/terminal.git "$REPO_DIR" > /dev/null 2>&1
-    else
-        cd "$REPO_DIR"
-        git fetch origin > /dev/null 2>&1
-        git reset --hard origin/main > /dev/null 2>&1
-    fi
+    # First time update — clone to canonical path
+    REPO_DIR="$INSTALL_DIR"
+    git clone https://github.com/akaoio/terminal.git "$REPO_DIR" > /dev/null 2>&1
 fi
 echo -e "${GREEN}✓ Repository updated from GitHub${NC}"
 
