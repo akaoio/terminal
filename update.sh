@@ -105,9 +105,15 @@ elif [ -d "$SCRIPT_DIR/.git" ]; then
         echo -e "${YELLOW}  Local changes detected, skipping pull${NC}"
     fi
 else
-    # First time update — clone to canonical path
+    # Clone to canonical path; remove partial/non-git dir if present
     REPO_DIR="$INSTALL_DIR"
-    git clone https://github.com/akaoio/terminal.git "$REPO_DIR" > /dev/null 2>&1
+    if [ -d "$REPO_DIR" ] && [ ! -d "$REPO_DIR/.git" ]; then
+        rm -rf "$REPO_DIR"
+    fi
+    if ! git clone https://github.com/akaoio/terminal.git "$REPO_DIR" > /dev/null 2>&1; then
+        echo -e "${RED}  ✗ Failed to clone repository to $REPO_DIR${NC}"
+        exit 1
+    fi
 fi
 echo -e "${GREEN}✓ Repository updated from GitHub${NC}"
 
