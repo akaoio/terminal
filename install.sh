@@ -1246,6 +1246,23 @@ bindkey '^P' up-line-or-history
 bindkey '^ ' autosuggest-accept
 bindkey '^[[Z' autosuggest-accept
 
+# Terminal management
+terminal() {
+    local cmd="${1:-help}"
+    local terminal_dir="$HOME/.config/terminal"
+    case "$cmd" in
+        update)    bash "$terminal_dir/update.sh" ;;
+        uninstall) bash "$terminal_dir/uninstall.sh" ;;
+        theme)     shift; theme "$@" ;;
+        *)
+            echo "Usage: terminal <command>"
+            echo "  update      Update to latest version"
+            echo "  uninstall   Remove terminal setup"
+            echo "  theme       Manage themes (alias for theme command)"
+            ;;
+    esac
+}
+
 # Theme management functions
 theme() {
     local theme_cmd="${1:-list}"
