@@ -84,27 +84,18 @@ generate_fzf_colors() {
     echo "--color=fg:$fg,bg:$bg,hl:$hl,fg+:$fg,bg+:$bg,hl+:$hl,info:$spinner,prompt:$prompt,pointer:$pointer,marker:$marker,spinner:$spinner,header:$header"
 }
 
-# Generate tmux colors (returns color codes)
+# Generate tmux color variables (hex values for @bg/@fg/@accent/@comment/@highlight/@active)
 generate_tmux_colors() {
     local theme="${1:-dracula}"
-    
-    case "$theme" in
-        dracula)
-            echo "status_bg=colour236 status_fg=colour141 border=colour238 active_border=colour141"
-            ;;
-        cyberpunk)
-            echo "status_bg=colour235 status_fg=colour198 border=colour238 active_border=colour51"
-            ;;
-        nord)
-            echo "status_bg=colour237 status_fg=colour109 border=colour238 active_border=colour109"
-            ;;
-        gruvbox)
-            echo "status_bg=colour237 status_fg=colour214 border=colour238 active_border=colour175"
-            ;;
-        *)
-            echo "status_bg=colour235 status_fg=colour250 border=colour238 active_border=colour250"
-            ;;
-    esac
+
+    local bg=$(get_theme_color "$theme" '.colors.hex.background' '#282a36')
+    local fg=$(get_theme_color "$theme" '.colors.hex.white'      '#f8f8f2')
+    local accent=$(get_theme_color "$theme" '.colors.hex.cyan'   '#8be9fd')
+    local comment=$(get_theme_color "$theme" '.colors.hex.comment' '#6272a4')
+    local highlight=$(get_theme_color "$theme" '.colors.hex.purple' '#bd93f9')
+    local active=$(get_theme_color "$theme" '.colors.hex.pink'   '#ff79c6')
+
+    echo "tmux_bg='$bg' tmux_fg='$fg' tmux_accent='$accent' tmux_comment='$comment' tmux_highlight='$highlight' tmux_active='$active'"
 }
 
 # Generate P10k colors
