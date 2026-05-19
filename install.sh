@@ -312,11 +312,16 @@ install_packages() {
             
         wsl|debian)
             show_loading "Installing packages via APT"
-            sudo apt-get update -qq > /dev/null 2>&1
-            sudo apt-get install -y -qq zsh git curl wget jq \
-                fzf ripgrep fd-find neofetch htop ncdu cmatrix > /dev/null 2>&1
-            # Try to install bat (might not be available on older versions)
+            sudo apt-get update -qq > /dev/null 2>&1 || true
+            # Core packages (must succeed)
+            sudo apt-get install -y -qq zsh git curl wget > /dev/null 2>&1
+            # Optional tools (best-effort — some removed from newer Debian)
+            sudo apt-get install -y -qq jq fzf ripgrep fd-find htop ncdu > /dev/null 2>&1 || true
             sudo apt-get install -y -qq bat 2>/dev/null || true
+            sudo apt-get install -y -qq cmatrix 2>/dev/null || true
+            # fastfetch replaces neofetch on Debian 12+
+            sudo apt-get install -y -qq fastfetch 2>/dev/null || \
+                sudo apt-get install -y -qq neofetch 2>/dev/null || true
             stop_loading
             ;;
             
@@ -324,12 +329,13 @@ install_packages() {
             show_loading "Installing packages via DNF/YUM"
             if command -v dnf &> /dev/null; then
                 sudo dnf install -y zsh git curl wget jq nano \
-                    fzf ripgrep fd-find neofetch htop ncdu cmatrix \
-                    util-linux-user > /dev/null 2>&1
-                # Try to install bat
+                    fzf ripgrep fd-find htop ncdu cmatrix \
+                    util-linux-user > /dev/null 2>&1 || true
                 sudo dnf install -y bat 2>/dev/null || true
+                sudo dnf install -y fastfetch 2>/dev/null || \
+                    sudo dnf install -y neofetch 2>/dev/null || true
             else
-                sudo yum install -y zsh git curl wget jq nano cmatrix > /dev/null 2>&1
+                sudo yum install -y zsh git curl wget jq nano cmatrix > /dev/null 2>&1 || true
             fi
             stop_loading
             ;;
@@ -715,41 +721,45 @@ install_lazyvim() {
             show_loading "Installing Neovim"
             # Force install latest Neovim (LazyVim requires >= 0.8.0)
             
-            # Method 1: Download pre-built binary (fastest, always latest)
+            # Method 1: Download pre-built binary based on architecture
             ARCH=$(uname -m)
+            NVIM_INSTALLED=false
             if [ "$ARCH" = "x86_64" ]; then
-                if wget -q https://github.com/neovim/neovim/releases/download/v0.10.2/nvim-linux64.tar.gz -O /tmp/nvim.tar.gz > /dev/null 2>&1; then
+                if wget -q https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz -O /tmp/nvim.tar.gz > /dev/null 2>&1; then
                     sudo tar -xzf /tmp/nvim.tar.gz -C /opt/ > /dev/null 2>&1
-                    sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
-                    rm /tmp/nvim.tar.gz
-                    sudo apt-get install -y -qq python3-neovim nodejs npm > /dev/null 2>&1 || true
+                    sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+                    rm -f /tmp/nvim.tar.gz
+                    NVIM_INSTALLED=true
                     stop_loading
-                    echo -e "${GREEN}  ✓ Neovim v0.10.2 installed${NC}"
+                    echo -e "${GREEN}  ✓ Neovim v0.10.4 installed (x86_64)${NC}"
                 else
-                    # Fallback to other methods if download fails
                     stop_loading
-                    echo -e "${YELLOW}  Binary download failed, trying alternatives...${NC}"
+                    echo -e "${YELLOW}  Binary download failed, trying apt...${NC}"
                 fi
+            elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+                if wget -q https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-arm64.tar.gz -O /tmp/nvim.tar.gz > /dev/null 2>&1; then
+                    sudo tar -xzf /tmp/nvim.tar.gz -C /opt/ > /dev/null 2>&1
+                    sudo ln -sf /opt/nvim-linux-arm64/bin/nvim /usr/local/bin/nvim
+                    rm -f /tmp/nvim.tar.gz
+                    NVIM_INSTALLED=true
+                    stop_loading
+                    echo -e "${GREEN}  ✓ Neovim v0.10.4 installed (ARM64)${NC}"
+                else
+                    stop_loading
+                    echo -e "${YELLOW}  ARM64 binary download failed, trying apt...${NC}"
+                fi
+            else
+                stop_loading
             fi
             
-            # Method 2: Try AppImage if binary failed
-            if ! command -v nvim &> /dev/null || [ "$(nvim --version 2>/dev/null | head -1 | grep -o '[0-9]\+\.[0-9]\+' | cut -d. -f2)" -lt 8 ] 2>/dev/null; then
-                show_loading "Trying AppImage method"
-                if wget -q https://github.com/neovim/neovim/releases/latest/download/nvim.appimage -O /tmp/nvim.appimage > /dev/null 2>&1; then
-                    chmod +x /tmp/nvim.appimage
-                    cd /tmp && ./nvim.appimage --appimage-extract > /dev/null 2>&1
-                    sudo mv squashfs-root /opt/nvim 2>/dev/null || mv squashfs-root $HOME/.local/nvim
-                    sudo ln -sf /opt/nvim/AppRun /usr/local/bin/nvim 2>/dev/null || ln -sf $HOME/.local/nvim/AppRun $HOME/.local/bin/nvim
-                    cd - > /dev/null
-                    rm -f /tmp/nvim.appimage
-                    stop_loading
-                    echo -e "${GREEN}  ✓ Neovim AppImage installed${NC}"
-                else
-                    # Last resort: use system package
-                    sudo apt-get install -y -qq neovim > /dev/null 2>&1 || true
-                    stop_loading
-                    echo -e "${YELLOW}  ⚠ Using system Neovim (may be old)${NC}"
-                fi
+            # Method 2: Use apt if binary install failed
+            if [ "$NVIM_INSTALLED" = "false" ]; then
+                show_loading "Installing Neovim via apt"
+                sudo apt-get install -y -qq neovim > /dev/null 2>&1 || true
+                stop_loading
+                command -v nvim &>/dev/null && \
+                    echo -e "${GREEN}  ✓ Neovim installed via apt${NC}" || \
+                    echo -e "${YELLOW}  ⚠ Neovim installation failed${NC}"
             fi
             
             # Install dependencies
@@ -759,31 +769,34 @@ install_lazyvim() {
             show_loading "Installing Neovim"
             # Try to install latest binary first
             ARCH=$(uname -m)
+            NVIM_INSTALLED=false
             if [ "$ARCH" = "x86_64" ]; then
-                if wget -q https://github.com/neovim/neovim/releases/download/v0.10.2/nvim-linux64.tar.gz -O /tmp/nvim.tar.gz > /dev/null 2>&1; then
-                    sudo tar -xzf /tmp/nvim.tar.gz -C /opt/
-                    sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
-                    rm /tmp/nvim.tar.gz
+                if wget -q https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz -O /tmp/nvim.tar.gz > /dev/null 2>&1; then
+                    sudo tar -xzf /tmp/nvim.tar.gz -C /opt/ > /dev/null 2>&1
+                    sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+                    rm -f /tmp/nvim.tar.gz
+                    NVIM_INSTALLED=true
                     stop_loading
-                    echo -e "${GREEN}  ✓ Neovim v0.10.2 installed${NC}"
-                else
-                    # Fallback to package manager
-                    if command -v dnf &> /dev/null; then
-                        sudo dnf install -y epel-release > /dev/null 2>&1
-                        sudo dnf install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
-                    else
-                        sudo yum install -y epel-release > /dev/null 2>&1
-                        sudo yum install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
-                    fi
-                    stop_loading
+                    echo -e "${GREEN}  ✓ Neovim v0.10.4 installed (x86_64)${NC}"
                 fi
-            else
-                # Non-x86_64 arch, use package manager
+            elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+                if wget -q https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-arm64.tar.gz -O /tmp/nvim.tar.gz > /dev/null 2>&1; then
+                    sudo tar -xzf /tmp/nvim.tar.gz -C /opt/ > /dev/null 2>&1
+                    sudo ln -sf /opt/nvim-linux-arm64/bin/nvim /usr/local/bin/nvim
+                    rm -f /tmp/nvim.tar.gz
+                    NVIM_INSTALLED=true
+                    stop_loading
+                    echo -e "${GREEN}  ✓ Neovim v0.10.4 installed (ARM64)${NC}"
+                fi
+            fi
+            if [ "$NVIM_INSTALLED" = "false" ]; then
+                # Fallback to package manager
                 if command -v dnf &> /dev/null; then
-                    sudo dnf install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
+                    sudo dnf install -y epel-release > /dev/null 2>&1 || true
+                    sudo dnf install -y neovim python3-neovim nodejs npm > /dev/null 2>&1 || true
                 else
-                    sudo yum install -y epel-release > /dev/null 2>&1
-                    sudo yum install -y neovim python3-neovim nodejs npm > /dev/null 2>&1
+                    sudo yum install -y epel-release > /dev/null 2>&1 || true
+                    sudo yum install -y neovim python3-neovim nodejs npm > /dev/null 2>&1 || true
                 fi
                 stop_loading
             fi
@@ -1159,7 +1172,7 @@ fdir() {
 # System info
 sysinfo() {
     echo -e "\n\033[38;5;198mSYSTEM INFORMATION\033[0m\n"
-    neofetch
+    command -v fastfetch &>/dev/null && fastfetch || neofetch
 }
 
 # Git status for all repos in current directory
@@ -1458,7 +1471,10 @@ fi
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
 # Welcome message
-if command -v neofetch &> /dev/null; then
+if command -v fastfetch &> /dev/null; then
+    clear
+    fastfetch
+elif command -v neofetch &> /dev/null; then
     clear
     neofetch
 fi
@@ -1689,7 +1705,6 @@ show_complete() {
     echo -e "${WHITE}    • Nerd Fonts for Icons${NC}"
     echo -e "${WHITE}    • tmux with Smart Layouts (dex command)${NC}"
     echo -e "${WHITE}    • LazyVim - Modern Neovim IDE${NC}"
-    echo -e "${WHITE}    • Claude Code - AI Coding Assistant${NC}"
     echo -e "${WHITE}    • 60+ Useful Aliases & Functions${NC}"
     echo ""
     echo -e "${NEON_PURPLE}  ▸ KEYBOARD SHORTCUTS:${NC}"
@@ -1817,7 +1832,6 @@ main() {
     install_fonts
     install_tmux
     install_lazyvim
-    install_claude_code
     configure_zsh
     install_dex
     set_default_shell
