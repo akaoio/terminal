@@ -587,107 +587,6 @@ install_tmux() {
     sleep 1
 }
 
-# Install Claude Code - Anthropic's AI coding assistant
-install_claude_code() {
-    echo -e "${BLUE}▸ Installing Claude Code${NC}"
-    
-    # Check if already installed
-    if command -v claude &> /dev/null; then
-        echo -e "${GREEN}✓ Claude Code already installed${NC}"
-        claude --version 2>/dev/null || true
-        return 0
-    fi
-    
-    # Method 1: Try official binary installer (fastest and recommended)
-    show_loading "Installing Claude Code via official installer"
-    if curl -fsSL https://claude.ai/install.sh | bash > /dev/null 2>&1; then
-        stop_loading
-        echo -e "${GREEN}✓ Claude Code binary installed${NC}"
-        
-        # Verify installation
-        if command -v claude &> /dev/null; then
-            # Run claude doctor to verify everything is working
-            claude doctor > /dev/null 2>&1 || true
-            echo -e "${CYAN}  Run 'claude doctor' to verify installation${NC}"
-            return 0
-        fi
-    else
-        stop_loading
-        echo -e "${YELLOW}  Official installer failed, trying npm/bun${NC}"
-    fi
-    
-    # Method 2: Fall back to npm/bun installation
-    # Try bun first (faster)
-    if command -v bun &> /dev/null; then
-        show_loading "Installing Claude Code via bun"
-        bun install -g @anthropic/claude > /dev/null 2>&1
-        stop_loading
-        if command -v claude &> /dev/null; then
-            echo -e "${GREEN}✓ Claude Code installed via bun${NC}"
-            return 0
-        fi
-    fi
-    
-    # Try npm
-    if command -v npm &> /dev/null; then
-        show_loading "Installing Claude Code via npm"
-        npm install -g @anthropic/claude > /dev/null 2>&1
-        stop_loading
-        if command -v claude &> /dev/null; then
-            echo -e "${GREEN}✓ Claude Code installed via npm${NC}"
-            return 0
-        fi
-    fi
-    
-    # Install Node.js first if needed, then try npm
-    if ! command -v npm &> /dev/null; then
-        echo -e "${YELLOW}  Installing Node.js first${NC}"
-        case "$ENV_TYPE" in
-            termux)
-                pkg install -y nodejs-lts > /dev/null 2>&1
-                ;;
-            debian|wsl)
-                sudo apt-get install -y -qq nodejs npm > /dev/null 2>&1
-                ;;
-            redhat)
-                if command -v dnf &> /dev/null; then
-                    sudo dnf install -y nodejs npm > /dev/null 2>&1
-                else
-                    sudo yum install -y nodejs npm > /dev/null 2>&1
-                fi
-                ;;
-            arch)
-                sudo pacman -S --noconfirm nodejs npm > /dev/null 2>&1
-                ;;
-            macos)
-                brew install node > /dev/null 2>&1
-                ;;
-        esac
-        
-        if command -v npm &> /dev/null; then
-            show_loading "Installing Claude Code via npm"
-            npm install -g @anthropic/claude > /dev/null 2>&1
-            stop_loading
-            if command -v claude &> /dev/null; then
-                echo -e "${GREEN}✓ Claude Code installed via npm${NC}"
-                return 0
-            fi
-        fi
-    fi
-    
-    # Final check and user message
-    if command -v claude &> /dev/null; then
-        echo -e "${GREEN}✓ Claude Code ready to use!${NC}"
-        echo -e "${CYAN}  Run 'claude doctor' to verify installation${NC}"
-        echo -e "${CYAN}  Run 'claude --help' for usage${NC}"
-    else
-        echo -e "${YELLOW}⚠ Claude Code installation incomplete${NC}"
-        echo -e "${CYAN}  You can install manually: curl -fsSL https://claude.ai/install.sh | bash${NC}"
-    fi
-    
-    sleep 1
-}
-
 # Install LazyVim - modern Neovim configuration
 install_lazyvim() {
     echo -e "${BLUE}▸ Installing LazyVim (Neovim)${NC}"
@@ -1085,12 +984,6 @@ alias path='echo -e ${PATH//:/\\n}'
 alias now='date +"%Y-%m-%d %H:%M:%S"'
 alias week='date +%V'
 
-# Claude CLI aliases (override system cc compiler)
-unalias cc 2>/dev/null
-unalias dex 2>/dev/null
-alias cc='claude --dangerously-skip-permissions'
-alias dex='claude --dangerously-skip-permissions'
-
 # Safety nets
 alias rm='rm -iv'
 alias cp='cp -i'
@@ -1118,9 +1011,6 @@ alias tks='tmux kill-session -t'
 alias tls='tmux list-sessions'
 alias ta='tmux attach -t'
 alias tn='tmux new -s'
-
-# Claude Code AI Assistant
-alias cc='claude --dangerously-skip-permissions'
 
 # Fun stuff
 alias matrix='cmatrix -B'
@@ -1716,7 +1606,6 @@ show_complete() {
     echo -e "${WHITE}    • Ctrl+T      → Find files${NC}"
     echo -e "${WHITE}    • Alt+C       → Navigate directories${NC}"
     echo -e "${WHITE}    • dex         → Smart tmux workspace${NC}"
-    echo -e "${WHITE}    • claude      → AI coding assistant${NC}"
     echo -e "${WHITE}    • Ctrl+A      → tmux prefix key${NC}"
     echo -e "${WHITE}    • Ctrl+A h    → split horizontal (mobile-friendly)${NC}"
     echo -e "${WHITE}    • Ctrl+A v    → split vertical (mobile-friendly)${NC}"
