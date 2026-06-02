@@ -311,7 +311,7 @@ echo -e "  • Powerlevel10k theme"
 echo -e "  • System packages"
 echo -e "  • tmux & dex script"
 echo -e "  • LazyVim (if installed)"
-echo -e "  "echo ""
+echo ""
 if [ -n "$SSH_CONNECTION" ]; then
     echo -e "${YELLOW}Run to reload config:${NC} ${CYAN}source ~/.zshrc${NC}"
 else
