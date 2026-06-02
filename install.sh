@@ -1470,13 +1470,15 @@ fi
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
-# Welcome message
-if command -v fastfetch &> /dev/null; then
-    clear
-    fastfetch
-elif command -v neofetch &> /dev/null; then
-    clear
-    neofetch
+# Welcome message — skip on SSH sessions (avoids breaking small screens)
+if [[ -z "$SSH_CONNECTION" ]]; then
+    if command -v fastfetch &> /dev/null; then
+        clear
+        fastfetch
+    elif command -v neofetch &> /dev/null; then
+        clear
+        neofetch
+    fi
 fi
 
 # END OF CYBERPUNK CONFIG
