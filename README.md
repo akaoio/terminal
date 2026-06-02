@@ -53,7 +53,7 @@ wget -qO- https://raw.githubusercontent.com/akaoio/terminal/main/install.sh | ba
 - `tmux` 🆕 - Terminal multiplexer with compact status tabs and mobile-friendly keybindings
 - `nvim` 🆕 - Neovim with LazyVim configuration
 - `dex` 🆕 - Smart workspace manager (auto-adapts to screen)
-- `exa` - Better ls with icons and tree view
+- `eza` - Better ls with icons and tree view
 - `bat` - Better cat with syntax highlighting
 - `ripgrep` - Blazing fast grep alternative
 - `fd` - User-friendly find replacement
@@ -174,7 +174,7 @@ alias mycommand='your command here'
 ### CLI Tools
 - ✅ fzf (fuzzy finder)
 - ✅ bat (better cat)
-- ✅ exa (better ls)
+- ✅ eza (better ls)
 - ✅ ripgrep (better grep)
 - ✅ fd (better find)
 - ✅ htop (process manager)
@@ -182,7 +182,7 @@ alias mycommand='your command here'
 - ✅ dex (smart workspace manager)
 
 ### Configurations
-- ✅ 70+ useful aliases
+- ✅ 60+ useful aliases
 - ✅ Smart functions
 - ✅ tmux with compact touch-friendly status bar
 - ✅ LazyVim modern IDE setup

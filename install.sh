@@ -322,6 +322,8 @@ install_packages() {
             # fastfetch replaces neofetch on Debian 12+
             sudo apt-get install -y -qq fastfetch 2>/dev/null || \
                 sudo apt-get install -y -qq neofetch 2>/dev/null || true
+            # eza replaces exa (available on Ubuntu 23.10+ / Debian 13+)
+            sudo apt-get install -y -qq eza 2>/dev/null || true
             stop_loading
             ;;
             
@@ -344,7 +346,7 @@ install_packages() {
             show_loading "Installing packages via Pacman"
             sudo pacman -Syu --noconfirm > /dev/null 2>&1
             sudo pacman -S --noconfirm zsh git curl wget jq nano \
-                fzf bat ripgrep fd neofetch htop ncdu cmatrix > /dev/null 2>&1
+                fzf bat ripgrep fd eza neofetch htop ncdu cmatrix > /dev/null 2>&1
             stop_loading
             ;;
             
@@ -913,10 +915,16 @@ fi
 
 # CYBERPUNK ALIASES
 
-# Better ls with exa - Rainbow colors
-if command -v exa &> /dev/null; then
+# Better ls with eza/exa - Rainbow colors
+if command -v eza &> /dev/null; then
+    alias ls='eza --color=always --group-directories-first'
+    alias ll='eza -alF --color=always --group-directories-first'
+    alias la='eza -a --color=always --group-directories-first'
+    alias l='eza -F --color=always --group-directories-first'
+    alias lt='eza --tree --color=always --group-directories-first'
+elif command -v exa &> /dev/null; then
     alias ls='exa --color=always --group-directories-first'
-    alias ll='exa -alF --color=always --group-directories-first'  
+    alias ll='exa -alF --color=always --group-directories-first'
     alias la='exa -a --color=always --group-directories-first'
     alias l='exa -F --color=always --group-directories-first'
     alias lt='exa --tree --color=always --group-directories-first'
@@ -1125,7 +1133,7 @@ zstyle ':completion:*' rehash true
 zstyle ':completion:*' accept-exact '*(N)'
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'exa -1 --color=always $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls --color=always $realpath'
 zstyle ':fzf-tab:*' switch-group ',' '.'
 
 # Key bindings
@@ -1282,7 +1290,7 @@ theme() {
             
             echo "✓ Theme changed to: $THEME_NAME"
             echo "  • Terminal prompt colors updated"
-            echo "  • File colors (ls/exa) updated"
+            echo "  • File colors (ls/eza) updated"
             echo "  • Syntax highlighting updated"
             echo "  • Tmux colors updated (all sessions)"
             echo "  • Neovim will use $THEME_NAME on next launch"
@@ -1593,7 +1601,7 @@ show_complete() {
     echo -e "${WHITE}    • Powerlevel10k Theme (Cyberpunk Edition)${NC}"
     echo -e "${WHITE}    • Auto-suggestions & Syntax Highlighting${NC}"
     echo -e "${WHITE}    • FZF Integration with Tab Completion${NC}"
-    echo -e "${WHITE}    • Enhanced CLI Tools (bat, exa, ripgrep)${NC}"
+    echo -e "${WHITE}    • Enhanced CLI Tools (bat, eza, ripgrep)${NC}"
     echo -e "${WHITE}    • Nerd Fonts for Icons${NC}"
     echo -e "${WHITE}    • tmux with Smart Layouts (dex command)${NC}"
     echo -e "${WHITE}    • LazyVim - Modern Neovim IDE${NC}"

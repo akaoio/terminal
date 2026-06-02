@@ -56,7 +56,7 @@ validate_claim "neofetch installed" "command -v neofetch"
 # Enhanced CLI tools
 validate_claim "tmux installed" "command -v tmux"
 validate_claim "dex script exists" "[ -f dex ]"
-validate_claim "exa installed" "command -v exa"
+validate_claim "eza installed" "command -v eza || command -v exa"
 validate_claim "ripgrep installed" "command -v rg"
 validate_claim "htop installed" "command -v htop"
 

@@ -107,11 +107,11 @@ akaoio/terminal/
 - **FZF integration** for fuzzy finding
 - **Smart tab completion** with preview
 - **Directory jumper** (z command)
-- **50+ aliases** for common tasks
+- **60+ aliases** for common tasks
 - **Custom functions** (mkcd, extract, backup, etc.)
 
 #### Enhanced CLI Tools
-- `exa` - ls replacement with icons
+- `eza` - ls replacement with icons
 - `bat` - cat with syntax highlighting
 - `ripgrep` - fast grep alternative
 - `fd` - user-friendly find

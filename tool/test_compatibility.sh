@@ -83,7 +83,7 @@ done
 
 # Test enhanced tools
 echo -e "\n${YELLOW}Enhanced Tools:${NC}"
-for tool in fzf bat ripgrep fd exa; do
+for tool in fzf bat ripgrep fd eza; do
     if command -v $tool &> /dev/null; then
         echo -e "${GREEN}✓ $tool installed${NC}"
     else
