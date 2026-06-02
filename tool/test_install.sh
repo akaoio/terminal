@@ -55,19 +55,12 @@ test_component "dex script exists" "[ -f dex ]"
 test_component "dex syntax" "bash -n dex"
 test_component "dex help" "./dex --help"
 
-# Test 5: Claude Code
-test_component "claude command" "command -v claude"
-test_component "claude version" "claude --version"
-
-# Test 6: File permissions
+# Test 5: File permissions
 test_component "install.sh executable" "[ -x install.sh ]"
 test_component "dex executable" "[ -x dex ]"
 
 # Test 7: Dependencies for LazyVim
 test_component "neovim in PATH or installable" "command -v nvim || command -v apt-get || command -v brew || command -v pkg"
-
-# Test 8: Node.js for Claude fallback
-test_component "nodejs available" "command -v node || command -v npm || command -v bun"
 
 echo ""
 echo -e "${CYAN}═══════════════════════════════════════════${NC}"
@@ -84,7 +77,6 @@ if [ $TESTS_FAILED -eq 0 ]; then
     echo -e "${YELLOW}To test individual components:${NC}"
     echo -e "${CYAN}  tmux -V                   # Check tmux${NC}"
     echo -e "${CYAN}  ./dex test-session        # Test workspace${NC}"
-    echo -e "${CYAN}  claude --version          # Check Claude${NC}"
     exit 0
 else
     echo -e "${RED}❌ Some tests failed. Check the issues above.${NC}"

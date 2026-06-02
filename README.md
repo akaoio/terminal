@@ -163,7 +163,6 @@ alias mycommand='your command here'
 - ✅ Nerd Fonts (MesloLGS NF)
 - ✅ tmux (terminal multiplexer)
 - ✅ Neovim with LazyVim IDE
-- ✅ Claude Code AI assistant
 
 ### Plugins
 - ✅ zsh-autosuggestions
@@ -189,7 +188,6 @@ alias mycommand='your command here'
 - ✅ LazyVim modern IDE setup
 - ✅ Adaptive screen layouts
 - ✅ Session persistence
-- ✅ Claude Code integration
 
 ---
 

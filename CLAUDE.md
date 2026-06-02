@@ -55,14 +55,27 @@ akaoio/terminal/
 ├── install.sh          # Main installer
 ├── update.sh           # Update script
 ├── uninstall.sh        # Uninstaller
+├── force-sync.sh       # Force-sync configs from repo
+├── dex                 # Smart tmux workspace script
 ├── README.md           # User documentation
 ├── CLAUDE.md           # AI documentation
 ├── configs/
-│   └── p10k.zsh        # Unified Powerlevel10k config (2-line prompt)
-├── themes/
-│   └── cyberpunk.zsh-theme   # Custom theme
-└── assets/
-    └── screenshots/           # Demo images
+│   ├── p10k.zsh        # Powerlevel10k config (2-line prompt)
+│   ├── tmux.conf       # tmux config
+│   ├── tmux-themes.sh  # tmux theme engine
+│   ├── neofetch.conf   # neofetch config
+│   ├── nvim-themes.lua # Neovim theme integration
+│   └── tmux-scripts/   # dex helper scripts
+├── theme/
+│   ├── theme-engine.sh # Theme switching engine
+│   ├── cli.sh          # CLI color output
+│   └── data/           # Theme JSON files (cyberpunk, dracula, gruvbox, nord)
+└── tool/
+    ├── validate_docs.sh       # Validate README claims against code
+    ├── test_install.sh        # Pre-install dependency checks
+    ├── test_compatibility.sh  # Post-install compatibility checks
+    ├── debug_install.sh       # Debug environment diagnostics
+    └── install_neovim_latest.sh
 ```
 
 ## Technical Implementation

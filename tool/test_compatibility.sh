@@ -39,22 +39,6 @@ for shell in bash zsh sh; do
     fi
 done
 
-# Test Claude alias
-echo -e "\n${YELLOW}Claude Aliases:${NC}"
-if grep -q "alias cc='claude --dangerously-skip-permissions'" "$HOME/.zshrc" 2>/dev/null; then
-    echo -e "${GREEN}✓ cc alias configured in .zshrc${NC}"
-else
-    echo -e "${YELLOW}⚠ cc alias not found in .zshrc${NC}"
-fi
-
-if grep -q "alias dex='claude --dangerously-skip-permissions'" "$HOME/.zshrc" 2>/dev/null; then
-    echo -e "${YELLOW}⚠ dex configured as Claude alias (should be tmux script)${NC}"
-elif [ -f "$HOME/.local/bin/dex" ]; then
-    echo -e "${GREEN}✓ dex script installed${NC}"
-else
-    echo -e "${RED}✗ dex script not found${NC}"
-fi
-
 # Test tmux availability
 echo -e "\n${YELLOW}tmux Status:${NC}"
 if command -v tmux &> /dev/null; then
@@ -85,14 +69,6 @@ if command -v nvim &> /dev/null; then
     fi
 else
     echo -e "${RED}✗ Neovim not installed${NC}"
-fi
-
-# Test Claude Code
-echo -e "\n${YELLOW}Claude Code Status:${NC}"
-if command -v claude &> /dev/null; then
-    echo -e "${GREEN}✓ Claude CLI installed${NC}"
-else
-    echo -e "${RED}✗ Claude CLI not found${NC}"
 fi
 
 # Test critical tools

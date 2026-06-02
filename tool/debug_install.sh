@@ -50,30 +50,6 @@ else
 fi
 
 echo ""
-echo -e "${YELLOW}Testing Claude Code prerequisites:${NC}"
-
-echo -n "Node.js available: "
-if command -v node &> /dev/null; then
-    echo -e "${GREEN}✓ $(node --version)${NC}"
-else
-    echo -e "${YELLOW}- Not installed${NC}"
-fi
-
-echo -n "NPM available: "
-if command -v npm &> /dev/null; then
-    echo -e "${GREEN}✓ $(npm --version)${NC}"
-else
-    echo -e "${YELLOW}- Not installed${NC}"
-fi
-
-echo -n "Claude installer accessible: "
-if curl -s --max-time 5 https://claude.ai/install.sh > /dev/null; then
-    echo -e "${GREEN}✓${NC}"
-else
-    echo -e "${RED}✗${NC}"
-fi
-
-echo ""
 echo -e "${YELLOW}Environment info:${NC}"
 echo "OS: $(uname -s)"
 echo "Architecture: $(uname -m)"
