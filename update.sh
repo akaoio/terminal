@@ -299,83 +299,6 @@ else
     echo -e "${YELLOW}  Neovim not installed${NC}"
 fi
 
-# Update Claude Code
-echo -e "${BLUE}▸ Updating Claude Code...${NC}"
-if command -v claude &> /dev/null; then
-    # Check if installed via npm/bun
-    if command -v bun &> /dev/null && bun list -g 2>/dev/null | grep -q "@anthropic/claude-code"; then
-        bun update -g @anthropic/claude-code > /dev/null 2>&1
-        echo -e "${GREEN}✓ Claude Code updated via bun${NC}"
-    elif command -v npm &> /dev/null && npm list -g @anthropic/claude-code 2>/dev/null | grep -q "@anthropic/claude-code"; then
-        npm update -g @anthropic/claude-code > /dev/null 2>&1
-        echo -e "${GREEN}✓ Claude Code updated via npm${NC}"
-    else
-        # Binary installation - download latest
-        ARCH=$(uname -m)
-        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-        
-        case "$ARCH" in
-            x86_64|amd64) ARCH="x64" ;;
-            aarch64|arm64) ARCH="arm64" ;;
-            armv7l|armv7) ARCH="armv7" ;;
-        esac
-        
-        if [ "$OS" = "darwin" ]; then
-            CLAUDE_URL="https://github.com/anthropics/claude-code/releases/latest/download/claude-macos-${ARCH}"
-        else
-            CLAUDE_URL="https://github.com/anthropics/claude-code/releases/latest/download/claude-linux-${ARCH}"
-        fi
-        
-        if curl -fsSL "$CLAUDE_URL" -o /tmp/claude 2>/dev/null; then
-            chmod +x /tmp/claude
-            if [ -f "/usr/local/bin/claude" ]; then
-                sudo mv /tmp/claude /usr/local/bin/claude 2>/dev/null || mv /tmp/claude "$HOME/.local/bin/claude"
-            else
-                mv /tmp/claude "$HOME/.local/bin/claude"
-            fi
-            echo -e "${GREEN}✓ Claude Code binary updated${NC}"
-        else
-            echo -e "${YELLOW}  Claude Code update failed${NC}"
-        fi
-    fi
-else
-    echo -e "${YELLOW}  Claude Code not installed${NC}"
-fi
-
-# Fix Claude CLI aliases if missing or incorrect
-echo -e "${BLUE}▸ Checking Claude CLI aliases...${NC}"
-if ! grep -q "alias cc='claude --dangerously-skip-permissions'" "$HOME/.zshrc" 2>/dev/null; then
-    echo -e "${YELLOW}  Updating Claude CLI aliases...${NC}"
-    # Remove old aliases if they exist
-    sed -i '/^alias cc=/d' "$HOME/.zshrc" 2>/dev/null
-    sed -i '/^alias dex=/d' "$HOME/.zshrc" 2>/dev/null
-    sed -i '/^unalias cc/d' "$HOME/.zshrc" 2>/dev/null
-    sed -i '/^unalias dex/d' "$HOME/.zshrc" 2>/dev/null
-    sed -i '/# Claude CLI aliases/d' "$HOME/.zshrc" 2>/dev/null
-    
-    # Find the line with "# System shortcuts" and add after it
-    if grep -q "# System shortcuts" "$HOME/.zshrc"; then
-        # Add Claude aliases after System shortcuts section
-        sed -i '/^alias week=/a\\n# Claude CLI aliases (override system cc compiler)\nunalias cc 2>/dev/null\nunalias dex 2>/dev/null\nalias cc='"'"'claude --dangerously-skip-permissions'"'"'\nalias dex='"'"'claude --dangerously-skip-permissions'"'"'' "$HOME/.zshrc" 2>/dev/null || \
-        # macOS compatibility
-        sed -i '' '/^alias week=/a\\
-# Claude CLI aliases (override system cc compiler)\\
-unalias cc 2>/dev/null\\
-unalias dex 2>/dev/null\\
-alias cc='"'"'claude --dangerously-skip-permissions'"'"'\\
-alias dex='"'"'claude --dangerously-skip-permissions'"'"'
-' "$HOME/.zshrc" 2>/dev/null || \
-        # Fallback: append to end of file
-        echo -e "\n# Claude CLI alias\nalias cc='claude --dangerously-skip-permissions'" >> "$HOME/.zshrc"
-    else
-        # Append to end of file if pattern not found
-        echo -e "\n# Claude CLI alias\nalias cc='claude --dangerously-skip-permissions'" >> "$HOME/.zshrc"
-    fi
-    echo -e "${GREEN}✓ Claude CLI aliases updated${NC}"
-else
-    echo -e "${GREEN}✓ Claude CLI aliases already configured${NC}"
-fi
-
 echo -e "${GREEN}✓ Configurations updated${NC}"
 
 # Complete
@@ -388,8 +311,7 @@ echo -e "  • Powerlevel10k theme"
 echo -e "  • System packages"
 echo -e "  • tmux & dex script"
 echo -e "  • LazyVim (if installed)"
-echo -e "  • Claude Code AI assistant"
-echo ""
+echo -e "  "echo ""
 if [ -n "$SSH_CONNECTION" ]; then
     echo -e "${YELLOW}Run to reload config:${NC} ${CYAN}source ~/.zshrc${NC}"
 else
